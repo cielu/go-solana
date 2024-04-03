@@ -6,6 +6,7 @@ package common
 import (
 	"bytes"
 	"database/sql/driver"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/mr-tron/base58"
@@ -81,7 +82,7 @@ func (a *Address) SetBytes(b []byte) {
 // MarshalText returns base58 str account
 func (a Address) MarshalText() ([]byte, error) {
 	input, err := json.Marshal(a.Base58())
-	return input[1:len(input)-1], err
+	return input[1 : len(input)-1], err
 }
 
 // UnmarshalText parses an account in base58 syntax.
@@ -92,8 +93,11 @@ func (a *Address) UnmarshalText(input []byte) error {
 
 // UnmarshalJSON parses an account in base58 syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
-	a.SetBytes(input)
-	return nil
+	// Unmarshal data to []byte
+	data, _, err := UnmarshalDataByEncoding(input)
+	// set string to Hash
+	a.SetBytes(data)
+	return err
 }
 
 // Scan implements Scanner for database/sql.
@@ -188,7 +192,7 @@ func (h *Hash) SetBytes(b []byte) {
 // MarshalText returns base58 str hash
 func (h Hash) MarshalText() ([]byte, error) {
 	input, err := json.Marshal(h.Base58())
-	return input[1:len(input)-1], err
+	return input[1 : len(input)-1], err
 }
 
 // UnmarshalText parses a hash in base58 syntax.
@@ -199,8 +203,12 @@ func (h *Hash) UnmarshalText(input []byte) error {
 
 // UnmarshalJSON parses a hash in base58 syntax.
 func (h *Hash) UnmarshalJSON(input []byte) error {
-	h.SetBytes(input)
-	return nil
+	// Unmarshal data to []byte
+	data, _, err := UnmarshalDataByEncoding(input)
+	// set string to Hash
+	h.SetBytes(data)
+	// return err
+	return err
 }
 
 // Scan implements Scanner for database/sql.
@@ -236,53 +244,76 @@ func (h *Hash) UnmarshalGraphQL(input interface{}) error {
 	return err
 }
 
-/////// ----------------------------------------------------///////
-/////// ----------------------------------------------------///////
-/////// -------------------- Base58Data --------------------///////
-/////// -------------------- Base58Data --------------------///////
-/////// ----------------------------------------------------///////
-/////// ----------------------------------------------------///////
+/////// -------------------------------------------------///////
+/////// -------------------------------------------------///////
+/////// -------------------- SolData --------------------///////
+/////// -------------------- SolData --------------------///////
+/////// -------------------------------------------------///////
+/////// -------------------------------------------------///////
 
-
-// Base58Data base58 data
-type Base58Data []byte
+// SolData base58, base64 data
+type SolData struct {
+	Data     []byte
+	Encoding string
+}
 
 // Base58 return base58 str
-func (b Base58Data) Base58() string {
-	return base58.Encode(b)
+func (sd SolData) Base58() string {
+	return base58.Encode(sd.Data)
+}
+
+func (sd SolData) Base64() string {
+	return base64.StdEncoding.EncodeToString(sd.Data)
 }
 
 // String return base58 str
-func (b Base58Data) String() string {
-	return b.Base58()
+func (sd SolData) String() string {
+	// base64
+	if sd.Encoding == "base64" {
+		return sd.Base64()
+	}
+	return sd.Base58()
 }
 
-// SetBytes sets the Base58Data to the value of b.
-func (b *Base58Data) SetBytes(input []byte) {
-	*b = input
+// SetBytes sets the SolData to the value of sd. (default base58)
+func (sd *SolData) SetBytes(input []byte) {
+	sd.Data = input
 }
 
-// MarshalText returns base58 str
-func (b Base58Data) MarshalText() ([]byte, error) {
-	input, err := json.Marshal(b.Base58())
-	return input[1:len(input)-1], err
+// SetSolData sets the SolData
+func (sd *SolData) SetSolData(data []byte, encoding string) {
+	sd.Data = data
+	sd.Encoding = encoding
+}
+
+// MarshalText returns base58/base64 str
+func (sd SolData) MarshalText() ([]byte, error) {
+	input, err := json.Marshal(sd.String())
+	return input[1 : len(input)-1], err
 }
 
 // UnmarshalText parses data in base58 syntax.
-func (b *Base58Data) UnmarshalText(input []byte) error {
-	b.SetBytes(input)
+func (sd *SolData) UnmarshalText(input []byte) error {
+	sd.SetBytes(input)
 	return nil
 }
 
 // UnmarshalJSON parses data in base58 syntax.
-func (b *Base58Data) UnmarshalJSON(input []byte) error {
-	b.SetBytes(input)
-	return nil
+func (sd *SolData) UnmarshalJSON(input []byte) error {
+	// Unmarshal data to []byte
+	data, encoding, err := UnmarshalDataByEncoding(input)
+	// set SolData by encoding
+	if encoding == "" {
+		sd.SetBytes(data)
+	}else {
+		sd.SetSolData(data, encoding)
+	}
+	return err
 }
 
 // Value implements valuer for database/sql.
-func (b Base58Data) Value() (driver.Value, error) {
-	return b[:], nil
+func (sd SolData) Value() (driver.Value, error) {
+	return sd.Data[:], nil
 }
 
 /////// ---------------------------------------------------///////
@@ -344,7 +375,7 @@ func (s *Signature) SetBytes(b []byte) {
 // MarshalText returns base58 str account
 func (s Signature) MarshalText() ([]byte, error) {
 	input, err := json.Marshal(s.Base58())
-	return input[1:len(input)-1], err
+	return input[1 : len(input)-1], err
 }
 
 // UnmarshalText parses an account in base58 syntax.
@@ -355,8 +386,12 @@ func (s *Signature) UnmarshalText(input []byte) error {
 
 // UnmarshalJSON parses an account in base58 syntax.
 func (s *Signature) UnmarshalJSON(input []byte) error {
-	s.SetBytes(input)
-	return nil
+	// Unmarshal data to []byte
+	data, _, err := UnmarshalDataByEncoding(input)
+	// set string to Hash
+	s.SetBytes(data)
+	// return err
+	return err
 }
 
 // Scan implements Scanner for database/sql.
@@ -391,4 +426,3 @@ func (s *Signature) UnmarshalGraphQL(input interface{}) error {
 	}
 	return err
 }
-

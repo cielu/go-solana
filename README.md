@@ -38,7 +38,7 @@ func main() {
 
 	// request Airdrop
 	signature, err := c.RequestAirdrop(ctx, account, big.NewInt(1000000000))
-    // has err
+	// has err
 	if err != nil {
 		fmt.Errorf("RequestAirdrop Failed: %w", err)
 		return
