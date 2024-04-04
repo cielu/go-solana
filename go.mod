@@ -1,3 +1,4 @@
+// go-solana
 module github.com/cielu/go-solana
 
 go 1.18
