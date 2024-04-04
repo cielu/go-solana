@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"github.com/mr-tron/base58"
 	"github.com/tyler-smith/go-bip39"
-	"go-solana/common"
-	"go-solana/core"
-	"go-solana/core/hdwallet"
+	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/core/hdwallet"
 	"os"
 	"regexp"
 )

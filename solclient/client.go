@@ -6,9 +6,9 @@ package solclient
 import (
 	"context"
 	"errors"
-	"go-solana/common"
-	"go-solana/rpc"
-	"go-solana/types"
+	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana/rpc"
+	"github.com/cielu/go-solana/types"
 	"math/big"
 )
 

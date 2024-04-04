@@ -1,4 +1,4 @@
-# go-solana
+# github.com/cielu/go-solana
 
 #### Example
 

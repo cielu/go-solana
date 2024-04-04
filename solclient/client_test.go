@@ -2,10 +2,10 @@ package solclient
 
 import (
 	"context"
-	"go-solana/common"
-	"go-solana/core"
-	"go-solana/rpc"
-	"go-solana/types"
+	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/rpc"
+	"github.com/cielu/go-solana/types"
 	"os"
 	"testing"
 )
@@ -21,7 +21,6 @@ func newClient() *Client {
 	//
 	rpcUrl := rpc.DevnetRPCEndpoint
 	//rpcUrl := rpc.MainnetRPCEndpoint
-	//rpcUrl := "https://go.getblock.io/3efc84876d334c50ab5ff5bf50b5b15b"
 	// dial rpc
 	c, err := Dial(rpcUrl)
 	if err != nil {

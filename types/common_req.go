@@ -3,7 +3,7 @@
 
 package types
 
-import "go-solana/common"
+import "github.com/cielu/go-solana/common"
 
 // RpcCommitmentCfg rpc config of commitment
 type RpcCommitmentCfg struct {

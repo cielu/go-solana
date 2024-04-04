@@ -5,7 +5,7 @@ package types
 
 import (
 	"encoding/json"
-	"go-solana/common"
+	"github.com/cielu/go-solana/common"
 	"math/big"
 )
 

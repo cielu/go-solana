@@ -3,7 +3,7 @@ package crypto
 import (
 	"crypto/ed25519"
 	"fmt"
-	"go-solana/common"
+	"github.com/cielu/go-solana/common"
 	"testing"
 )
 

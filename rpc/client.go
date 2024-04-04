@@ -23,7 +23,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"go-solana/core"
+	"github.com/cielu/go-solana/core"
 	"net/url"
 	"reflect"
 	"strconv"

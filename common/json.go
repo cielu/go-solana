@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go-solana/core"
+	"github.com/cielu/go-solana/core"
 )
 
 // UnmarshalDataByEncoding Unmarshal data to string by encoding
