@@ -463,3 +463,13 @@ type SubAccountInfo struct {
 	Result       AccountInfoWithCtx `json:"result"`
 	Subscription uint64             `json:"subscription"`
 }
+
+type BlockInfoWithCtx struct {
+	Content ContextSlot `json:"content"`
+	Block   BlockInfo   `json:"value"`
+}
+
+type BlockInfoNotify struct {
+	Result       BlockInfoWithCtx `json:"result"`
+	Subscription uint64           `json:"subscription"`
+}

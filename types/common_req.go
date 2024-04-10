@@ -134,3 +134,7 @@ type RpcSendTxCfg struct {
 	// set the minimum slot at which to perform preflight transaction checks
 	MinContextSlot *uint64 `json:"minContextSlot,omitempty"`
 }
+
+type MentionsAccountProgramParam struct {
+	MentionsAccountOrProgram string `json:"MentionsAccountOrProgram"`
+}
