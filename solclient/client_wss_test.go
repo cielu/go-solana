@@ -106,3 +106,34 @@ func TestClient_LogsSubscribe(t *testing.T) {
 		}
 	}
 }
+
+func TestClient_ProgramSubscribe(t *testing.T) {
+	var (
+		c             = newClient()
+		ctx           = context.Background()
+		programNotify = make(chan *types.ProgramNotify)
+	)
+	address := common.Base58ToAddress("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
+	sub, err := c.ProgramSubscribe(ctx, programNotify, address)
+	if err != nil {
+		t.Error("ProgramSubscribe Failed: %w", err)
+	}
+	// if error
+	if err != nil {
+		panic(fmt.Sprintf("EthSubscribe Failed: %s", err.Error()))
+	}
+
+	defer sub.Unsubscribe()
+	// fmt.Println("Start BotClient Pointer:", bot)
+	// handler the subscribed pending hash
+	for {
+		select {
+		case err = <-sub.Err():
+			panic(fmt.Sprintf("[SUBSCRIPTION] Fatal error: %s", err.Error()))
+		// Code block is executed when a new tx hash is piped to the channel
+		case accountInfo := <-programNotify:
+			// analyse transaction from hash by querying the client
+			fmt.Println(accountInfo)
+		}
+	}
+}

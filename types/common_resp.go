@@ -465,7 +465,7 @@ type SubAccountInfo struct {
 }
 
 type BlockInfoWithCtx struct {
-	Content ContextSlot `json:"content"`
+	Context ContextSlot `json:"content"`
 	Block   BlockInfo   `json:"value"`
 }
 
@@ -481,11 +481,21 @@ type LogsValue struct {
 }
 
 type LogsInfo struct {
-	Content ContextSlot `json:"content"`
+	Context ContextSlot `json:"content"`
 	Value   LogsValue   `json:"value"`
 }
 
 type LogsInfoNotify struct {
 	Result       LogsInfo `json:"result"`
 	Subscription uint64   `json:"subscription"`
+}
+
+type ProgramInfo struct {
+	Context ContextSlot  `json:"content"`
+	Value   TokenAccount `json:"value"`
+}
+
+type ProgramNotify struct {
+	Result       ProgramInfo `json:"result"`
+	Subscription uint64      `json:"subscription"`
 }

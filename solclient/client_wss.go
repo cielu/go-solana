@@ -56,3 +56,13 @@ func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- *types.LogsInfoNo
 	}
 	return sub, nil
 }
+
+// ProgramSubscribe to a program to receive notifications when the lamports or data for an account owned by the given program changes
+func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- *types.ProgramNotify, address common.Address, cfg ...types.RpcCommitmentCfg) (core.Subscription, error) {
+	// SolSubscribe
+	sub, err := sc.c.Subscribe(ctx, "program", ch, address, getRpcCfg(cfg))
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
+}
