@@ -459,7 +459,7 @@ type RpcVoteAccounts struct {
 	Delinquent []VoteAccount `json:"delinquent"`
 }
 
-type SubAccountInfo struct {
+type AccountInfoNotify struct {
 	Result       AccountInfoWithCtx `json:"result"`
 	Subscription uint64             `json:"subscription"`
 }

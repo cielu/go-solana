@@ -12,7 +12,7 @@ import (
 )
 
 // AccountSubscribe Subscribe to an account to receive notifications when the lamports or data for a given account public key changes
-func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- *types.SubAccountInfo, account common.Address, cfg ...types.RpcCommitmentWithEncodingCfg) (core.Subscription, error) {
+func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- *types.AccountInfoNotify, account common.Address, cfg ...types.RpcCommitmentWithEncodingCfg) (core.Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "account", ch, account, getRpcCfg(cfg))
 	if err != nil {
@@ -29,7 +29,7 @@ func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- *types.BlockInfo
 		filter = "all"
 	case types.MentionsAccountProgramParam:
 	default:
-		return nil, errors.New("invalid args. Require: [string|types.MentionsAccountProgramParam]")
+		return nil, errors.New("invalid filter arg. Require: [string|types.MentionsAccountProgramParam]")
 	}
 	sub, err := sc.c.Subscribe(ctx, "block", ch, filter, getRpcCfg(cfg))
 	if err != nil {
