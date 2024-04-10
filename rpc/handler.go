@@ -19,6 +19,7 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -408,7 +409,8 @@ func (h *handler) handleResponses(batch []*jsonrpcMessage, handleCall func(*json
 				op.err = json.Unmarshal(msg.Result, &op.sub.subid)
 				if op.err == nil {
 					go op.sub.run()
-					h.clientSubs[op.sub.subid] = op.sub
+					subId := fmt.Sprintf("%d", op.sub.subid)
+					h.clientSubs[subId] = op.sub
 				}
 			}
 		}

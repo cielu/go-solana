@@ -14,7 +14,8 @@ func TestClient_AccountSubscribe(t *testing.T) {
 		ctx           = context.Background()
 		accountNotify = make(chan *types.SubAccountInfo)
 	)
-	account := common.Base58ToAddress("CM78CPUeXjn8o3yroDHxUtKsZZgoy4GPkPPXfouKNH12")
+
+	account := common.Base58ToAddress("6v3nv8BUJKpXvnBnD4ZvpDiG3u847ALLYyo1NACn2zmV")
 	//
 	sub, err := c.AccountSubscribe(ctx, accountNotify, account)
 	if err != nil {

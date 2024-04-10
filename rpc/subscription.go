@@ -213,7 +213,7 @@ type ClientSubscription struct {
 	etype     reflect.Type
 	channel   reflect.Value
 	namespace string
-	subid     string
+	subid     uint64
 
 	// The in channel receives notification values from client dispatcher.
 	in chan json.RawMessage
