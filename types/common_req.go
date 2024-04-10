@@ -136,5 +136,9 @@ type RpcSendTxCfg struct {
 }
 
 type MentionsAccountProgramParam struct {
-	MentionsAccountOrProgram string `json:"MentionsAccountOrProgram"`
+	MentionsAccountOrProgram string `json:"MentionsAccountOrProgram,omitempty"`
+}
+
+type MentionsParam struct {
+	Mentions []string `json:"mentions,omitempty"`
 }

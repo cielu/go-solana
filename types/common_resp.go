@@ -473,3 +473,19 @@ type BlockInfoNotify struct {
 	Result       BlockInfoWithCtx `json:"result"`
 	Subscription uint64           `json:"subscription"`
 }
+
+type LogsValue struct {
+	Signature string   `json:"signature"`
+	Err       string   `json:"err"`
+	Logs      []string `json:"logs"`
+}
+
+type LogsInfo struct {
+	Content ContextSlot `json:"content"`
+	Value   LogsValue   `json:"value"`
+}
+
+type LogsInfoNotify struct {
+	Result       LogsInfo `json:"result"`
+	Subscription uint64   `json:"subscription"`
+}
