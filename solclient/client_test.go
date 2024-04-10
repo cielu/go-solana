@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
-	"github.com/cielu/go-solana/rpc"
 	"github.com/cielu/go-solana/types"
 	"os"
 	"testing"
@@ -19,8 +18,9 @@ func init() {
 
 func newClient() *Client {
 	//
-	rpcUrl := rpc.DevnetRPCEndpoint
+	// rpcUrl := rpc.DevnetRPCEndpoint
 	//rpcUrl := rpc.MainnetRPCEndpoint
+	rpcUrl := "wss://billowing-tame-aura.solana-mainnet.quiknode.pro/10aef092fa7d94a2b7fb600e0cf713921217f964/"
 	// dial rpc
 	c, err := Dial(rpcUrl)
 	if err != nil {

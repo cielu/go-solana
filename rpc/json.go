@@ -1,4 +1,4 @@
-// Copyright 2016 The go-ethereum Authors
+// Copyright 2015 The go-ethereum Authors
 // This file is part of the go-ethereum library.
 //
 // The go-ethereum library is free software: you can redistribute it and/or modify
@@ -218,6 +218,11 @@ func NewCodec(conn Conn) ServerCodec {
 		return enc.Encode(v)
 	}
 	return NewFuncCodec(conn, encode, dec.Decode)
+}
+
+func (c *jsonCodec) peerInfo() PeerInfo {
+	// This returns "ipc" because all other built-in transports have a separate codec type.
+	return PeerInfo{Transport: "ipc", RemoteAddr: c.remote}
 }
 
 func (c *jsonCodec) remoteAddr() string {
