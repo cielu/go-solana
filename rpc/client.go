@@ -21,6 +21,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/cielu/go-solana/core"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -474,18 +475,7 @@ func (c *Client) Notify(ctx context.Context, method string, args ...interface{})
 	return c.send(ctx, op, msg)
 }
 
-// EthSubscribe registers a subscription under the "eth" namespace.
-func (c *Client) EthSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
-	return c.Subscribe(ctx, "eth", channel, args...)
-}
-
-// ShhSubscribe registers a subscription under the "shh" namespace.
-// Deprecated: use Subscribe(ctx, "shh", ...).
-func (c *Client) ShhSubscribe(ctx context.Context, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
-	return c.Subscribe(ctx, "shh", channel, args...)
-}
-
-// Subscribe calls the "<namespace>_subscribe" method with the given arguments,
+// Subscribe calls the "<namespace>_Subscribe" method with the given arguments,
 // registering a subscription. Server notifications for the subscription are
 // sent to the given channel. The element type of the channel must match the
 // expected type of content returned by the subscription.
@@ -511,6 +501,9 @@ func (c *Client) Subscribe(ctx context.Context, namespace string, channel interf
 	}
 
 	msg, err := c.newMessage(namespace+subscribeMethodSuffix, args...)
+
+	core.BeautifyConsole("Subscribe", msg)
+
 	if err != nil {
 		return nil, err
 	}
@@ -519,6 +512,7 @@ func (c *Client) Subscribe(ctx context.Context, namespace string, channel interf
 		resp: make(chan []*jsonrpcMessage, 1),
 		sub:  newClientSubscription(c, namespace, chanVal),
 	}
+
 
 	// Send the subscription request.
 	// The arrival and validity of the response is signaled on sub.quit.

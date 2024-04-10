@@ -10,6 +10,12 @@ type RpcCommitmentCfg struct {
 	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
 }
 
+// RpcCommitmentWithEncodingCfg rpc config of commitment
+type RpcCommitmentWithEncodingCfg struct {
+	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
+	Encoding   EnumEncoding      `json:"encoding,omitempty"`
+}
+
 // RpcCommitmentWithMinSlotCfg commitment & min slot
 type RpcCommitmentWithMinSlotCfg struct {
 	Commitment     EnumRpcCommitment `json:"commitment,omitempty"`

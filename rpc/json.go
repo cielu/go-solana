@@ -32,9 +32,9 @@ import (
 const (
 	vsn                      = "2.0"
 	serviceMethodSeparator   = "_"
-	subscribeMethodSuffix    = "_subscribe"
-	unsubscribeMethodSuffix  = "_unsubscribe"
-	notificationMethodSuffix = "_subscription"
+	subscribeMethodSuffix    = "Subscribe"
+	unsubscribeMethodSuffix  = "Unsubscribe"
+	notificationMethodSuffix = "Notification"
 
 	defaultWriteTimeout = 10 * time.Second // used if context has no deadline
 )
@@ -97,7 +97,9 @@ func (msg *jsonrpcMessage) isUnsubscribe() bool {
 }
 
 func (msg *jsonrpcMessage) namespace() string {
+	fmt.Println("namespace", msg.Method)
 	before, _, _ := strings.Cut(msg.Method, serviceMethodSeparator)
+	fmt.Println("namespace before", before)
 	return before
 }
 

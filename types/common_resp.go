@@ -393,11 +393,11 @@ type StakeActivation struct {
 }
 
 type SupplyInfo struct {
-	//Total supply in lamports
+	// Total supply in lamports
 	Total uint64 `json:"total"`
-	//Circulating supply in lamports
+	// Circulating supply in lamports
 	Circulating uint64 `json:"circulating"`
-	//Non-circulating supply in lamports
+	// Non-circulating supply in lamports
 	NonCirculating uint64 `json:"nonCirculating"`
 	// an array of account addresses of non-circulating accounts, as strings. If excludeNonCirculatingAccountsList is enabled, the returned array will be empty.
 	NonCirculatingAccounts []common.Address `json:"nonCirculatingAccounts"`
@@ -457,4 +457,9 @@ type VoteAccount struct {
 type RpcVoteAccounts struct {
 	Current    []VoteAccount `json:"current"`
 	Delinquent []VoteAccount `json:"delinquent"`
+}
+
+type SubAccountInfo struct {
+	Result       AccountInfoWithCtx `json:"result"`
+	Subscription uint64             `json:"subscription"`
 }
