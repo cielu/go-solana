@@ -115,7 +115,7 @@ func TestClient_ProgramSubscribe(t *testing.T) {
 	var (
 		c             = newClient()
 		ctx           = context.Background()
-		programNotify = make(chan *types.ProgramNotify)
+		programNotify = make(chan types.ProgramInfoWithCtx)
 	)
 	address := common.Base58ToAddress("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
 	sub, err := c.ProgramSubscribe(ctx, programNotify, address)
