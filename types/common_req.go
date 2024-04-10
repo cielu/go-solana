@@ -135,10 +135,10 @@ type RpcSendTxCfg struct {
 	MinContextSlot *uint64 `json:"minContextSlot,omitempty"`
 }
 
-type MentionsAccountProgramParam struct {
+type MentionsAccountProgramCfg struct {
 	MentionsAccountOrProgram string `json:"MentionsAccountOrProgram,omitempty"`
 }
 
-type MentionsParam struct {
+type MentionsCfg struct {
 	Mentions []string `json:"mentions,omitempty"`
 }

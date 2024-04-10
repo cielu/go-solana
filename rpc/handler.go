@@ -449,11 +449,13 @@ func (h *handler) handleResponses(batch []*jsonrpcMessage, handleCall func(*json
 func (h *handler) handleSubscriptionResult(msg *jsonrpcMessage) {
 	var result subscriptionResult
 	if err := json.Unmarshal(msg.Params, &result); err != nil {
-		// h.log.Debug("Dropping invalid subscription message")
+		fmt.Errorf("dropping invalid subscription message, %s", err.Error())
 		return
 	}
-	if h.clientSubs[result.ID] != nil {
-		h.clientSubs[result.ID].deliver(result.Result)
+	resID := fmt.Sprintf("%d", result.ID)
+	// deliver the result
+	if h.clientSubs[resID] != nil {
+		h.clientSubs[resID].deliver(result.Result)
 	}
 }
 

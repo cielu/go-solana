@@ -346,7 +346,7 @@ func (sub *ClientSubscription) forward() (unsubscribeServer bool, err error) {
 			if !recv.IsNil() {
 				err = recv.Interface().(error)
 			}
-			if err == errUnsubscribed {
+			if errors.Is(err, errUnsubscribed) {
 				// Exiting because Unsubscribe was called, unsubscribe on server.
 				return true, nil
 			}

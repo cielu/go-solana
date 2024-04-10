@@ -12,7 +12,7 @@ func TestClient_AccountSubscribe(t *testing.T) {
 	var (
 		c             = newClient()
 		ctx           = context.Background()
-		accountNotify = make(chan *types.AccountInfoNotify)
+		accountNotify = make(chan types.AccountInfoWithCtx)
 	)
 
 	account := common.Base58ToAddress("6v3nv8BUJKpXvnBnD4ZvpDiG3u847ALLYyo1NACn2zmV")
@@ -45,14 +45,13 @@ func TestClient_BlockSubscribe(t *testing.T) {
 	var (
 		c               = newClient()
 		ctx             = context.Background()
-		blockInfoNotify = make(chan *types.BlockInfoNotify)
+		blockInfoNotify = make(chan types.BlockInfoWithCtx)
 		filter          = ""
 	)
 
 	//
 	sub, err := c.BlockSubscribe(ctx, blockInfoNotify, filter)
 
-	fmt.Println(sub)
 	if err != nil {
 		t.Error("BlockSubscribe Failed: %w", err)
 	}
@@ -71,7 +70,10 @@ func TestClient_BlockSubscribe(t *testing.T) {
 		// Code block is executed when a new tx hash is piped to the channel
 		case blockInfo := <-blockInfoNotify:
 			// analyse transaction from hash by querying the client
-			fmt.Println(blockInfo)
+			fmt.Printf("%#v\n", blockInfo)
+			fmt.Println("Slot", blockInfo.Context.Slot)
+			fmt.Println("Err", blockInfo.BlockInfo.Err)
+			fmt.Println("Height", blockInfo.BlockInfo.BlockHeight)
 		}
 	}
 }
@@ -80,8 +82,8 @@ func TestClient_LogsSubscribe(t *testing.T) {
 	var (
 		c              = newClient()
 		ctx            = context.Background()
-		logsInfoNotify = make(chan *types.LogsInfoNotify)
-		filter         = ""
+		logsInfoNotify = make(chan types.LogsInfoWithCtx)
+		filter         = "all"
 	)
 
 	//

@@ -193,6 +193,7 @@ type BlockTransaction struct {
 }
 
 type BlockInfo struct {
+	Err               json.RawMessage    `json:"err"`
 	BlockHeight       uint64             `json:"blockHeight"`
 	BlockTime         int64              `json:"blockTime"`
 	ParentSlot        uint64             `json:"parentSlot"`
@@ -459,43 +460,25 @@ type RpcVoteAccounts struct {
 	Delinquent []VoteAccount `json:"delinquent"`
 }
 
-type AccountInfoNotify struct {
-	Result       AccountInfoWithCtx `json:"result"`
-	Subscription uint64             `json:"subscription"`
-}
-
 type BlockInfoWithCtx struct {
-	Context ContextSlot `json:"content"`
-	Block   BlockInfo   `json:"value"`
-}
-
-type BlockInfoNotify struct {
-	Result       BlockInfoWithCtx `json:"result"`
-	Subscription uint64           `json:"subscription"`
+	Context   ContextSlot `json:"context"`
+	BlockInfo BlockInfo   `json:"value"`
 }
 
 type LogsValue struct {
-	Signature string   `json:"signature"`
-	Err       string   `json:"err"`
-	Logs      []string `json:"logs"`
+	Signature common.Signature `json:"signature"`
+	Err       json.RawMessage  `json:"err"`
+	Logs      []string         `json:"logs"`
 }
 
-type LogsInfo struct {
-	Context ContextSlot `json:"content"`
+type LogsInfoWithCtx struct {
+	Context ContextSlot `json:"context"`
 	Value   LogsValue   `json:"value"`
 }
 
-type LogsInfoNotify struct {
-	Result       LogsInfo `json:"result"`
-	Subscription uint64   `json:"subscription"`
-}
-
-type ProgramInfo struct {
+type ProgramInfoWithCtx struct {
 	Context ContextSlot  `json:"content"`
 	Value   TokenAccount `json:"value"`
 }
 
-type ProgramNotify struct {
-	Result       ProgramInfo `json:"result"`
-	Subscription uint64      `json:"subscription"`
-}
+

@@ -42,7 +42,7 @@ const (
 var null = json.RawMessage("null")
 
 type subscriptionResult struct {
-	ID     string          `json:"subscription"`
+	ID     uint64          `json:"subscription"`
 	Result json.RawMessage `json:"result,omitempty"`
 }
 
@@ -97,7 +97,6 @@ func (msg *jsonrpcMessage) isUnsubscribe() bool {
 }
 
 func (msg *jsonrpcMessage) namespace() string {
-	fmt.Println("namespace", msg.Method)
 	before, _, _ := strings.Cut(msg.Method, serviceMethodSeparator)
 	fmt.Println("namespace before", before)
 	return before

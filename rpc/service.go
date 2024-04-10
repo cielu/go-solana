@@ -92,6 +92,7 @@ func (r *serviceRegistry) registerName(name string, rcvr interface{}) error {
 
 // callback returns the callback corresponding to the given RPC method name.
 func (r *serviceRegistry) callback(method string) *callback {
+	fmt.Println("====!!!!serviceMethodSeparator")
 	before, after, found := strings.Cut(method, serviceMethodSeparator)
 	if !found {
 		return nil
@@ -196,7 +197,7 @@ func (c *callback) call(ctx context.Context, method string, args []reflect.Value
 			const size = 64 << 10
 			buf := make([]byte, size)
 			buf = buf[:runtime.Stack(buf, false)]
-			errRes = &internalServerError{errcodePanic, "method handler crashed"}
+			errRes = &internalServerError{errcodePanic, fmt.Sprintf("method: [%s] handler crashed", method)}
 		}
 	}()
 	// Run the callback.
