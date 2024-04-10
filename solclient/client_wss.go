@@ -39,14 +39,16 @@ func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- *types.BlockInfo
 }
 
 // LogsSubscribe Subscribe to transaction logging
-func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- *types.LogsInfoNotify, mentions interface{}, cfg ...types.RpcGetBlockContextCfg) (core.Subscription, error) {
+func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- *types.LogsInfoNotify, mentions interface{}, cfg ...types.RpcCommitmentCfg) (core.Subscription, error) {
 	// SolSubscribe
 	switch mentions.(type) {
 	case string:
-		mentions = "all"
+		if mentions != "all" && mentions != "allWithVotes" {
+			mentions = "all"
+		}
 	case types.MentionsParam:
 	default:
-		return nil, errors.New("invalid args. Require: [string|types.MentionsAccountProgramParam]")
+		return nil, errors.New("invalid args. Require: [string|types.MentionsParam]")
 	}
 	sub, err := sc.c.Subscribe(ctx, "logs", ch, mentions, getRpcCfg(cfg))
 	if err != nil {
