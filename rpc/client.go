@@ -68,7 +68,9 @@ const (
 
 // Client represents a connection to an RPC server.
 type Client struct {
+	idgen    func() ID // for subscriptions
 	isHTTP   bool      // connection type: http, ws or ipc
+	services *serviceRegistry
 
 	idCounter atomic.Uint32
 	// This function, if non-nil, is called when the connection is lost.
@@ -108,7 +110,7 @@ type clientConn struct {
 func (c *Client) newClientConn(conn ServerCodec) *clientConn {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, clientContextKey{}, c)
-	handler := newHandler(ctx, conn, c.batchItemLimit, c.batchResponseMaxSize)
+	handler := newHandler(ctx, conn, c.idgen, c.services, c.batchItemLimit, c.batchResponseMaxSize)
 	return &clientConn{conn, handler}
 }
 
@@ -128,7 +130,7 @@ type requestOp struct {
 	ids         []json.RawMessage
 	err         error
 	resp        chan []*jsonrpcMessage // the response goes here
-	//sub         *ClientSubscription    // set for Subscribe requests.
+	sub         *ClientSubscription    // set for Subscribe requests.
 	hadResponse bool                   // true when the request was responded to
 }
 
@@ -195,11 +197,11 @@ func DialOptions(ctx context.Context, rawurl string, options ...ClientOption) (*
 	case "http", "https":
 		reconnect = newClientTransportHTTP(rawurl, cfg)
 	case "ws", "wss":
-		//rc, err := newClientTransportWS(rawurl, cfg)
-		//if err != nil {
-		//	return nil, err
-		//}
-		//reconnect = rc
+		rc, err := newClientTransportWS(rawurl, cfg)
+		if err != nil {
+			return nil, err
+		}
+		reconnect = rc
 	default:
 		return nil, fmt.Errorf("no known transport for URL scheme %q", u.Scheme)
 	}
@@ -219,15 +221,17 @@ func newClient(initctx context.Context, cfg *clientConfig, connect reconnectFunc
 	if err != nil {
 		return nil, err
 	}
-	c := initClient(conn,  cfg)
+	c := initClient(conn, new(serviceRegistry), cfg)
 	c.reconnectFunc = connect
 	return c, nil
 }
 
-func initClient(conn ServerCodec, cfg *clientConfig) *Client {
+func initClient(conn ServerCodec, services *serviceRegistry, cfg *clientConfig) *Client {
 	_, isHTTP := conn.(*httpConn)
 	c := &Client{
 		isHTTP:               isHTTP,
+		services:             services,
+		idgen:                cfg.idgen,
 		batchItemLimit:       cfg.batchItemLimit,
 		batchResponseMaxSize: cfg.batchResponseLimit,
 		writeConn:            conn,
@@ -242,9 +246,14 @@ func initClient(conn ServerCodec, cfg *clientConfig) *Client {
 		reqTimeout:           make(chan *requestOp),
 	}
 
+	// Set defaults.
+	if c.idgen == nil {
+		c.idgen = randomIDGenerator()
+	}
+
 	// Launch the main loop.
 	if !isHTTP {
-		//go c.dispatch(conn)
+		go c.dispatch(conn)
 	}
 	return c
 }
@@ -311,7 +320,7 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 	if c.isHTTP {
 		err = c.sendHTTP(ctx, op, msg)
 	} else {
-		//err = c.send(ctx, op, msg)
+		err = c.send(ctx, op, msg)
 	}
 	if err != nil {
 		return err

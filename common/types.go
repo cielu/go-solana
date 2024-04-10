@@ -42,10 +42,33 @@ func BytesToAddress(b []byte) (a Address) {
 // BigToAddress returns Address with byte values of b.
 func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 
+// StrToAddress returns Address with byte values of b.
+// Notice: only support base58/base64 str
+func StrToAddress(b string) Address {
+	// decode base58 str
+	if d, err := base58.Decode(b); err == nil {
+		return BytesToAddress(d)
+	}
+	// decode base64 str
+	if d, err := base64.StdEncoding.DecodeString(b); err == nil {
+		return BytesToAddress(d)
+	}
+	// empty
+	return Address{}
+}
+
 // Base58ToAddress returns Address with byte values of b.
 func Base58ToAddress(b string) Address {
 	// decode base58
 	d, _ := base58.Decode(b)
+	// bytes to address
+	return BytesToAddress(d)
+}
+
+// Base64ToAddress returns Address with byte values of b.
+func Base64ToAddress(b string) Address {
+	// decode base64
+	d, _ := base64.StdEncoding.DecodeString(b)
 	// bytes to address
 	return BytesToAddress(d)
 }
@@ -152,11 +175,34 @@ func BytesToHash(b []byte) (h Hash) {
 // BigToHash returns Hash with byte values of b.
 func BigToHash(b *big.Int) Hash { return BytesToHash(b.Bytes()) }
 
+// StrToHash returns Hash with byte values of b.
+// Notice: only support base58/base64 str
+func StrToHash(b string) Hash {
+	// decode base58 str
+	if d, err := base58.Decode(b); err == nil {
+		return BytesToHash(d)
+	}
+	// decode base64 str
+	if d, err := base64.StdEncoding.DecodeString(b); err == nil {
+		return BytesToHash(d)
+	}
+	// base 64
+	return Hash{}
+}
+
 // Base58ToHash returns Hash with byte values of b.
 func Base58ToHash(b string) Hash {
 	// decode base58
 	d, _ := base58.Decode(b)
 	// bytes to Hash
+	return BytesToHash(d)
+}
+
+// Base64ToHash returns Hash with byte values of b.
+func Base64ToHash(b string) Hash {
+	// decode base64
+	d, _ := base64.StdEncoding.DecodeString(b)
+	// bytes to address
 	return BytesToHash(d)
 }
 

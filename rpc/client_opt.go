@@ -17,7 +17,10 @@
 
 package rpc
 
-import "net/http"
+import (
+	"github.com/gorilla/websocket"
+	"net/http"
+)
 
 // ClientOption is a configuration option for the RPC client.
 type ClientOption interface {
@@ -31,10 +34,11 @@ type clientConfig struct {
 	httpAuth    HTTPAuth
 
 	// WebSocket options
-	//wsDialer           *websocket.Dialer
-	//wsMessageSizeLimit *int64 // wsMessageSizeLimit nil = default, 0 = no limit
+	wsDialer           *websocket.Dialer
+	wsMessageSizeLimit *int64 // wsMessageSizeLimit nil = default, 0 = no limit
 
 	// RPC handler options
+	idgen              func() ID
 	batchItemLimit     int
 	batchResponseLimit int
 }

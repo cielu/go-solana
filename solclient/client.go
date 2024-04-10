@@ -41,11 +41,6 @@ func (sc *Client) Close() {
 	sc.c.Close()
 }
 
-// Client gets the underlying RPC client.
-func (sc *Client) Client() *rpc.Client {
-	return sc.c
-}
-
 // --------------------------------------------------------
 // --------------------------------------------------------
 // ------------------Blockchain Access---------------------
