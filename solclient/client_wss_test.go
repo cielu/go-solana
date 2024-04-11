@@ -141,3 +141,67 @@ func TestClient_ProgramSubscribe(t *testing.T) {
 		}
 	}
 }
+
+func TestClient_SignatureSubscribe(t *testing.T) {
+	var (
+		c                    = newClient()
+		ctx                  = context.Background()
+		signatureInfoWithCtx = make(chan types.SignatureInfoWithCtx)
+	)
+
+	signature := common.Base58ToSignature("hLUfBB8BSzoBrqzvyvHyyrCJrkHWeZNFc1uyRw45c5ZZGK5eiyDX7zjWTgE3bzjGyjUAL4Rh3CHiMqkbtiXvPo2")
+	sub, err := c.SignatureSubscribe(ctx, signatureInfoWithCtx, signature)
+
+	if err != nil {
+		t.Error("SignatureSubscribe Failed: %w", err)
+	}
+	// if error
+	if err != nil {
+		panic(fmt.Sprintf("EthSubscribe Failed: %s", err.Error()))
+	}
+
+	defer sub.Unsubscribe()
+	// fmt.Println("Start BotClient Pointer:", bot)
+	// handler the subscribed pending hash
+	for {
+		select {
+		case err = <-sub.Err():
+			panic(fmt.Sprintf("[SUBSCRIPTION] Fatal error: %s", err.Error()))
+		// Code block is executed when a new tx hash is piped to the channel
+		case accountInfo := <-signatureInfoWithCtx:
+			// analyse transaction from hash by querying the client
+			fmt.Println(accountInfo)
+		}
+	}
+}
+func TestClient_SlotSubscribe(t *testing.T) {
+	var (
+		c               = newClient()
+		ctx             = context.Background()
+		SlotInfoWithCtx = make(chan types.SlotInfoWithCtx)
+	)
+
+	sub, err := c.SlotSubscribe(ctx, SlotInfoWithCtx)
+
+	if err != nil {
+		t.Error("SlotSubscribe Failed: %w", err)
+	}
+	// if error
+	if err != nil {
+		panic(fmt.Sprintf("EthSubscribe Failed: %s", err.Error()))
+	}
+
+	defer sub.Unsubscribe()
+	// fmt.Println("Start BotClient Pointer:", bot)
+	// handler the subscribed pending hash
+	for {
+		select {
+		case err = <-sub.Err():
+			panic(fmt.Sprintf("[SUBSCRIPTION] Fatal error: %s", err.Error()))
+		// Code block is executed when a new tx hash is piped to the channel
+		case accountInfo := <-SlotInfoWithCtx:
+			// analyse transaction from hash by querying the client
+			fmt.Println(accountInfo)
+		}
+	}
+}

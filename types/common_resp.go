@@ -477,8 +477,17 @@ type LogsInfoWithCtx struct {
 }
 
 type ProgramInfoWithCtx struct {
-	Context ContextSlot  `json:"content"`
+	Context ContextSlot  `json:"context"`
 	Value   TokenAccount `json:"value"`
 }
 
+type SignatureInfoWithCtx struct {
+	Context ContextSlot `json:"context"`
+	Value   string      `json:"value"`
+}
 
+type SlotInfoWithCtx struct {
+	Parent uint64 `json:"parent"`
+	Root   uint64 `json:"root"`
+	Slot   uint64 `json:"slot"`
+}

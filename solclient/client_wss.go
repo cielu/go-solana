@@ -67,3 +67,23 @@ func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- types.ProgramI
 	}
 	return sub, nil
 }
+
+// SignatureSubscribe Subscribe to receive a notification when the transaction with the given signature reaches the specified commitment level.
+func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- types.SignatureInfoWithCtx, signature common.Signature, cfg ...types.RpcCommitmentCfg) (core.Subscription, error) {
+	// SolSubscribe
+	sub, err := sc.c.Subscribe(ctx, "signature", ch, signature, getRpcCfg(cfg))
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
+}
+
+// SlotSubscribe Subscribe to receive notification anytime a slot is processed by the validator
+func (sc *Client) SlotSubscribe(ctx context.Context, ch chan<- types.SlotInfoWithCtx) (core.Subscription, error) {
+	// SolSubscribe
+	sub, err := sc.c.Subscribe(ctx, "slot", ch)
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
+}
