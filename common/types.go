@@ -5,6 +5,7 @@ package common
 
 import (
 	"bytes"
+	"crypto/ed25519"
 	"database/sql/driver"
 	"encoding/base64"
 	"encoding/json"
@@ -351,7 +352,7 @@ func (sd *SolData) UnmarshalJSON(input []byte) error {
 	// set SolData by encoding
 	if encoding == "" {
 		sd.SetBytes(data)
-	}else {
+	} else {
 		sd.SetSolData(data, encoding)
 	}
 	return err
@@ -371,6 +372,8 @@ func (sd SolData) Value() (driver.Value, error) {
 
 // Signature The signature
 type Signature [SignatureLength]byte
+
+type SignatureUndefinedLength []byte
 
 // BytesToSignature returns Signature with value b.
 func BytesToSignature(b []byte) (a Signature) {
@@ -471,4 +474,8 @@ func (s *Signature) UnmarshalGraphQL(input interface{}) error {
 		err = fmt.Errorf("unexpected type %T for Signature", input)
 	}
 	return err
+}
+
+func (a Signature) Sign(message []byte) []byte {
+	return ed25519.Sign(a.Bytes(), message)
 }

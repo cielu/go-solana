@@ -158,12 +158,13 @@ type TransactionMeta struct {
 }
 
 type MessageHeader struct {
-	NumRequiredSignatures       uint64 `json:"numRequiredSignatures"`
-	NumReadonlySignedAccounts   uint64 `json:"numReadonlySignedAccounts"`
-	NumReadonlyUnsignedAccounts uint64 `json:"numReadonlyUnsignedAccounts"`
+	NumRequiredSignatures       uint8 `json:"numRequiredSignatures"`
+	NumReadonlySignedAccounts   uint8 `json:"numReadonlySignedAccounts"`
+	NumReadonlyUnsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
 }
 
 type Message struct {
+	Version         MessageVersion
 	AccountKeys     []common.Address      `json:"accountKeys"`
 	Header          MessageHeader         `json:"header"`
 	RecentBlockHash common.Hash           `json:"recentBlockHash"`
