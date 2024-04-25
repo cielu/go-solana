@@ -108,8 +108,8 @@ type InnerInstruction struct {
 }
 
 type LoadedAddresses struct {
-	ReadOnly common.Address `json:"readonly,omitempty"`
-	Writable common.Address `json:"writable,omitempty"`
+	ReadOnly []common.Address `json:"readonly,omitempty"`
+	Writable []common.Address `json:"writable,omitempty"`
 }
 
 type TxStatus struct {

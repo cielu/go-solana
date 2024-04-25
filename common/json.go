@@ -37,7 +37,7 @@ func UnmarshalDataByEncoding(input []byte) ([]byte, string, error) {
 			encoding = "base64"
 			input, _ = base64.StdEncoding.DecodeString(v[0].(string))
 		default:
-			return nil, "", fmt.Errorf("unsupported type: %s", v[1])
+			return nil, "", fmt.Errorf("UnmarshalDataByEncoding Err: %s", v[1])
 		}
 	}
 	return input, encoding, err
