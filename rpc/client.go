@@ -74,6 +74,8 @@ type BatchElem struct {
 
 // Client represents a connection to an RPC server.
 type Client struct {
+	IsDebug bool // debug rpc request
+
 	idgen    func() ID // for subscriptions
 	isHTTP   bool      // connection type: http, ws or ipc
 	services *serviceRegistry
@@ -502,8 +504,6 @@ func (c *Client) Subscribe(ctx context.Context, namespace string, channel interf
 
 	msg, err := c.newMessage(namespace+subscribeMethodSuffix, args...)
 
-	core.BeautifyConsole("Subscribe", msg)
-
 	if err != nil {
 		return nil, err
 	}
@@ -538,6 +538,10 @@ func (c *Client) newMessage(method string, paramsIn ...interface{}) (*jsonrpcMes
 		if msg.Params, err = json.Marshal(paramsIn); err != nil {
 			return nil, err
 		}
+	}
+	// If Debug the params
+	if c.IsDebug {
+		core.BeautifyConsole("Request Body:", msg)
 	}
 	return msg, nil
 }

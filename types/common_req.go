@@ -27,7 +27,7 @@ type RpcGetBlockContextCfg struct {
 	Commitment                     EnumRpcCommitment `json:"commitment,omitempty"`
 	Encoding                       EnumEncoding      `json:"encoding,omitempty"`
 	TransactionDetails             EnumTxDetailLevel `json:"transactionDetails,omitempty"`
-	MaxSupportedTransactionVersion *uint64           `json:"maxSupportedTransactionVersion,omitempty"`
+	MaxSupportedTransactionVersion uint64            `json:"maxSupportedTransactionVersion"`
 	Rewards                        *bool             `json:"rewards,omitempty"`
 }
 
