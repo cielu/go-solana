@@ -36,6 +36,11 @@ func NewClient(c *rpc.Client) *Client {
 	return &Client{c}
 }
 
+// SetDebug set solClient debug
+func (sc *Client) SetDebug(isDebug bool) {
+	sc.c.IsDebug = isDebug
+}
+
 // Close closes the underlying RPC connection.
 func (sc *Client) Close() {
 	sc.c.Close()
