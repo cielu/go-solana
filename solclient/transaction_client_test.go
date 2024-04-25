@@ -5,8 +5,104 @@ import (
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/types"
 	"github.com/cielu/go-solana/types/system"
+	"github.com/cielu/go-solana/types/token"
 	"testing"
 )
+
+func Test_TransferTokenChecked(t *testing.T) {
+	var (
+		c   = newClient()
+		ctx = context.Background()
+	)
+	latestHash, err := c.GetLatestBlockhash(ctx)
+	if err != nil {
+		println("get latest blockHash err:", err)
+	}
+	var feePayer, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
+	var owner, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
+	var from = common.StrToAddress("BuAeYkSfGyTpHszavYX4VwtwvkiAiB8S3gwar6sxymrL")
+	var to = common.StrToAddress("4X9nZF4gNqATtcS26CoSm9oZVoZwookgHuSCZT2dPYUa")
+	var mint = common.StrToAddress("oreoN2tQbHXVaZsr3pf66A48miqcBXCDJozganhEJgz")
+
+	transaction, err := types.NewTransaction(
+		types.NewTransactionParam{
+			Signatures: []types.Account{feePayer, owner},
+			Message: types.NewMessage(types.NewMessageParam{
+				FeePayer:        feePayer.PublicKey,
+				RecentBlockhash: latestHash.LastBlock.Blockhash,
+				Instructions: []types.Instruction{
+					token.TransferChecked(token.TransferCheckedParam{
+						From:     from,
+						To:       to,
+						Mint:     mint,
+						Auth:     feePayer.PublicKey,
+						Signers:  []common.Address{},
+						Amount:   1,
+						Decimals: 9,
+					}),
+				},
+			}),
+		},
+	)
+	serialize, err := transaction.Serialize()
+	if err != nil {
+		println("err")
+	}
+	res, err := c.SendTransaction(ctx, common.SolData{serialize, "base58"})
+	if err != nil {
+		println(err.Error())
+	}
+	println(res.String())
+
+}
+
+func Test_TransferToken(t *testing.T) {
+	var (
+		c   = newClient()
+		ctx = context.Background()
+	)
+	type args struct {
+		param token.TransferParam
+	}
+
+	latestHash, err := c.GetLatestBlockhash(ctx)
+	if err != nil {
+		println("get latest blockHash err:", err)
+	}
+	var feePayer, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
+	var owner, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
+	var from = common.StrToAddress("BuAeYkSfGyTpHszavYX4VwtwvkiAiB8S3gwar6sxymrL")
+	var to = common.StrToAddress("4X9nZF4gNqATtcS26CoSm9oZVoZwookgHuSCZT2dPYUa")
+
+	transaction, err := types.NewTransaction(
+		types.NewTransactionParam{
+			Signatures: []types.Account{feePayer, owner},
+			Message: types.NewMessage(types.NewMessageParam{
+				FeePayer:        feePayer.PublicKey,
+				RecentBlockhash: latestHash.LastBlock.Blockhash,
+				Instructions: []types.Instruction{
+					token.Transfer(token.TransferParam{
+						From:    from,
+						To:      to,
+						Auth:    owner.PublicKey,
+						Signers: []common.Address{},
+						Amount:  1,
+					}),
+				},
+			}),
+		},
+	)
+	serialize, err := transaction.Serialize()
+	if err != nil {
+		println("err")
+	}
+	res, err := c.SendTransaction(ctx, common.SolData{serialize, "base58"})
+	if err != nil {
+		println(err.Error())
+	}
+	println(res.String())
+
+}
 
 func TestClient_SendTransaction(t *testing.T) {
 	var (
@@ -18,9 +114,8 @@ func TestClient_SendTransaction(t *testing.T) {
 	if err2 != nil {
 		println("error")
 	}
-
-	var feePayer, _ = types.AccountFromBase58("3DjxzhaPzhq4oVM7u3n92UgNa5BtGBoYzDLboZCoYZDbgvuGycAFm4UeqhZqzTJM61zU4nRoBdxekRxDj3duk3W9")
-	var alice, _ = types.AccountFromBase58("3DjxzhaPzhq4oVM7u3n92UgNa5BtGBoYzDLboZCoYZDbgvuGycAFm4UeqhZqzTJM61zU4nRoBdxekRxDj3duk3W9")
+	var feePayer, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
+	var alice, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
 
 	transaction, err := types.NewTransaction(
 		types.NewTransactionParam{
@@ -31,8 +126,8 @@ func TestClient_SendTransaction(t *testing.T) {
 				Instructions: []types.Instruction{
 					system.Transfer(system.TransferParam{
 						From:   alice.PublicKey,
-						To:     common.StrToAddress("5qV6Xh7pjHNTsXFRRckUJChVxpNmEPL6X58QXPc6qht9"),
-						Amount: 1e5, // 0.01 SOL
+						To:     common.StrToAddress("CtiyYm2pRNwNKGcUPC7h9zHpdoqQnBEt9vPWQbZU9RCD"),
+						Amount: 1e6, // 0.01 SOL
 					}),
 				},
 			}),
