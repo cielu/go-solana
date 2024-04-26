@@ -204,7 +204,7 @@ NEXT_ACCOUNT:
 		compiledInstructions = append(compiledInstructions, CompiledInstruction{
 			ProgramIDIndex: uint16(publicKeyToIdx[instruction.ProgramID]),
 			Accounts:       accountIdx,
-			Data:           common.SolData{Data: instruction.Data, Encoding: ""},
+			Data:           common.SolData{RawData: instruction.Data, Encoding: ""},
 		})
 	}
 
@@ -246,8 +246,8 @@ func (m *MessageBody) Serialize() ([]byte, error) {
 			b = append(b, byte(accountIdx))
 		}
 
-		b = append(b, bincode.UintToVarLenBytes(uint64(len(instruction.Data.Data)))...)
-		b = append(b, instruction.Data.Data...)
+		b = append(b, bincode.UintToVarLenBytes(uint64(len(instruction.Data.RawData)))...)
+		b = append(b, instruction.Data.RawData...)
 	}
 
 	if len(m.Version) > 0 && m.Version != MessageVersionLegacy {
