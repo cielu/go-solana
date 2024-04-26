@@ -32,8 +32,8 @@ type AccountInfo struct {
 }
 
 type AccountInfoWithCtx struct {
-	Context     ContextSlot `json:"context"`
-	AccountInfo AccountInfo `json:"value"`
+	Context     ContextSlot  `json:"context"`
+	AccountInfo *AccountInfo `json:"value,omitempty"`
 }
 
 type BalanceWithCtx struct {

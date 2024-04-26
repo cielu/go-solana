@@ -18,11 +18,11 @@ func Test_TransferTokenChecked(t *testing.T) {
 	if err != nil {
 		println("get latest blockHash err:", err)
 	}
-	var feePayer, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
-	var owner, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
-	var from = common.StrToAddress("BuAeYkSfGyTpHszavYX4VwtwvkiAiB8S3gwar6sxymrL")
-	var to = common.StrToAddress("4X9nZF4gNqATtcS26CoSm9oZVoZwookgHuSCZT2dPYUa")
-	var mint = common.StrToAddress("oreoN2tQbHXVaZsr3pf66A48miqcBXCDJozganhEJgz")
+	var feePayer, _ = types.AccountFromBase58("3HE29Pg2c2tjbCkVxJpDKhLZuqPLEfoeF3gwjE8MTP3WzvQmLFCxHtKHkGnqNMBPPgFwTWP4vmb9b9a7hGybgtDb")
+	var owner, _ = types.AccountFromBase58("3HE29Pg2c2tjbCkVxJpDKhLZuqPLEfoeF3gwjE8MTP3WzvQmLFCxHtKHkGnqNMBPPgFwTWP4vmb9b9a7hGybgtDb")
+	var from = common.StrToAddress("BZYExy8yxFZF6jTp4h7X98dPLBcbQDFhvHXPdTjDb2ag")
+	var to = common.StrToAddress("7dCNBJ3qtkU4z2vCNk2MsNJqJ7CSWdqCxn7Zogpp9Sr")
+	var mint = common.StrToAddress("6vG61wtqP7aRgabnECQ2pYBHToJEmPtafvQrxYwmqsAL")
 
 	transaction, err := types.NewTransaction(
 		types.NewTransactionParam{
@@ -37,7 +37,7 @@ func Test_TransferTokenChecked(t *testing.T) {
 						Mint:     mint,
 						Auth:     feePayer.PublicKey,
 						Signers:  []common.Address{},
-						Amount:   1,
+						Amount:   1000000e9,
 						Decimals: 9,
 					}),
 				},

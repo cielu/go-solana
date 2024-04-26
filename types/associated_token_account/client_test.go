@@ -12,7 +12,7 @@ import (
 )
 
 func newClient() *solclient.Client {
-	rpcUrl := "https://small-sly-pool.solana-mainnet.quiknode.pro/83bb6bc144ded159a51a1c28b45ae82ae95053af/"
+	rpcUrl := "https://delicate-capable-wish.solana-devnet.quiknode.pro/e48425abfdab96e8263779f8e3334e4a5da10696/"
 	c, err := solclient.Dial(rpcUrl)
 	if err != nil {
 		panic("Dial rpc endpoint failed")
@@ -24,11 +24,11 @@ func Test_CreateAssociationAccount(t *testing.T) {
 	var (
 		c           = newClient()
 		ctx         = context.Background()
-		feePayer, _ = types.AccountFromBase58("2KLTas5hUpiFNyT3tdDGjuFuJbYcm1bMsqgiCFJeU6JdmgAbAykqNf2jqSFfTEP9ATz5wg3JckgH5H19L8V9r6Sb")
-		auth, _     = types.AccountFromBase58("3DjxzhaPzhq4oVM7u3n92UgNa5BtGBoYzDLboZCoYZDbgvuGycAFm4UeqhZqzTJM61zU4nRoBdxekRxDj3duk3W9")
-		mint        = common.StrToAddress("DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263")
+		feePayer, _ = types.AccountFromBase58("3HE29Pg2c2tjbCkVxJpDKhLZuqPLEfoeF3gwjE8MTP3WzvQmLFCxHtKHkGnqNMBPPgFwTWP4vmb9b9a7hGybgtDb")
+		auth        = common.StrToAddress("Fjw2S4TzcxCkJdfho6mhseDCPKQ9QrxUf2aZiGpi7ar3")
+		mint        = common.StrToAddress("6vG61wtqP7aRgabnECQ2pYBHToJEmPtafvQrxYwmqsAL")
 	)
-	ata, _, err := account.FindAssociatedTokenAddress(auth.PublicKey, mint)
+	ata, _, err := account.FindAssociatedTokenAddress(auth, mint)
 	if err != nil {
 		log.Fatalf("find ata error, err: %v", err)
 	}
@@ -45,7 +45,7 @@ func Test_CreateAssociationAccount(t *testing.T) {
 			Instructions: []types.Instruction{
 				Create(CreateParam{
 					Funder:                 feePayer.PublicKey,
-					Owner:                  auth.PublicKey,
+					Owner:                  auth,
 					Mint:                   mint,
 					AssociatedTokenAccount: ata,
 				}),
