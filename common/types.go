@@ -349,13 +349,17 @@ func (sd *SolData) UnmarshalText(input []byte) error {
 func (sd *SolData) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
 	data, encoding, err := UnmarshalDataByEncoding(input)
+	// has err
+	if err != nil {
+		return err
+	}
 	// set SolData by encoding
 	if encoding == "" {
 		sd.SetBytes(data)
 	} else {
 		sd.SetSolData(data, encoding)
 	}
-	return err
+	return nil
 }
 
 // Value implements valuer for database/sql.
