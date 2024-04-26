@@ -21,6 +21,7 @@ func UnmarshalDataByEncoding(input []byte) ([]byte, string, error) {
 	// get active type
 	switch v := data.(type) {
 	case string:
+		encoding = "base58"
 		input = core.DecodeBase58Str(v)
 	// slice
 	case []interface{}:
