@@ -2,6 +2,7 @@ package solclient
 
 import (
 	"context"
+	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/types"
@@ -20,7 +21,7 @@ func newClient() *Client {
 	//
 	// rpcUrl := rpc.DevnetRPCEndpoint
 	//rpcUrl := rpc.MainnetRPCEndpoint
-	rpcUrl := "wss://billowing-tame-aura.solana-mainnet.quiknode.pro/10aef092fa7d94a2b7fb600e0cf713921217f964/"
+	rpcUrl := "https://api.mainnet-beta.solana.com"
 	// dial rpc
 	c, err := Dial(rpcUrl)
 	if err != nil {
@@ -72,11 +73,25 @@ func TestClient_GetBlock(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	res, err := c.GetBlock(ctx, 256731099)
+	res, err := c.GetBlock(ctx, 260373041, types.RpcGetBlockContextCfg{
+		TransactionDetails:             types.TxDetailLevelFull,
+		MaxSupportedTransactionVersion: 0,
+	})
 	if err != nil {
 		t.Error("GetBlock Failed: %w", err)
 	}
-	core.BeautifyConsole("BlockInfo:", res)
+	for i, tx := range res.BlockTransaction {
+		fmt.Println("Tx index:", i+1)
+		fmt.Println("Signature:", tx.Transaction.Signatures[0])
+		// foreach Instruction
+		for i2, instruction := range tx.Transaction.Message.Instructions {
+			fmt.Println("	Instruction Index:", i2)
+			fmt.Println("	Program ID:", instruction.ProgramIDIndex)
+			fmt.Println("	Data:", instruction.Data)
+		}
+		fmt.Println("===================================================")
+	}
+	// core.BeautifyConsole("BlockInfo:", res)
 }
 
 func TestClient_GetBlockCommitment(t *testing.T) {
