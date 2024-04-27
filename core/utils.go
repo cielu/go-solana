@@ -54,6 +54,32 @@ func UnmarshalDataByEncoding(input []byte) ([]byte, string, error) {
 	return input, encoding, err
 }
 
+// UniqueAppend judge and append key
+func UniqueAppend[T comparable](slice []T, lookup T) []T {
+	// append unique key
+	hasKey := false
+	for _, key := range slice {
+		// found the key
+		if key == lookup {
+			hasKey = true
+			break
+		}
+	}
+	// not found
+	if !hasKey {
+		slice = append(slice, lookup)
+	}
+	return slice
+}
+
+func getRpcCfg[T any](cfg []T) *T {
+	// never set rpc ctx cfg
+	if len(cfg) == 0 {
+		return nil
+	}
+	return &cfg[0]
+}
+
 
 // DecodeBase58Str input string
 func DecodeBase58Str(input string) []byte {

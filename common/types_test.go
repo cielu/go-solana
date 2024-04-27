@@ -10,10 +10,10 @@ func TestAddress(t *testing.T) {
 
 	tests := []struct {
 		addr string
-		want  Address
+		want Address
 	}{
 		{
-			addr:  "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // usdc
+			addr: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // usdc
 			want: Base58ToAddress("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
 		},
 	}
@@ -35,7 +35,7 @@ func TestAddress(t *testing.T) {
 	// --> set Bytes
 	var (
 		addr1, addr2 Address
-		pubKey = make([]byte, AddressLength)
+		pubKey       = make([]byte, AddressLength)
 	)
 	addr1.SetBytes(pub)
 	//

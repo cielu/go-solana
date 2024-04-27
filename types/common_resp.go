@@ -45,8 +45,8 @@ type BlockReward struct {
 	Commission  *uint8         `json:"commission"`
 	Lamports    *big.Int       `json:"lamports"`
 	PostBalance uint64         `json:"postBalance"`
-	RewardType  string         `json:"rewardType"`
-	Pubkey      common.Address `json:"pubkey"`
+	RewardType string         `json:"rewardType"`
+	Pubkey     common.Address `json:"pubkey"`
 }
 
 type UiTokenAmount struct {
@@ -80,23 +80,6 @@ type TokenBalance struct {
 	ProgramId string `json:"programId"`
 
 	UiTokenAmount UiTokenAmount `json:"uiTokenAmount"`
-}
-
-type CompiledInstruction struct {
-	// StackHeight if empty
-	StackHeight *uint16 `json:"stackHeight"`
-	// Index into the message.accountKeys array indicating the program account that executes this instruction.
-	// NOTE: it is actually an uint8, but using an uint16 because uint8 is treated as a byte everywhere,
-	// and that can be an issue.
-	ProgramIDIndex uint16 `json:"programIdIndex"`
-
-	// List of ordered indices into the message.accountKeys array indicating which accounts to pass to the program.
-	// NOTE: it is actually a []uint8, but using an uint16 because []uint8 is treated as a []byte everywhere,
-	// and that can be an issue.
-	Accounts []uint16 `json:"accounts"`
-
-	// The program input data encoded in a base-58 string.
-	Data common.SolData `json:"data"`
 }
 
 type InnerInstruction struct {
@@ -157,27 +140,6 @@ type TransactionMeta struct {
 	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
 }
 
-type MessageHeader struct {
-	NumRequiredSignatures       uint8 `json:"numRequiredSignatures"`
-	NumReadonlySignedAccounts   uint8 `json:"numReadonlySignedAccounts"`
-	NumReadonlyUnsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
-}
-
-type Message struct {
-	Version         MessageVersion
-	AccountKeys     []common.Address      `json:"accountKeys"`
-	Header          MessageHeader         `json:"header"`
-	RecentBlockHash common.Hash           `json:"recentBlockHash"`
-	Instructions    []CompiledInstruction `json:"instructions"`
-}
-
-type TransactionContent struct {
-	//
-	Message Message `json:"message"`
-
-	Signatures []common.Signature `json:"signatures"`
-}
-
 type BlockTransaction struct {
 	// Transaction status metadata object
 	Meta TransactionMeta `json:"meta"`
@@ -190,17 +152,17 @@ type BlockTransaction struct {
 	BlockTime *int64 `json:"blockTime" bin:"optional"`
 
 	// Transaction
-	Transaction TransactionContent `json:"transaction"`
+	Transaction Transaction `json:"transaction"`
 }
 
 type BlockInfo struct {
 	Err               json.RawMessage    `json:"err"`
 	BlockHeight       uint64             `json:"blockHeight"`
 	BlockTime         int64              `json:"blockTime"`
-	ParentSlot        uint64             `json:"parentSlot"`
-	BlockHash         common.Hash        `json:"blockHash"`
-	PreviousBlockhash common.Hash        `json:"previousBlockhash"`
-	Rewards           []BlockReward      `json:"rewards"`
+	ParentSlot        uint64        `json:"parentSlot"`
+	BlockHash         common.Hash   `json:"blockHash"`
+	PreviousBlockhash common.Hash   `json:"previousBlockhash"`
+	Rewards           []BlockReward `json:"rewards"`
 	BlockTransaction  []BlockTransaction `json:"transactions"`
 }
 

@@ -75,6 +75,10 @@ func Base64ToAddress(b string) Address {
 	return BytesToAddress(d)
 }
 
+func (a Address) IsEmpty() bool {
+	return a == Address{}
+}
+
 // Cmp compares two addresses.
 func (a Address) Cmp(other Address) int {
 	return bytes.Compare(a[:], other[:])
@@ -377,8 +381,6 @@ func (sd SolData) Value() (driver.Value, error) {
 
 // Signature The signature
 type Signature [SignatureLength]byte
-
-type SignatureUndefinedLength []byte
 
 // BytesToSignature returns Signature with value b.
 func BytesToSignature(b []byte) (a Signature) {
