@@ -256,13 +256,13 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 					})
 				}
 				msgHeader, ok := message["header"].(map[string]interface{})
-				if !ok {
-					continue
-				}
-				tx.Message.Header = MessageHeader{
-					NumRequiredSignatures:       uint8(msgHeader["numRequiredSignatures"].(float64)),
-					NumReadonlySignedAccounts:   uint8(msgHeader["numReadonlySignedAccounts"].(float64)),
-					NumReadonlyUnsignedAccounts: uint8(msgHeader["numReadonlyUnsignedAccounts"].(float64)),
+				// get msgHeader
+				if ok {
+					tx.Message.Header = MessageHeader{
+						NumRequiredSignatures:       uint8(msgHeader["numRequiredSignatures"].(float64)),
+						NumReadonlySignedAccounts:   uint8(msgHeader["numReadonlySignedAccounts"].(float64)),
+						NumReadonlyUnsignedAccounts: uint8(msgHeader["numReadonlyUnsignedAccounts"].(float64)),
+					}
 				}
 				tx.Message.RecentBlockhash = common.Base58ToHash(message["recentBlockhash"].(string))
 			case "signatures":
