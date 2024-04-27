@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
-	"github.com/cielu/go-solana/core/hdwallet"
+	"github.com/cielu/go-solana/pkg/hdwallet"
 	"github.com/mr-tron/base58"
 	"github.com/tyler-smith/go-bip39"
 	"os"

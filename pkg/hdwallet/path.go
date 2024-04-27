@@ -46,7 +46,7 @@ func hamc512(key, data []byte) []byte {
 }
 
 func isValidPath(path string) bool {
-	r := regexp.MustCompile(`^m{1,1}(/\d+')*$`)
+	r := regexp.MustCompile(`^m(/\d+')*$`)
 	return r.MatchString(path)
 }
 
