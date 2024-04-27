@@ -75,7 +75,15 @@ func (sc *Client) GetBalance(ctx context.Context, account common.Address, cfg ..
 
 // GetBlock Returns identity and transaction information about a confirmed block in the ledger
 func (sc *Client) GetBlock(ctx context.Context, blockNum uint64, cfg ...types.RpcGetBlockContextCfg) (blockInfo types.BlockInfo, err error) {
-	err = sc.c.CallContext(ctx, &blockInfo, "getBlock", blockNum, getRpcCfg(cfg))
+	c := getRpcCfg(cfg)
+	if c == nil {
+		c = &types.RpcGetBlockContextCfg{}
+	}
+	// set Encoding as base64
+	// if c.Encoding == "" {
+	// 	c.Encoding = types.EncodingBase64
+	// }
+	err = sc.c.CallContext(ctx, &blockInfo, "getBlock", blockNum, c)
 	return
 }
 
@@ -108,7 +116,7 @@ func (sc *Client) GetBlocks(ctx context.Context, startSlot uint64, args ...inter
 	var (
 		tmpSlot uint64
 		endSlot *uint64
-		cfg *types.RpcCommitmentCfg
+		cfg     *types.RpcCommitmentCfg
 	)
 	for _, arg := range args {
 		// set endSlot & cfg
@@ -124,7 +132,7 @@ func (sc *Client) GetBlocks(ctx context.Context, startSlot uint64, args ...inter
 		}
 	}
 	// setTmpSlot
-	if tmpSlot > startSlot && tmpSlot - startSlot < 500000 {
+	if tmpSlot > startSlot && tmpSlot-startSlot < 500000 {
 		endSlot = &tmpSlot
 	}
 	err = sc.c.CallContext(ctx, &res, "getBlocks", startSlot, endSlot, cfg)
@@ -209,7 +217,7 @@ func (sc *Client) GetInflationRate(ctx context.Context) (res types.InflationRate
 func (sc *Client) GetInflationReward(ctx context.Context, args ...interface{}) (res map[string]interface{}, err error) {
 	var (
 		accounts []common.Address
-		cfg *types.RpcCommitmentCfg
+		cfg      *types.RpcCommitmentCfg
 	)
 	for _, arg := range args {
 		// set endSlot & cfg
@@ -244,9 +252,9 @@ func (sc *Client) GetLatestBlockhash(ctx context.Context, cfg ...types.RpcCommit
 func (sc *Client) GetLeaderSchedule(ctx context.Context, args ...interface{}) (res map[string][]uint64, err error) {
 	// Fetch the leader schedule for the epoch that corresponds to the provided slot.
 	var (
-		slot *uint64
+		slot    *uint64
 		tmpSlot uint64
-		cfg *types.RpcCommitmentWithIdentity
+		cfg     *types.RpcCommitmentWithIdentity
 	)
 	// args
 	for _, arg := range args {
@@ -288,7 +296,7 @@ func (sc *Client) GetMinimumBalanceForRentExemption(ctx context.Context, args ..
 	var (
 		accLen *uint64
 		tmpLen uint64
-		cfg *types.RpcCommitmentCfg
+		cfg    *types.RpcCommitmentCfg
 	)
 	// args
 	for _, arg := range args {

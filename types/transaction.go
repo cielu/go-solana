@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/cielu/go-solana/common"
@@ -162,7 +163,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
 			Accounts:       accountIndex,
-			Data:           common.SolData{RawData: data},
+			Data:           common.SolData{RawData: data, Encoding: "base58"},
 		})
 	}
 
@@ -191,6 +192,89 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	output = append(output, messageContent...)
 
 	return output, nil
+}
+
+// UnmarshalJSON parses the transaction Content
+func (tx *Transaction) UnmarshalJSON(input []byte) error {
+	// Unmarshal data to []byte
+	var data interface{}
+	// Unmarshal to map
+	if err := json.Unmarshal(input, &data); err != nil {
+		return err
+	}
+	// core.BeautifyConsole("aaa", data)
+	// get active type
+	switch v := data.(type) {
+	// slice
+	case []interface{}:
+		// none data
+		if len(v) == 0 {
+			return nil
+		}
+		// decode to string
+		switch v[1] {
+		case "base58":
+			tx.UnmarshalBase58(v[0].(string))
+		case "base64":
+			tx.UnmarshalBase64(v[0].(string))
+		default:
+			return fmt.Errorf("UnmarshalDataByEncoding Err: %s", v[1])
+		}
+	case map[string]interface{}:
+		//
+		for k, vv := range v {
+			switch k {
+			case "message":
+				message := vv.(map[string]interface{})
+				// Message
+				for _, accKeys := range message["accountKeys"].([]interface{}) {
+					tx.Message.AccountKeys = append(tx.Message.AccountKeys, common.Base58ToAddress(accKeys.(string)))
+				}
+				for _, insMap := range message["instructions"].([]interface{}) {
+					var (
+						accounts []uint16
+						stackHeight *uint16
+						ins = insMap.(map[string]interface{})
+					)
+					for _, acc := range ins["accounts"].([]interface{}) {
+						accounts = append(accounts, uint16(acc.(float64)))
+					}
+					// exist stack height
+					if ins["stackHeight"] != nil {
+						stackHeight = ins["stackHeight"].(*uint16)
+					}
+					insData, _ := base58.Decode(ins["data"].(string))
+					// Instructions
+					tx.Message.Instructions = append(tx.Message.Instructions, CompiledInstruction{
+						StackHeight:    stackHeight,
+						ProgramIDIndex: uint16(ins["programIdIndex"].(float64)),
+						Accounts:       accounts,
+						Data: common.SolData{
+							RawData:  insData,
+							Encoding: "base58",
+						},
+					})
+				}
+				msgHeader, ok := message["header"].(map[string]interface{})
+				if !ok {
+					continue
+				}
+				tx.Message.Header = MessageHeader{
+					NumRequiredSignatures:       uint8(msgHeader["numRequiredSignatures"].(float64)),
+					NumReadonlySignedAccounts:   uint8(msgHeader["numReadonlySignedAccounts"].(float64)),
+					NumReadonlyUnsignedAccounts: uint8(msgHeader["numReadonlyUnsignedAccounts"].(float64)),
+				}
+				tx.Message.RecentBlockhash = common.Base58ToHash(message["recentBlockhash"].(string))
+			case "signatures":
+				for _, sig := range vv.([]interface{}) {
+					tx.Signatures = append(tx.Signatures, common.Base58ToSignature(sig.(string)))
+				}
+			}
+		}
+		return nil
+	}
+	// UnSerialize transaction content
+	return nil
 }
 
 // UnmarshalBase64 decodes a base64 encoded transaction.

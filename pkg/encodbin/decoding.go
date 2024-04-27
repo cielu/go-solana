@@ -79,12 +79,12 @@ func (dec *Decoder) ReadUvarint64() (uint64, error) {
 	return l, nil
 }
 
-func (d *Decoder) ReadVarint64() (out int64, err error) {
-	l, read := binary.Varint(d.data[d.pos:])
+func (dec *Decoder) ReadVarint64() (out int64, err error) {
+	l, read := binary.Varint(dec.data[dec.pos:])
 	if read <= 0 {
 		return l, ErrVarIntBufferSize
 	}
-	d.pos += read
+	dec.pos += read
 	return l, nil
 }
 
@@ -186,12 +186,12 @@ func discardNBytes(n int, reader *Decoder) error {
 	return reader.SkipBytes(uint(n))
 }
 
-func (d *Decoder) Read(buf []byte) (int, error) {
-	if d.pos+len(buf) > len(d.data) {
+func (dec *Decoder) Read(buf []byte) (int, error) {
+	if dec.pos+len(buf) > len(dec.data) {
 		return 0, io.ErrShortBuffer
 	}
-	numCopied := copy(buf, d.data[d.pos:])
-	d.pos += numCopied
+	numCopied := copy(buf, dec.data[dec.pos:])
+	dec.pos += numCopied
 	// must read exactly len(buf) bytes
 	if numCopied != len(buf) {
 		return 0, io.ErrUnexpectedEOF

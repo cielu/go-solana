@@ -23,16 +23,16 @@ func (enc Encoding) String() string {
 	}
 }
 
-func (en Encoding) IsBorsh() bool {
-	return en == EncodingBorsh
+func (enc Encoding) IsBorsh() bool {
+	return enc == EncodingBorsh
 }
 
-func (en Encoding) IsBin() bool {
-	return en == EncodingBin
+func (enc Encoding) IsBin() bool {
+	return enc == EncodingBin
 }
 
-func (en Encoding) IsCompactU16() bool {
-	return en == EncodingCompactU16
+func (enc Encoding) IsCompactU16() bool {
+	return enc == EncodingCompactU16
 }
 
 func isValidEncoding(enc Encoding) bool {

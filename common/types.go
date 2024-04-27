@@ -483,6 +483,6 @@ func (s *Signature) UnmarshalGraphQL(input interface{}) error {
 	return err
 }
 
-func (a Signature) Sign(message []byte) []byte {
-	return ed25519.Sign(a.Bytes(), message)
+func (s Signature) Sign(message []byte) []byte {
+	return ed25519.Sign(s.Bytes(), message)
 }

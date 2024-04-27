@@ -2,6 +2,7 @@ package solclient
 
 import (
 	"context"
+	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/types"
@@ -18,14 +19,13 @@ func init() {
 
 func newClient() *Client {
 	//
-	// rpcUrl := rpc.DevnetRPCEndpoint
-	// rpcUrl := rpc.MainnetRPCEndpoint
 	rpcUrl := "https://api.mainnet-beta.solana.com"
 	// dial rpc
 	c, err := Dial(rpcUrl)
 	if err != nil {
 		panic("Dial rpc endpoint failed")
 	}
+	c.SetDebug(true)
 	return c
 }
 
@@ -71,38 +71,24 @@ func TestClient_GetBlock(t *testing.T) {
 	var (
 		c   = newClient()
 		ctx = context.Background()
-		// txContent types.TransactionContent
 	)
-
-	// base58Str := "6RekQs6gHxkNaHEw9Wn6ssdVhNPmTrfi47T7XkCybBzS25bdsmeshres1iyTVaaEVSPikhHcuX1SSbdezufvF78qaRWWU8dQXBx6fyqjvAgERhhP5qMNtAkh52gSMQAgbhonYafLmVzdkGH8s8cqsBt1kPhBJ4Bc7J3QPus4Y7cn6sXMYDSHoRgrbsMCN2LEwUU4gE67SqYnfrpomgPrjni86kSQMNL9En5ou4ZjWjUUTg6FHE6Bomv5PiUkss2mtbvZrPMaJBw1RRkbfv4hmaGg6dQ56jJAmKuJhBV4zbtwikP42FAi4Ar5nZKVogSBqUtJUr95FmJGuBgYTZeSVF5hkhCRLHis2XCCi9rUT6AR7ZJ9qAZ3H1CKSrWiYxeb8aKaGzktQYaGbpsE2cwpwwNH3nG4CVYFLV3Wdjxd9BSLPrRQE31"
-
-	// data, err := base58.Decode(base58Str)
-
-	// err = bincode.DeserializeData(data, &txContent)
-
-	// fmt.Println(err)
-	// fmt.Println(txContent)
-	return
-	res, err := c.GetBlock(ctx, 260373041, types.RpcGetBlockContextCfg{
-		MaxSupportedTxVersion: 0,
-		TransactionDetails:    types.TxDetailLevelFull,
-		Encoding:              types.EncodingBase58,
-	})
+	res, err := c.GetBlock(ctx, 260373041)
 	if err != nil {
 		t.Error("GetBlock Failed: %w", err)
 	}
-	// for i, tx := range res.BlockTransaction {
-	// 	fmt.Println("Tx index:", i+1)
-	// 	fmt.Println("Signature:", tx.Transaction.Signatures[0])
-	// 	// foreach Instruction
-	// 	for i2, instruction := range tx.Transaction.Message.Instructions {
-	// 		fmt.Println("	Instruction Index:", i2)
-	// 		fmt.Println("	Program ID:", instruction.ProgramIDIndex)
-	// 		fmt.Println("	Data:", instruction.Data)
-	// 	}
-	// 	fmt.Println("===================================================")
-	// }
-	core.BeautifyConsole("BlockInfo:", res)
+	// range block transactions
+	for i, tx := range res.BlockTransaction {
+		fmt.Println("Tx index:", i+1)
+		fmt.Println("Signature:", tx.Transaction.Signatures[0])
+		// foreach Instruction
+		for i2, instruction := range tx.Transaction.Message.Instructions {
+			fmt.Println("	Instruction Index:", i2)
+			fmt.Println("	Program ID:", instruction.ProgramIDIndex)
+			fmt.Println("	Data:", instruction.Data)
+		}
+		fmt.Println("===================================================")
+	}
+	// core.BeautifyConsole("BlockInfo:", res)
 }
 
 func TestClient_GetBlockCommitment(t *testing.T) {
