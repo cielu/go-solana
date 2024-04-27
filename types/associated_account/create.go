@@ -4,6 +4,7 @@ import (
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types"
+	"github.com/cielu/go-solana/types/base"
 )
 
 // Copyright 2021 github.com/gagliardetto
@@ -82,8 +83,8 @@ func (inst Create) Build() *Instruction {
 		inst.Wallet,
 		inst.Mint,
 	)
-	if inst.TokenProgramID == common.Token2022ProgramID {
-		associatedTokenAddress, _, _ = FindAssociatedTokenAddress(inst.Wallet, inst.Mint, common.Token2022ProgramID)
+	if inst.TokenProgramID == base.Token2022ProgramID {
+		associatedTokenAddress, _, _ = FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
 	}
 
 	keys := []*types.AccountMeta{
@@ -108,7 +109,7 @@ func (inst Create) Build() *Instruction {
 			IsWritable: false,
 		},
 		{
-			PublicKey:  common.SystemProgramID,
+			PublicKey:  base.SystemProgramID,
 			IsSigner:   false,
 			IsWritable: false,
 		},
@@ -118,7 +119,7 @@ func (inst Create) Build() *Instruction {
 			IsWritable: false,
 		},
 		{
-			PublicKey:  common.SysVarRentPubkey,
+			PublicKey:  base.SysVarRentPubkey,
 			IsSigner:   false,
 			IsWritable: false,
 		},
@@ -145,5 +146,5 @@ func NewCreateInstruction(
 		SetPayer(payer).
 		SetWallet(walletAddress).
 		SetMint(splTokenMintAddress).
-		SetTokenProgramID(common.TokenProgramID)
+		SetTokenProgramID(base.TokenProgramID)
 }

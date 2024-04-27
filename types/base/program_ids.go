@@ -41,6 +41,12 @@ var (
 	FeatureProgramID = common.StrToAddress("Feature111111111111111111111111111111111111")
 
 	ComputeBudget = common.StrToAddress("ComputeBudget111111111111111111111111111111")
+
+	//
+	SPLNameServiceProgramID            = common.StrToAddress("namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX")
+	MetaplexTokenMetaProgramID         = common.StrToAddress("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+	ComputeBudgetProgramID             = common.StrToAddress("ComputeBudget111111111111111111111111111111")
+	AddressLookupTableProgramID        = common.StrToAddress("AddressLookupTab1e1111111111111111111111111")
 )
 
 // SPL:
@@ -72,6 +78,7 @@ var (
 	MemoProgramID = common.StrToAddress("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
 )
 
+
 var (
 	// The Mint for native SOL Token accounts
 	SolMint = common.StrToAddress("So11111111111111111111111111111111111111112")
@@ -79,60 +86,9 @@ var (
 	SolMint2022 = common.StrToAddress("9pan9bMn5HatX4EJdBwg9VgCa7Uz5HL8N1m5D3NdXejP")
 
 	WrappedSol = SolMint
-)
 
-var (
 	TokenMetadataProgramID = common.StrToAddress("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
-)
 
-var (
-	// The Clock sysvar contains data on cluster time,
-	// including the current slot, epoch, and estimated wall-clock Unix timestamp.
-	// It is updated every slot.
-	SysVarClockPubkey = common.StrToAddress("SysvarC1ock11111111111111111111111111111111")
-
-	// The EpochSchedule sysvar contains epoch scheduling constants that are set in genesis,
-	// and enables calculating the number of slots in a given epoch,
-	// the epoch for a given slot, etc.
-	// (Note: the epoch schedule is distinct from the leader schedule)
-	SysVarEpochSchedulePubkey = common.StrToAddress("SysvarEpochSchedu1e111111111111111111111111")
-
-	// The Fees sysvar contains the fee calculator for the current slot.
-	// It is updated every slot, based on the fee-rate governor.
-	SysVarFeesPubkey = common.StrToAddress("SysvarFees111111111111111111111111111111111")
-
-	// The Instructions sysvar contains the serialized instructions in a Message while that Message is being processed.
-	// This allows program instructions to reference other instructions in the same transaction.
-	SysVarInstructionsPubkey = common.StrToAddress("Sysvar1nstructions1111111111111111111111111")
-
-	// The RecentBlockhashes sysvar contains the active recent blockhashes as well as their associated fee calculators.
-	// It is updated every slot.
-	// Entries are ordered by descending block height,
-	// so the first entry holds the most recent block hash,
-	// and the last entry holds an old block hash.
-	SysVarRecentBlockHashesPubkey = common.StrToAddress("SysvarRecentB1ockHashes11111111111111111111")
-
-	// The Rent sysvar contains the rental rate.
-	// Currently, the rate is static and set in genesis.
-	// The Rent burn percentage is modified by manual feature activation.
-	SysVarRentPubkey = common.StrToAddress("SysvarRent111111111111111111111111111111111")
-
-	//
-	SysVarRewardsPubkey = common.StrToAddress("SysvarRewards111111111111111111111111111111")
-
-	// The SlotHashes sysvar contains the most recent hashes of the slot's parent banks.
-	// It is updated every slot.
-	SysVarSlotHashesPubkey = common.StrToAddress("SysvarS1otHashes111111111111111111111111111")
-
-	// The SlotHistory sysvar contains a bitvector of slots present over the last epoch. It is updated every slot.
-	SysVarSlotHistoryPubkey = common.StrToAddress("SysvarS1otHistory11111111111111111111111111")
-
-	// The StakeHistory sysvar contains the history of cluster-wide stake activations and de-activations per epoch.
-	// It is updated at the start of every epoch.
-	SysVarStakeHistoryPubkey = common.StrToAddress("SysvarStakeHistory1111111111111111111111111")
-)
-
-var (
 	MetaplexCandyMachineV2ProgramID = common.StrToAddress("cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ")
 	MetaplexTokenMetadataProgramID  = common.StrToAddress("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
 )

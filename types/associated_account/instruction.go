@@ -18,6 +18,7 @@ import (
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types"
+	"github.com/cielu/go-solana/types/base"
 )
 
 type Instruction struct {
@@ -25,7 +26,7 @@ type Instruction struct {
 }
 
 func (inst *Instruction) ProgramID() common.Address {
-	return common.SPLAssociatedTokenAccountProgramID
+	return base.SPLAssociatedTokenAccountProgramID
 }
 
 func (inst *Instruction) Accounts() (out []*types.AccountMeta) {
