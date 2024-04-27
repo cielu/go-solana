@@ -10,6 +10,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/cielu/go-solana/core"
 	"github.com/mr-tron/base58"
 	"math/big"
 )
@@ -118,7 +119,7 @@ func (a *Address) UnmarshalText(input []byte) error {
 // UnmarshalJSON parses an account in base58 syntax.
 func (a *Address) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
-	data, _, err := UnmarshalDataByEncoding(input)
+	data, _, err := core.UnmarshalDataByEncoding(input)
 	// set string to Hash
 	a.SetBytes(data)
 	return err
@@ -251,7 +252,7 @@ func (h *Hash) UnmarshalText(input []byte) error {
 // UnmarshalJSON parses a hash in base58 syntax.
 func (h *Hash) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
-	data, _, err := UnmarshalDataByEncoding(input)
+	data, _, err := core.UnmarshalDataByEncoding(input)
 	// set string to Hash
 	h.SetBytes(data)
 	// return err
@@ -348,7 +349,7 @@ func (sd *SolData) UnmarshalText(input []byte) error {
 // UnmarshalJSON parses data in base58 syntax.
 func (sd *SolData) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
-	data, encoding, err := UnmarshalDataByEncoding(input)
+	data, encoding, err := core.UnmarshalDataByEncoding(input)
 	// has err
 	if err != nil {
 		return err
@@ -440,7 +441,7 @@ func (s *Signature) UnmarshalText(input []byte) error {
 // UnmarshalJSON parses an account in base58 syntax.
 func (s *Signature) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
-	data, _, err := UnmarshalDataByEncoding(input)
+	data, _, err := core.UnmarshalDataByEncoding(input)
 	// set string to Hash
 	s.SetBytes(data)
 	// return err

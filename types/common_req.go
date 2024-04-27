@@ -24,11 +24,11 @@ type RpcCommitmentWithMinSlotCfg struct {
 
 // RpcGetBlockContextCfg commitment & min slot
 type RpcGetBlockContextCfg struct {
-	Commitment                     EnumRpcCommitment `json:"commitment,omitempty"`
-	Encoding                       EnumEncoding      `json:"encoding,omitempty"`
-	TransactionDetails             EnumTxDetailLevel `json:"transactionDetails,omitempty"`
-	MaxSupportedTransactionVersion uint64            `json:"maxSupportedTransactionVersion"`
-	Rewards                        *bool             `json:"rewards,omitempty"`
+	Commitment            EnumRpcCommitment `json:"commitment,omitempty"`
+	Encoding              EnumEncoding      `json:"encoding,omitempty"`
+	TransactionDetails    EnumTxDetailLevel `json:"transactionDetails,omitempty"`
+	MaxSupportedTxVersion uint8             `json:"maxSupportedTransactionVersion"`
+	Rewards               *bool             `json:"rewards,omitempty"`
 }
 
 type RpcCommitmentWithIdentity struct {
