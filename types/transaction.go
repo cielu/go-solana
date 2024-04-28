@@ -9,6 +9,7 @@ import (
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/pkg/encodbin"
+	"github.com/cielu/go-solana/types/base"
 	"github.com/mr-tron/base58"
 	"sort"
 )
@@ -60,7 +61,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 	}
 
 	programIDs := make([]common.Address, 0)
-	accounts := []*AccountMeta{}
+	var accounts []*base.AccountMeta
 	for _, instruction := range instructions {
 		accounts = append(accounts, instruction.Accounts()...)
 		programIDs = core.UniqueAppend(programIDs, instruction.ProgramID())
@@ -68,7 +69,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 
 	// Add programID to the account list
 	for _, programID := range programIDs {
-		accounts = append(accounts, &AccountMeta{
+		accounts = append(accounts, &base.AccountMeta{
 			PublicKey:  programID,
 			IsSigner:   false,
 			IsWritable: false,
@@ -81,7 +82,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 	})
 
 	var (
-		uniqAccounts    []*AccountMeta
+		uniqAccounts    []*base.AccountMeta
 		uniqAccountsMap = map[common.Address]uint64{}
 	)
 	for _, acc := range accounts {
@@ -106,7 +107,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 		// fee payer is not part of accounts we want to add it
 		accountCount++
 	}
-	finalAccounts := make([]*AccountMeta, accountCount)
+	finalAccounts := make([]*base.AccountMeta, accountCount)
 
 	itr := 1
 	for idx, uniqAccount := range uniqAccounts {
@@ -122,7 +123,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 
 	if feePayerIndex < 0 {
 		// fee payer is not part of accounts we want to add it
-		feePayerAccount := &AccountMeta{
+		feePayerAccount := &base.AccountMeta{
 			PublicKey:  feePayer,
 			IsSigner:   true,
 			IsWritable: true,

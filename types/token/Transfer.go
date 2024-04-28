@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types"
+	"github.com/cielu/go-solana/types/base"
 )
 
 type Transfer struct {
@@ -16,12 +16,12 @@ type Transfer struct {
 	//
 	// [1] = [WRITE] RecipientAccount
 	// ··········· Recipient account
-	AccountMeta []*types.AccountMeta `bin:"-" borsh_skip:"true"`
+	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
 func NewTransferInstructionBuilder() *Transfer {
 	nd := &Transfer{
-		AccountMeta: make([]*types.AccountMeta, 2),
+		AccountMeta: make([]*base.AccountMeta, 2),
 	}
 	return nd
 }
@@ -33,13 +33,13 @@ func (inst *Transfer) SetLamports(lamports uint64) *Transfer {
 
 // Funding account
 func (inst *Transfer) SetFundingAccount(fundingAccount common.Address) *Transfer {
-	inst.AccountMeta[0] = types.Meta(fundingAccount).WRITE().SIGNER()
+	inst.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
 	return inst
 }
 
 // Recipient account
 func (inst *Transfer) SetRecipientAccount(recipientAccount common.Address) *Transfer {
-	inst.AccountMeta[1] = types.Meta(recipientAccount).WRITE()
+	inst.AccountMeta[1] = base.Meta(recipientAccount).WRITE()
 	return inst
 }
 

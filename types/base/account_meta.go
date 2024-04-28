@@ -1,4 +1,4 @@
-package types
+package base
 
 import "github.com/cielu/go-solana/common"
 
@@ -44,12 +44,12 @@ func NewAccountMeta(pubKey common.Address, WRITE bool, SIGNER bool) *AccountMeta
 	}
 }
 
-func (a *AccountMeta) less(act *AccountMeta) bool {
-	if a.IsSigner != act.IsSigner {
-		return a.IsSigner
+func (meta *AccountMeta) less(act *AccountMeta) bool {
+	if meta.IsSigner != act.IsSigner {
+		return meta.IsSigner
 	}
-	if a.IsWritable != act.IsWritable {
-		return a.IsWritable
+	if meta.IsWritable != act.IsWritable {
+		return meta.IsWritable
 	}
 	return false
 }

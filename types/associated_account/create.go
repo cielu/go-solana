@@ -3,7 +3,6 @@ package associated_account
 import (
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types"
 	"github.com/cielu/go-solana/types/base"
 )
 
@@ -47,7 +46,7 @@ type Create struct {
 	//
 	// [6] = [] SysVarRent
 	// ··········· SysVarRentPubkey
-	AccountMetaSlice []*types.AccountMeta `bin:"-" borsh_skip:"true"`
+	AccountMetaSlice []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateInstructionBuilder creates a new `Create` instruction builder.
@@ -87,7 +86,7 @@ func (inst Create) Build() *Instruction {
 		associatedTokenAddress, _, _ = FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
 	}
 
-	keys := []*types.AccountMeta{
+	keys := []*base.AccountMeta{
 		{
 			PublicKey:  inst.Payer,
 			IsSigner:   true,

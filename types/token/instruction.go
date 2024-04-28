@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types"
 	"github.com/cielu/go-solana/types/base"
 )
 
@@ -56,8 +55,8 @@ func (inst *Instruction) ProgramID() common.Address {
 	return base.SystemProgramID
 }
 
-func (inst *Instruction) Accounts() (out []*types.AccountMeta) {
-	return inst.Impl.(types.AccountsGettable).GetAccounts()
+func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
+	return inst.Impl.(base.AccountsGettable).GetAccounts()
 }
 
 func (inst *Instruction) Data() ([]byte, error) {

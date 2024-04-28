@@ -6,12 +6,13 @@ import (
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
+	"github.com/cielu/go-solana/types/base"
 )
 
 type Instruction interface {
-	ProgramID() common.Address // the programID the instruction acts on
-	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
-	Data() ([]byte, error)    // the binary encoded instructions
+	ProgramID() common.Address     // the programID the instruction acts on
+	Accounts() []*base.AccountMeta // returns the list of accounts the instructions requires
+	Data() ([]byte, error)         // the binary encoded instructions
 }
 
 type MessageVersion int
@@ -77,23 +78,23 @@ type Message struct {
 	addressTables map[common.Address][]common.Address
 }
 
-func (mx *Message) MarshalBinary() ([]byte, error) {
+func (m *Message) MarshalBinary() ([]byte, error) {
 
 	buf := []byte{
-		mx.Header.NumRequiredSignatures,
-		mx.Header.NumReadonlySignedAccounts,
-		mx.Header.NumReadonlyUnsignedAccounts,
+		m.Header.NumRequiredSignatures,
+		m.Header.NumReadonlySignedAccounts,
+		m.Header.NumReadonlyUnsignedAccounts,
 	}
 
-	encodbin.EncodeCompactU16Length(&buf, len(mx.AccountKeys))
-	for _, key := range mx.AccountKeys {
+	encodbin.EncodeCompactU16Length(&buf, len(m.AccountKeys))
+	for _, key := range m.AccountKeys {
 		buf = append(buf, key[:]...)
 	}
 
-	buf = append(buf, mx.RecentBlockhash[:]...)
+	buf = append(buf, m.RecentBlockhash[:]...)
 
-	encodbin.EncodeCompactU16Length(&buf, len(mx.Instructions))
-	for _, instruction := range mx.Instructions {
+	encodbin.EncodeCompactU16Length(&buf, len(m.Instructions))
+	for _, instruction := range m.Instructions {
 		buf = append(buf, byte(instruction.ProgramIDIndex))
 		encodbin.EncodeCompactU16Length(&buf, len(instruction.Accounts))
 		for _, accountIdx := range instruction.Accounts {
@@ -176,7 +177,7 @@ type MessageHeader struct {
 
 
 
-func (mx *Message) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
+func (m *Message) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
 	// peek first byte to determine if this is a legacy or v0 message
 	versionNum, err := decoder.Peek(1)
 	if err != nil {
@@ -184,38 +185,38 @@ func (mx *Message) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
 	}
 	// TODO: is this the right way to determine if this is a legacy or v0 message?
 	if versionNum[0] < 127 {
-		mx.version = MessageVersionLegacy
+		m.version = MessageVersionLegacy
 	} else {
-		mx.version = MessageVersionV0
+		m.version = MessageVersionV0
 	}
-	switch mx.version {
+	switch m.version {
 	case MessageVersionV0:
-		return mx.UnmarshalV0(decoder)
+		return m.UnmarshalV0(decoder)
 	case MessageVersionLegacy:
-		return mx.UnmarshalLegacy(decoder)
+		return m.UnmarshalLegacy(decoder)
 	default:
-		return fmt.Errorf("invalid message version: %d", mx.version)
+		return fmt.Errorf("invalid message version: %d", m.version)
 	}
 }
 
-func (mx *Message) UnmarshalBase64(b64 string) error {
+func (m *Message) UnmarshalBase64(b64 string) error {
 	b, err := base64.StdEncoding.DecodeString(b64)
 	if err != nil {
 		return err
 	}
-	return mx.UnmarshalWithDecoder(encodbin.NewBinDecoder(b))
+	return m.UnmarshalWithDecoder(encodbin.NewBinDecoder(b))
 }
 
-func (mx *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
+func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 	version, err := decoder.ReadByte()
 	if err != nil {
 		return fmt.Errorf("failed to read message version: %w", err)
 	}
 	// TODO: check version
-	mx.version = MessageVersion(version - 127)
+	m.version = MessageVersion(version - 127)
 
 	// The middle of the message is the same as the legacy message:
-	err = mx.UnmarshalLegacy(decoder)
+	err = m.UnmarshalLegacy(decoder)
 	if err != nil {
 		return err
 	}
@@ -226,10 +227,10 @@ func (mx *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 		return fmt.Errorf("failed to read address table lookups length: %w", err)
 	}
 	if addressTableLookupsLen > 0 {
-		mx.addressTableLookups = make([]MessageAddressTableLookup, addressTableLookupsLen)
+		m.addressTableLookups = make([]MessageAddressTableLookup, addressTableLookupsLen)
 		for i := 0; i < int(addressTableLookupsLen); i++ {
 			// read account pubkey
-			_, err = decoder.Read(mx.addressTableLookups[i].AccountKey[:])
+			_, err = decoder.Read(m.addressTableLookups[i].AccountKey[:])
 			if err != nil {
 				return fmt.Errorf("failed to read account pubkey: %w", err)
 			}
@@ -239,8 +240,8 @@ func (mx *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 			if err != nil {
 				return fmt.Errorf("failed to read writable indexes length: %w", err)
 			}
-			mx.addressTableLookups[i].WritableIndexes = make([]byte, writableIndexesLen)
-			_, err = decoder.Read(mx.addressTableLookups[i].WritableIndexes)
+			m.addressTableLookups[i].WritableIndexes = make([]byte, writableIndexesLen)
+			_, err = decoder.Read(m.addressTableLookups[i].WritableIndexes)
 			if err != nil {
 				return fmt.Errorf("failed to read writable indexes: %w", err)
 			}
@@ -250,8 +251,8 @@ func (mx *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 			if err != nil {
 				return fmt.Errorf("failed to read readonly indexes length: %w", err)
 			}
-			mx.addressTableLookups[i].ReadonlyIndexes = make([]byte, readonlyIndexesLen)
-			_, err = decoder.Read(mx.addressTableLookups[i].ReadonlyIndexes)
+			m.addressTableLookups[i].ReadonlyIndexes = make([]byte, readonlyIndexesLen)
+			_, err = decoder.Read(m.addressTableLookups[i].ReadonlyIndexes)
 			if err != nil {
 				return fmt.Errorf("failed to read readonly indexes: %w", err)
 			}
@@ -260,17 +261,17 @@ func (mx *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 	return nil
 }
 
-func (mx *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
+func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 	{
-		mx.Header.NumRequiredSignatures, err = decoder.ReadUint8()
+		m.Header.NumRequiredSignatures, err = decoder.ReadUint8()
 		if err != nil {
 			return fmt.Errorf("unable to decode mx.Header.NumRequiredSignatures: %w", err)
 		}
-		mx.Header.NumReadonlySignedAccounts, err = decoder.ReadUint8()
+		m.Header.NumReadonlySignedAccounts, err = decoder.ReadUint8()
 		if err != nil {
 			return fmt.Errorf("unable to decode mx.Header.NumReadonlySignedAccounts: %w", err)
 		}
-		mx.Header.NumReadonlyUnsignedAccounts, err = decoder.ReadUint8()
+		m.Header.NumReadonlyUnsignedAccounts, err = decoder.ReadUint8()
 		if err != nil {
 			return fmt.Errorf("unable to decode mx.Header.NumReadonlyUnsignedAccounts: %w", err)
 		}
@@ -280,16 +281,16 @@ func (mx *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 		if err != nil {
 			return fmt.Errorf("unable to decode numAccountKeys: %w", err)
 		}
-		mx.AccountKeys = make([]common.Address, numAccountKeys)
+		m.AccountKeys = make([]common.Address, numAccountKeys)
 		for i := 0; i < numAccountKeys; i++ {
-			_, err := decoder.Read(mx.AccountKeys[i][:])
+			_, err := decoder.Read(m.AccountKeys[i][:])
 			if err != nil {
 				return fmt.Errorf("unable to decode mx.AccountKeys[%d]: %w", i, err)
 			}
 		}
 	}
 	{
-		_, err := decoder.Read(mx.RecentBlockhash[:])
+		_, err := decoder.Read(m.RecentBlockhash[:])
 		if err != nil {
 			return fmt.Errorf("unable to decode mx.RecentBlockhash: %w", err)
 		}
@@ -299,26 +300,26 @@ func (mx *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 		if err != nil {
 			return fmt.Errorf("unable to decode numInstructions: %w", err)
 		}
-		mx.Instructions = make([]CompiledInstruction, numInstructions)
+		m.Instructions = make([]CompiledInstruction, numInstructions)
 		for instructionIndex := 0; instructionIndex < numInstructions; instructionIndex++ {
 			programIDIndex, err := decoder.ReadUint8()
 			if err != nil {
 				return fmt.Errorf("unable to decode mx.Instructions[%d].ProgramIDIndex: %w", instructionIndex, err)
 			}
-			mx.Instructions[instructionIndex].ProgramIDIndex = uint16(programIDIndex)
+			m.Instructions[instructionIndex].ProgramIDIndex = uint16(programIDIndex)
 
 			{
 				numAccounts, err := decoder.ReadCompactU16()
 				if err != nil {
 					return fmt.Errorf("unable to decode numAccounts for ix[%d]: %w", instructionIndex, err)
 				}
-				mx.Instructions[instructionIndex].Accounts = make([]uint16, numAccounts)
+				m.Instructions[instructionIndex].Accounts = make([]uint16, numAccounts)
 				for i := 0; i < numAccounts; i++ {
 					accountIndex, err := decoder.ReadUint8()
 					if err != nil {
 						return fmt.Errorf("unable to decode accountIndex for ix[%d].Accounts[%d]: %w", instructionIndex, i, err)
 					}
-					mx.Instructions[instructionIndex].Accounts[i] = uint16(accountIndex)
+					m.Instructions[instructionIndex].Accounts[i] = uint16(accountIndex)
 				}
 			}
 			{
@@ -331,7 +332,7 @@ func (mx *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 					return fmt.Errorf("unable to decode dataBytes for ix[%d]: %w", instructionIndex, err)
 				}
 				// setBytes
-				mx.Instructions[instructionIndex].Data.SetBytes(dataBytes)
+				m.Instructions[instructionIndex].Data.SetBytes(dataBytes)
 			}
 		}
 	}
