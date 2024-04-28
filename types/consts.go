@@ -17,7 +17,7 @@ const (
 	RpcCommitmentConfirmed EnumRpcCommitment = "confirmed"
 
 	// RpcCommitmentProcessed the node will query its most recent block.
-	// Deprecated: Note that the block may still be skipped by the cluster.
+	// Note that the block may still be skipped by the cluster.
 	RpcCommitmentProcessed EnumRpcCommitment = "processed"
 )
 

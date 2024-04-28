@@ -78,6 +78,11 @@ type Message struct {
 	addressTables map[common.Address][]common.Address
 }
 
+// GetProgram current program address
+func (m Message) GetProgram(idIndex uint16) common.Address {
+	return m.AccountKeys[idIndex]
+}
+
 func (m *Message) MarshalBinary() ([]byte, error) {
 
 	buf := []byte{
@@ -174,7 +179,6 @@ type MessageHeader struct {
 	// The last `numReadonlyUnsignedAccounts` of the unsigned keys are read-only accounts.
 	NumReadonlyUnsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
 }
-
 
 
 func (m *Message) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {

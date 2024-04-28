@@ -44,7 +44,7 @@ func NewAccountMeta(pubKey common.Address, WRITE bool, SIGNER bool) *AccountMeta
 	}
 }
 
-func (meta *AccountMeta) less(act *AccountMeta) bool {
+func (meta *AccountMeta) Less(act *AccountMeta) bool {
 	if meta.IsSigner != act.IsSigner {
 		return meta.IsSigner
 	}

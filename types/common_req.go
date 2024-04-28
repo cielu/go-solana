@@ -138,9 +138,9 @@ type RpcSendTxCfg struct {
 }
 
 type MentionsAccountProgramCfg struct {
-	MentionsAccountOrProgram string `json:"MentionsAccountOrProgram,omitempty"`
+	MentionsAccountOrProgram common.Address `json:"MentionsAccountOrProgram,omitempty"`
 }
 
 type MentionsCfg struct {
-	Mentions []string `json:"mentions,omitempty"`
+	Mentions []common.Address `json:"mentions,omitempty"`
 }

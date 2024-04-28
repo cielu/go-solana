@@ -78,7 +78,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 
 	// Sort. Prioritizing first by signer, then by writable
 	sort.SliceStable(accounts, func(i, j int) bool {
-		return accounts[i].less(accounts[j])
+		return accounts[i].Less(accounts[j])
 	})
 
 	var (
