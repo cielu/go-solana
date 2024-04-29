@@ -72,14 +72,24 @@ func UniqueAppend[T comparable](slice []T, lookup T) []T {
 	return slice
 }
 
-func getRpcCfg[T any](cfg []T) *T {
-	// never set rpc ctx cfg
-	if len(cfg) == 0 {
-		return nil
-	}
-	return &cfg[0]
-}
+// SliceSplitFrom Split Slice
+func SliceSplitFrom[T comparable](slice []T, index int) (first []T, second []T) {
 
+	if index < 0 {
+		panic("negative index")
+	}
+	if index == 0 {
+		second = slice
+		return
+	}
+	if index > len(slice)-1 {
+		first = slice
+		return
+	}
+	first = slice[:index]
+	second = slice[index:]
+	return
+}
 
 // DecodeBase58Str input string
 func DecodeBase58Str(input string) []byte {

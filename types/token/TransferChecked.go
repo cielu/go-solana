@@ -2,6 +2,7 @@ package token
 
 import (
 	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -32,7 +33,7 @@ type TransferChecked struct {
 }
 
 func (tc *TransferChecked) SetAccounts(accounts []*base.AccountMeta) error {
-	tc.Accounts, tc.Signers = base.AccountMetaSlice(accounts).SplitFrom(4)
+	tc.Accounts, tc.Signers = core.SliceSplitFrom(accounts, 4)
 	return nil
 }
 
@@ -45,8 +46,8 @@ func (tc TransferChecked) GetAccounts() (accounts []*base.AccountMeta) {
 // NewTransferCheckedInstructionBuilder creates a new `TransferChecked` instruction builder.
 func NewTransferCheckedInstructionBuilder() *TransferChecked {
 	nd := &TransferChecked{
-		Accounts: make(base.AccountMetaSlice, 4),
-		Signers:  make(base.AccountMetaSlice, 0),
+		Accounts: make([]*base.AccountMeta, 4),
+		Signers:  make([]*base.AccountMeta, 0),
 	}
 	return nd
 }

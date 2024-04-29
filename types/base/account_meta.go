@@ -8,8 +8,6 @@ type AccountMeta struct {
 	IsSigner   bool
 }
 
-type AccountMetaSlice []*AccountMeta
-
 type AccountsSettable interface {
 	SetAccounts(accounts []*AccountMeta) error
 }
@@ -23,16 +21,6 @@ func Meta(pubKey common.Address) *AccountMeta {
 	return &AccountMeta{
 		PublicKey: pubKey,
 	}
-}
-
-func (slice AccountMetaSlice) GetAccounts() []*AccountMeta {
-	out := make([]*AccountMeta, 0, len(slice))
-	for i := range slice {
-		if slice[i] != nil {
-			out = append(out, slice[i])
-		}
-	}
-	return out
 }
 
 // WRITE sets IsWritable to true.
@@ -63,36 +51,4 @@ func (meta *AccountMeta) Less(act *AccountMeta) bool {
 		return meta.IsWritable
 	}
 	return false
-}
-
-func calcSplitAtLengths(total int, index int) (int, int) {
-	if index == 0 {
-		return 0, total
-	}
-	if index > total-1 {
-		return total, 0
-	}
-	return index, total - index
-}
-
-func (slice AccountMetaSlice) SplitFrom(index int) (AccountMetaSlice, AccountMetaSlice) {
-	if index < 0 {
-		panic("negative index")
-	}
-	if index == 0 {
-		return AccountMetaSlice{}, slice
-	}
-	if index > len(slice)-1 {
-		return slice, AccountMetaSlice{}
-	}
-
-	firstLen, secondLen := calcSplitAtLengths(len(slice), index)
-
-	first := make(AccountMetaSlice, firstLen)
-	copy(first, slice[:index])
-
-	second := make(AccountMetaSlice, secondLen)
-	copy(second, slice[index:])
-
-	return first, second
 }
