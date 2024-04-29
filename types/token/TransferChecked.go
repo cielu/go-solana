@@ -27,18 +27,18 @@ type TransferChecked struct {
 	//
 	// [4...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
-	Signers  base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *TransferChecked) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = base.AccountMetaSlice(accounts).SplitFrom(4)
+func (tc *TransferChecked) SetAccounts(accounts []*base.AccountMeta) error {
+	tc.Accounts, tc.Signers = base.AccountMetaSlice(accounts).SplitFrom(4)
 	return nil
 }
 
-func (slice TransferChecked) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (tc TransferChecked) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, tc.Accounts...)
+	accounts = append(accounts, tc.Signers...)
 	return
 }
 
@@ -53,92 +53,92 @@ func NewTransferCheckedInstructionBuilder() *TransferChecked {
 
 // SetAmount sets the "amount" parameter.
 // The amount of tokens to transfer.
-func (inst *TransferChecked) SetAmount(amount uint64) *TransferChecked {
-	inst.Amount = &amount
-	return inst
+func (tc *TransferChecked) SetAmount(amount uint64) *TransferChecked {
+	tc.Amount = &amount
+	return tc
 }
 
 // SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
-func (inst *TransferChecked) SetDecimals(decimals uint8) *TransferChecked {
-	inst.Decimals = &decimals
-	return inst
+func (tc *TransferChecked) SetDecimals(decimals uint8) *TransferChecked {
+	tc.Decimals = &decimals
+	return tc
 }
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (inst *TransferChecked) SetSourceAccount(source common.Address) *TransferChecked {
-	inst.Accounts[0] = base.Meta(source).WRITE()
-	return inst
+func (tc *TransferChecked) SetSourceAccount(source common.Address) *TransferChecked {
+	tc.Accounts[0] = base.Meta(source).WRITE()
+	return tc
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (inst *TransferChecked) GetSourceAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (tc *TransferChecked) GetSourceAccount() *base.AccountMeta {
+	return tc.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (inst *TransferChecked) SetMintAccount(mint common.Address) *TransferChecked {
-	inst.Accounts[1] = base.Meta(mint)
-	return inst
+func (tc *TransferChecked) SetMintAccount(mint common.Address) *TransferChecked {
+	tc.Accounts[1] = base.Meta(mint)
+	return tc
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (inst *TransferChecked) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (tc *TransferChecked) GetMintAccount() *base.AccountMeta {
+	return tc.Accounts[1]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The destination account.
-func (inst *TransferChecked) SetDestinationAccount(destination common.Address) *TransferChecked {
-	inst.Accounts[2] = base.Meta(destination).WRITE()
-	return inst
+func (tc *TransferChecked) SetDestinationAccount(destination common.Address) *TransferChecked {
+	tc.Accounts[2] = base.Meta(destination).WRITE()
+	return tc
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The destination account.
-func (inst *TransferChecked) GetDestinationAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (tc *TransferChecked) GetDestinationAccount() *base.AccountMeta {
+	return tc.Accounts[2]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account's owner/delegate.
-func (inst *TransferChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *TransferChecked {
-	inst.Accounts[3] = base.Meta(owner)
+func (tc *TransferChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *TransferChecked {
+	tc.Accounts[3] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[3].SIGNER()
+		tc.Accounts[3].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		tc.Signers = append(tc.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return tc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account's owner/delegate.
-func (inst *TransferChecked) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[3]
+func (tc *TransferChecked) GetOwnerAccount() *base.AccountMeta {
+	return tc.Accounts[3]
 }
 
-func (inst TransferChecked) Build() *Instruction {
+func (tc TransferChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
-		TypeID: encodbin.TypeIDFromUint8(Instruction_Transfer),
+		Impl:   tc,
+		TypeID: encodbin.TypeIDFromUint8(Instruction_TransferChecked),
 	}}
 }
 
-func (obj TransferChecked) MarshalWithEncoder(encoder encodbin.Encoder) (err error) {
+func (tc TransferChecked) MarshalWithEncoder(encoder encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
 
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(tc.Amount)
 	if err != nil {
 		return err
 	}
 	// Serialize `Decimals` param:
-	err = encoder.Encode(obj.Decimals)
+	err = encoder.Encode(tc.Decimals)
 	if err != nil {
 		return err
 	}

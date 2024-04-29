@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/solclient"
 	"github.com/cielu/go-solana/types"
@@ -24,33 +25,44 @@ func TestTokenTransfer(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
+
+	payer := common.StrToAddress("F8HCC3DyoR6KN9SSK9NL1V6weRgsEvp8hjL26EnTxNTF")
+
 	instruction := NewTransferCheckedInstruction(
 		1,
 		9,
 		common.StrToAddress("BZYExy8yxFZF6jTp4h7X98dPLBcbQDFhvHXPdTjDb2ag"),
 		common.StrToAddress("6vG61wtqP7aRgabnECQ2pYBHToJEmPtafvQrxYwmqsAL"),
 		common.StrToAddress("EXC6EAnN7HMXbTWomY6j7tQZY1cfZ52LRJpwZ6i3CY66"),
-		common.StrToAddress("F8HCC3DyoR6KN9SSK9NL1V6weRgsEvp8hjL26EnTxNTF"),
-		[]common.Address{},
+		payer,
+		[]common.Address{ payer },
 	).Build()
+
+	core.BeautifyConsole("instruction", instruction)
+
 	latestHash, err := c.GetLatestBlockhash(ctx)
 	if err != nil {
 		println("get latest blockHash err:", err)
 	}
-	transaction, err := types.NewTransaction([]types.Instruction{instruction}, latestHash.LastBlock.Blockhash, common.StrToAddress("F8HCC3DyoR6KN9SSK9NL1V6weRgsEvp8hjL26EnTxNTF"))
+
+	transaction, err := types.NewTransaction([]types.Instruction{instruction}, latestHash.LastBlock.Blockhash, payer)
 	if err != nil {
 		fmt.Println("create transaction err:", err)
 		return
 	}
 
 	key, _ := crypto.AccountFromBase58Key("3HE29Pg2c2tjbCkVxJpDKhLZuqPLEfoeF3gwjE8MTP3WzvQmLFCxHtKHkGnqNMBPPgFwTWP4vmb9b9a7hGybgtDb")
+
 	signErr := transaction.Sign([]crypto.Account{key})
+
 	if signErr != nil {
 		fmt.Println("sign error:", signErr)
 		return
 	}
+
 	binary, err := transaction.MarshalBinary()
-	res, err := c.SendTransaction(ctx, common.SolData{binary, "base58"})
+
+	res, err := c.SendTransaction(ctx, common.SolData{RawData: binary})
 	if err != nil {
 		println(err.Error())
 	}

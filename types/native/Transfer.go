@@ -1,4 +1,4 @@
-package system
+package native
 
 import (
 	"encoding/binary"
@@ -16,8 +16,8 @@ type Transfer struct {
 	//
 	// [1] = [WRITE] RecipientAccount
 	// ··········· Recipient account
-	AccountMeta base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
-	Signers     base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers     []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
 func NewTransferInstructionBuilder() *Transfer {
@@ -27,40 +27,40 @@ func NewTransferInstructionBuilder() *Transfer {
 	return nd
 }
 
-func (slice Transfer) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.AccountMeta...)
-	accounts = append(accounts, slice.Signers...)
+func (trans Transfer) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, trans.AccountMeta...)
+	accounts = append(accounts, trans.Signers...)
 	return
 }
 
-func (inst *Transfer) SetLamports(lamports uint64) *Transfer {
-	inst.Lamports = &lamports
-	return inst
+func (trans *Transfer) SetLamports(lamports uint64) *Transfer {
+	trans.Lamports = &lamports
+	return trans
 }
 
 // Funding account
-func (inst *Transfer) SetFundingAccount(fundingAccount common.Address) *Transfer {
-	inst.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
-	return inst
+func (trans *Transfer) SetFundingAccount(fundingAccount common.Address) *Transfer {
+	trans.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+	return trans
 }
 
 // Recipient account
-func (inst *Transfer) SetRecipientAccount(recipientAccount common.Address) *Transfer {
-	inst.AccountMeta[1] = base.Meta(recipientAccount).WRITE()
-	return inst
+func (trans *Transfer) SetRecipientAccount(recipientAccount common.Address) *Transfer {
+	trans.AccountMeta[1] = base.Meta(recipientAccount).WRITE()
+	return trans
 }
 
-func (inst Transfer) Build() *Instruction {
+func (trans Transfer) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   trans,
 		TypeID: encodbin.TypeIDFromUint32(Instruction_Transfer, binary.LittleEndian),
 	}}
 }
 
-func (inst Transfer) MarshalWithEncoder(encoder encodbin.Encoder) error {
+func (trans Transfer) MarshalWithEncoder(encoder encodbin.Encoder) error {
 	// Serialize `Lamports` param:
 	{
-		err := encoder.Encode(*inst.Lamports)
+		err := encoder.Encode(*trans.Lamports)
 		if err != nil {
 			return err
 		}
