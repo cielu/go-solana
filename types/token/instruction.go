@@ -2,7 +2,6 @@ package token
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
@@ -10,49 +9,148 @@ import (
 )
 
 const (
-	// Create a new account
-	Instruction_CreateAccount uint32 = iota
+	// Initializes a new mint and optionally deposits all the newly minted
+	// tokens in an account.
+	//
+	// The `InitializeMint` instruction requires no signers and MUST be
+	// included within the same Transaction as the system program's
+	// `CreateAccount` instruction that creates the account being initialized.
+	// Otherwise another party can acquire ownership of the uninitialized
+	// account.
+	Instruction_InitializeMint uint8 = iota
 
-	// Assign account to a program
-	Instruction_Assign
+	// Initializes a new account to hold tokens.  If this account is associated
+	// with the native mint then the token balance of the initialized account
+	// will be equal to the amount of SOL in the account. If this account is
+	// associated with another mint, that mint must be initialized before this
+	// command can succeed.
+	//
+	// The `InitializeAccount` instruction requires no signers and MUST be
+	// included within the same Transaction as the system program's
+	// `CreateAccount` instruction that creates the account being initialized.
+	// Otherwise another party can acquire ownership of the uninitialized
+	// account.
+	Instruction_InitializeAccount
 
-	// Transfer lamports
+	// Initializes a multisignature account with N provided signers.
+	//
+	// Multisignature accounts can used in place of any single owner/delegate
+	// accounts in any token instruction that require an owner/delegate to be
+	// present.  The variant field represents the number of signers (M)
+	// required to validate this multisignature account.
+	//
+	// The `InitializeMultisig` instruction requires no signers and MUST be
+	// included within the same Transaction as the system program's
+	// `CreateAccount` instruction that creates the account being initialized.
+	// Otherwise another party can acquire ownership of the uninitialized
+	// account.
+	Instruction_InitializeMultisig
+
+	// Transfers tokens from one account to another either directly or via a
+	// delegate.  If this account is associated with the native mint then equal
+	// amounts of SOL and Tokens will be transferred to the destination
+	// account.
 	Instruction_Transfer
 
-	// Create a new account at an address derived from a base pubkey and a seed
-	Instruction_CreateAccountWithSeed
+	// Approves a delegate.  A delegate is given the authority over tokens on
+	// behalf of the source account's owner.
+	Instruction_Approve
 
-	// Consumes a stored nonce, replacing it with a successor
-	Instruction_AdvanceNonceAccount
+	// Revokes the delegate's authority.
+	Instruction_Revoke
 
-	// Withdraw funds from a nonce account
-	Instruction_WithdrawNonceAccount
+	// Sets a new authority of a mint or account.
+	Instruction_SetAuthority
 
-	// Drive state of Uninitalized nonce account to Initialized, setting the nonce value
-	Instruction_InitializeNonceAccount
+	// Mints new tokens to an account.  The native mint does not support
+	// minting.
+	Instruction_MintTo
 
-	// Change the entity authorized to execute nonce instructions on the account
-	Instruction_AuthorizeNonceAccount
+	// Burns tokens by removing them from an account.  `Burn` does not support
+	// accounts associated with the native mint, use `CloseAccount` instead.
+	Instruction_Burn
 
-	// Allocate space in a (possibly new) account without funding
-	Instruction_Allocate
+	// Close an account by transferring all its SOL to the destination account.
+	// Non-native accounts may only be closed if its token amount is zero.
+	Instruction_CloseAccount
 
-	// Allocate space for and assign an account at an address derived from a base public key and a seed
-	Instruction_AllocateWithSeed
+	// Freeze an Initialized account using the Mint's freeze_authority (if set).
+	Instruction_FreezeAccount
 
-	// Assign account to a program based on a seed
-	Instruction_AssignWithSeed
+	// Thaw a Frozen account using the Mint's freeze_authority (if set).
+	Instruction_ThawAccount
 
-	// Transfer lamports from a derived address
-	Instruction_TransferWithSeed
+	// Transfers tokens from one account to another either directly or via a
+	// delegate.  If this account is associated with the native mint then equal
+	// amounts of SOL and Tokens will be transferred to the destination
+	// account.
+	//
+	// This instruction differs from Transfer in that the token mint and
+	// decimals value is checked by the caller.  This may be useful when
+	// creating transactions offline or within a hardware wallet.
+	Instruction_TransferChecked
+
+	// Approves a delegate.  A delegate is given the authority over tokens on
+	// behalf of the source account's owner.
+	//
+	// This instruction differs from Approve in that the token mint and
+	// decimals value is checked by the caller.  This may be useful when
+	// creating transactions offline or within a hardware wallet.
+	Instruction_ApproveChecked
+
+	// Mints new tokens to an account.  The native mint does not support minting.
+	//
+	// This instruction differs from MintTo in that the decimals value is
+	// checked by the caller.  This may be useful when creating transactions
+	// offline or within a hardware wallet.
+	Instruction_MintToChecked
+
+	// Burns tokens by removing them from an account.  `BurnChecked` does not
+	// support accounts associated with the native mint, use `CloseAccount`
+	// instead.
+	//
+	// This instruction differs from Burn in that the decimals value is checked
+	// by the caller. This may be useful when creating transactions offline or
+	// within a hardware wallet.
+	Instruction_BurnChecked
+
+	// Like InitializeAccount, but the owner pubkey is passed via instruction data
+	// rather than the accounts list. This variant may be preferable when using
+	// Cross Program Invocation from an instruction that does not need the owner's
+	// `AccountInfo` otherwise.
+	Instruction_InitializeAccount2
+
+	// Given a wrapped / native token account (a token account containing SOL)
+	// updates its amount field based on the account's underlying `lamports`.
+	// This is useful if a non-wrapped SOL account uses `system_instruction::transfer`
+	// to move lamports to a wrapped token account, and needs to have its token
+	// `amount` field updated.
+	Instruction_SyncNative
+
+	// Like InitializeAccount2, but does not require the Rent sysvar to be provided.
+	Instruction_InitializeAccount3
+
+	// Like InitializeMultisig, but does not require the Rent sysvar to be provided.
+	Instruction_InitializeMultisig2
+
+	// Like InitializeMint, but does not require the Rent sysvar to be provided.
+	Instruction_InitializeMint2
 )
 
 type Instruction struct {
 	encodbin.BaseVariant
+	TokenProgramID common.Address
 }
 
 func (inst *Instruction) ProgramID() common.Address {
-	return base.SystemProgramID
+	if inst.TokenProgramID.IsEmpty() {
+		return base.TokenProgramID
+	}
+	return inst.TokenProgramID
+}
+
+func (inst *Instruction) SetProgramID(tokenProgramID common.Address) {
+	inst.TokenProgramID = tokenProgramID
 }
 
 func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
@@ -68,7 +166,7 @@ func (inst *Instruction) Data() ([]byte, error) {
 }
 
 func (inst *Instruction) MarshalWithEncoder(encoder *encodbin.Encoder) error {
-	err := encoder.WriteUint32(inst.TypeID.Uint32(), binary.LittleEndian)
+	err := encoder.WriteUint8(inst.TypeID.Uint8())
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)
 	}

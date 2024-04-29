@@ -233,9 +233,9 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 				}
 				for _, insMap := range message["instructions"].([]interface{}) {
 					var (
-						accounts []uint16
+						accounts    []uint16
 						stackHeight *uint16
-						ins = insMap.(map[string]interface{})
+						ins         = insMap.(map[string]interface{})
 					)
 					for _, acc := range ins["accounts"].([]interface{}) {
 						accounts = append(accounts, uint16(acc.(float64)))
@@ -319,25 +319,26 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err erro
 
 type privateKeyGetter func(key common.Address) *crypto.Account
 
-func (tx *Transaction) Sign(getter privateKeyGetter) (out []common.Signature, err error) {
+func (tx *Transaction) Sign(accounts []crypto.Account) (err error) {
 	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
-		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
+		return fmt.Errorf("unable to encode message for signing: %w", err)
 	}
 
 	signerKeys := tx.Message.signerKeys()
 
+signerMatch:
 	for _, key := range signerKeys {
-		privateKey := getter(key)
-		if privateKey == nil {
-			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
+		for _, signer := range accounts {
+			if key.Equals(signer.Address) {
+				s := signer.Sign(messageContent)
+				tx.Signatures = append(tx.Signatures, common.BytesToSignature(s))
+				continue signerMatch
+			}
 		}
-
-		s := privateKey.Sign(messageContent)
-
-		tx.Signatures = append(tx.Signatures, common.BytesToSignature(s))
+		return fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
 	}
-	return tx.Signatures, nil
+	return nil
 }
 
 func (tx Transaction) ToBase64() (string, error) {

@@ -1,4 +1,4 @@
-package token
+package system
 
 import (
 	"encoding/binary"
@@ -16,7 +16,8 @@ type Transfer struct {
 	//
 	// [1] = [WRITE] RecipientAccount
 	// ··········· Recipient account
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	AccountMeta base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers     base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 func NewTransferInstructionBuilder() *Transfer {
@@ -24,6 +25,12 @@ func NewTransferInstructionBuilder() *Transfer {
 		AccountMeta: make([]*base.AccountMeta, 2),
 	}
 	return nd
+}
+
+func (slice Transfer) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, slice.AccountMeta...)
+	accounts = append(accounts, slice.Signers...)
+	return
 }
 
 func (inst *Transfer) SetLamports(lamports uint64) *Transfer {
@@ -63,10 +70,10 @@ func (inst Transfer) MarshalWithEncoder(encoder encodbin.Encoder) error {
 
 func NewTransferInstruction(
 	// Parameters:
-	lamports uint64,
 	// Accounts:
 	fundingAccount common.Address,
-	recipientAccount common.Address) *Transfer {
+	recipientAccount common.Address,
+	lamports uint64) *Transfer {
 	return NewTransferInstructionBuilder().
 		SetLamports(lamports).
 		SetFundingAccount(fundingAccount).
