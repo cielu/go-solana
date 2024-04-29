@@ -29,13 +29,13 @@ func TestTokenTransfer(t *testing.T) {
 	payer := common.StrToAddress("F8HCC3DyoR6KN9SSK9NL1V6weRgsEvp8hjL26EnTxNTF")
 
 	instruction := NewTransferCheckedInstruction(
-		1,
+		1e9,
 		9,
 		common.StrToAddress("BZYExy8yxFZF6jTp4h7X98dPLBcbQDFhvHXPdTjDb2ag"),
 		common.StrToAddress("6vG61wtqP7aRgabnECQ2pYBHToJEmPtafvQrxYwmqsAL"),
 		common.StrToAddress("EXC6EAnN7HMXbTWomY6j7tQZY1cfZ52LRJpwZ6i3CY66"),
 		payer,
-		[]common.Address{ payer },
+		[]common.Address{payer},
 	).Build()
 
 	core.BeautifyConsole("instruction", instruction)
