@@ -41,10 +41,6 @@ func BytesToAddress(b []byte) (a Address) {
 	return
 }
 
-func (p Address) Equals(pb Address) bool {
-	return p == pb
-}
-
 // BigToAddress returns Address with byte values of b.
 func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
 

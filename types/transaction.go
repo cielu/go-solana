@@ -330,7 +330,7 @@ func (tx *Transaction) Sign(accounts []crypto.Account) (err error) {
 signerMatch:
 	for _, key := range signerKeys {
 		for _, signer := range accounts {
-			if key.Equals(signer.Address) {
+			if key == signer.Address {
 				s := signer.Sign(messageContent)
 				tx.Signatures = append(tx.Signatures, common.BytesToSignature(s))
 				continue signerMatch
