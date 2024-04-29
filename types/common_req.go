@@ -104,7 +104,7 @@ type RpcGetTransactionCfg struct {
 	// MaxSupportedTransactionVersion Set the max transaction version to return in responses.
 	// If the requested transaction is a higher version, an error will be returned.
 	// If this parameter is omitted, only legacy transactions will be returned, and any versioned transaction will prompt the error.
-	MaxSupportedTransactionVersion *uint64 `json:"maxSupportedTransactionVersion,omitempty"`
+	MaxSupportedTxVersion uint8 `json:"maxSupportedTransactionVersion,omitempty"`
 }
 
 type RpcVoteAccountCfg struct {
