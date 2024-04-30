@@ -1,4 +1,4 @@
-package system
+package native
 
 import (
 	"encoding/binary"
