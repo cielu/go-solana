@@ -1,4 +1,4 @@
-package associated_account
+package associatedaccount
 
 import (
 	"crypto/sha256"

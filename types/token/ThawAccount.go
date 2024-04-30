@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Thaw a Frozen account using the Mint's freeze_authority (if set).
+// ThawAccount Thaw a Frozen account using the Mint's freeze_authority (if set).
 type ThawAccount struct {
 
 	// [0] = [WRITE] account
@@ -41,14 +41,14 @@ type ThawAccount struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *ThawAccount) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (tAcc *ThawAccount) SetAccounts(accounts []*base.AccountMeta) error {
+	tAcc.Accounts, tAcc.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice ThawAccount) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (tAcc ThawAccount) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, tAcc.Accounts...)
+	accounts = append(accounts, tAcc.Signers...)
 	return
 }
 
@@ -63,52 +63,52 @@ func NewThawAccountInstructionBuilder() *ThawAccount {
 
 // SetAccount sets the "account" account.
 // The account to thaw.
-func (inst *ThawAccount) SetAccount(account common.Address) *ThawAccount {
-	inst.Accounts[0] = base.Meta(account).WRITE()
-	return inst
+func (tAcc *ThawAccount) SetAccount(account common.Address) *ThawAccount {
+	tAcc.Accounts[0] = base.Meta(account).WRITE()
+	return tAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to thaw.
-func (inst *ThawAccount) GetAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (tAcc *ThawAccount) GetAccount() *base.AccountMeta {
+	return tAcc.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (inst *ThawAccount) SetMintAccount(mint common.Address) *ThawAccount {
-	inst.Accounts[1] = base.Meta(mint)
-	return inst
+func (tAcc *ThawAccount) SetMintAccount(mint common.Address) *ThawAccount {
+	tAcc.Accounts[1] = base.Meta(mint)
+	return tAcc
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (inst *ThawAccount) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (tAcc *ThawAccount) GetMintAccount() *base.AccountMeta {
+	return tAcc.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint freeze authority.
-func (inst *ThawAccount) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *ThawAccount {
-	inst.Accounts[2] = base.Meta(authority)
+func (tAcc *ThawAccount) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *ThawAccount {
+	tAcc.Accounts[2] = base.Meta(authority)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		tAcc.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		tAcc.Signers = append(tAcc.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return tAcc
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint freeze authority.
-func (inst *ThawAccount) GetAuthorityAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (tAcc *ThawAccount) GetAuthorityAccount() *base.AccountMeta {
+	return tAcc.Accounts[2]
 }
 
-func (inst ThawAccount) Build() *Instruction {
+func (tAcc ThawAccount) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   tAcc,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_ThawAccount),
 	}}
 }
@@ -116,36 +116,36 @@ func (inst ThawAccount) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst ThawAccount) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (tAcc ThawAccount) ValidateAndBuild() (*Instruction, error) {
+	if err := tAcc.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return tAcc.Build(), nil
 }
 
-func (inst *ThawAccount) Validate() error {
+func (tAcc *ThawAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if tAcc.Accounts[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if tAcc.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if tAcc.Accounts[2] == nil {
 			return errors.New("accounts.Authority is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !tAcc.Accounts[2].IsSigner && len(tAcc.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(tAcc.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(tAcc.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj ThawAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (tAcc ThawAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	return nil
 }
 

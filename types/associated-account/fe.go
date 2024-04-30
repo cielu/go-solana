@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 // Package field implements fast arithmetic modulo 2^255-19.
-package associated_account
+package associatedaccount
 
 import (
 	"crypto/subtle"

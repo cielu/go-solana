@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Mints new tokens to an account.  The native mint does not support minting.
+// MintToChecked Mints new tokens to an account.  The native mint does not support minting.
 //
 // This instruction differs from MintTo in that the decimals value is
 // checked by the caller.  This may be useful when creating transactions
@@ -50,14 +50,14 @@ type MintToChecked struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *MintToChecked) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (mCkd *MintToChecked) SetAccounts(accounts []*base.AccountMeta) error {
+	mCkd.Accounts, mCkd.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice MintToChecked) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (mCkd MintToChecked) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, mCkd.Accounts...)
+	accounts = append(accounts, mCkd.Signers...)
 	return
 }
 
@@ -72,66 +72,66 @@ func NewMintToCheckedInstructionBuilder() *MintToChecked {
 
 // SetAmount sets the "amount" parameter.
 // The amount of new tokens to mint.
-func (inst *MintToChecked) SetAmount(amount uint64) *MintToChecked {
-	inst.Amount = &amount
-	return inst
+func (mCkd *MintToChecked) SetAmount(amount uint64) *MintToChecked {
+	mCkd.Amount = &amount
+	return mCkd
 }
 
 // SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
-func (inst *MintToChecked) SetDecimals(decimals uint8) *MintToChecked {
-	inst.Decimals = &decimals
-	return inst
+func (mCkd *MintToChecked) SetDecimals(decimals uint8) *MintToChecked {
+	mCkd.Decimals = &decimals
+	return mCkd
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint.
-func (inst *MintToChecked) SetMintAccount(mint common.Address) *MintToChecked {
-	inst.Accounts[0] = base.Meta(mint).WRITE()
-	return inst
+func (mCkd *MintToChecked) SetMintAccount(mint common.Address) *MintToChecked {
+	mCkd.Accounts[0] = base.Meta(mint).WRITE()
+	return mCkd
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint.
-func (inst *MintToChecked) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (mCkd *MintToChecked) GetMintAccount() *base.AccountMeta {
+	return mCkd.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
-func (inst *MintToChecked) SetDestinationAccount(destination common.Address) *MintToChecked {
-	inst.Accounts[1] = base.Meta(destination).WRITE()
-	return inst
+func (mCkd *MintToChecked) SetDestinationAccount(destination common.Address) *MintToChecked {
+	mCkd.Accounts[1] = base.Meta(destination).WRITE()
+	return mCkd
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The account to mint tokens to.
-func (inst *MintToChecked) GetDestinationAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (mCkd *MintToChecked) GetDestinationAccount() *base.AccountMeta {
+	return mCkd.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
-func (inst *MintToChecked) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *MintToChecked {
-	inst.Accounts[2] = base.Meta(authority)
+func (mCkd *MintToChecked) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *MintToChecked {
+	mCkd.Accounts[2] = base.Meta(authority)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		mCkd.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		mCkd.Signers = append(mCkd.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return mCkd
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint's minting authority.
-func (inst *MintToChecked) GetAuthorityAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (mCkd *MintToChecked) GetAuthorityAccount() *base.AccountMeta {
+	return mCkd.Accounts[2]
 }
 
-func (inst MintToChecked) Build() *Instruction {
+func (mCkd MintToChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   mCkd,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_MintToChecked),
 	}}
 }
@@ -139,53 +139,53 @@ func (inst MintToChecked) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst MintToChecked) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (mCkd MintToChecked) ValidateAndBuild() (*Instruction, error) {
+	if err := mCkd.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return mCkd.Build(), nil
 }
 
-func (inst *MintToChecked) Validate() error {
+func (mCkd *MintToChecked) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Amount == nil {
+		if mCkd.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
-		if inst.Decimals == nil {
+		if mCkd.Decimals == nil {
 			return errors.New("Decimals parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if mCkd.Accounts[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if mCkd.Accounts[1] == nil {
 			return errors.New("accounts.Destination is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if mCkd.Accounts[2] == nil {
 			return errors.New("accounts.Authority is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !mCkd.Accounts[2].IsSigner && len(mCkd.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(mCkd.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(mCkd.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj MintToChecked) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (mCkd MintToChecked) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(mCkd.Amount)
 	if err != nil {
 		return err
 	}
 	// Serialize `Decimals` param:
-	err = encoder.Encode(obj.Decimals)
+	err = encoder.Encode(mCkd.Decimals)
 	if err != nil {
 		return err
 	}

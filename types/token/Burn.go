@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Burns tokens by removing them from an account.  `Burn` does not support
+// Burn tokens by removing them from an account.  `Burn` does not support
 // accounts associated with the native mint, use `CloseAccount` instead.
 type Burn struct {
 	// The amount of tokens to burn.
@@ -44,14 +44,14 @@ type Burn struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *Burn) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (br *Burn) SetAccounts(accounts []*base.AccountMeta) error {
+	br.Accounts, br.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice Burn) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (br Burn) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, br.Accounts...)
+	accounts = append(accounts, br.Signers...)
 	return
 }
 
@@ -66,59 +66,59 @@ func NewBurnInstructionBuilder() *Burn {
 
 // SetAmount sets the "amount" parameter.
 // The amount of tokens to burn.
-func (inst *Burn) SetAmount(amount uint64) *Burn {
-	inst.Amount = &amount
-	return inst
+func (br *Burn) SetAmount(amount uint64) *Burn {
+	br.Amount = &amount
+	return br
 }
 
 // SetSourceAccount sets the "source" account.
 // The account to burn from.
-func (inst *Burn) SetSourceAccount(source common.Address) *Burn {
-	inst.Accounts[0] = base.Meta(source).WRITE()
-	return inst
+func (br *Burn) SetSourceAccount(source common.Address) *Burn {
+	br.Accounts[0] = base.Meta(source).WRITE()
+	return br
 }
 
 // GetSourceAccount gets the "source" account.
 // The account to burn from.
-func (inst *Burn) GetSourceAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (br *Burn) GetSourceAccount() *base.AccountMeta {
+	return br.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (inst *Burn) SetMintAccount(mint common.Address) *Burn {
-	inst.Accounts[1] = base.Meta(mint).WRITE()
-	return inst
+func (br *Burn) SetMintAccount(mint common.Address) *Burn {
+	br.Accounts[1] = base.Meta(mint).WRITE()
+	return br
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (inst *Burn) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (br *Burn) GetMintAccount() *base.AccountMeta {
+	return br.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
-func (inst *Burn) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Burn {
-	inst.Accounts[2] = base.Meta(owner)
+func (br *Burn) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Burn {
+	br.Accounts[2] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		br.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		br.Signers = append(br.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return br
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner/delegate.
-func (inst *Burn) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (br *Burn) GetOwnerAccount() *base.AccountMeta {
+	return br.Accounts[2]
 }
 
-func (inst Burn) Build() *Instruction {
+func (br Burn) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   br,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_Burn),
 	}}
 }
@@ -126,45 +126,45 @@ func (inst Burn) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst Burn) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (br Burn) ValidateAndBuild() (*Instruction, error) {
+	if err := br.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return br.Build(), nil
 }
 
-func (inst *Burn) Validate() error {
+func (br *Burn) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Amount == nil {
+		if br.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if br.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if br.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if br.Accounts[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !br.Accounts[2].IsSigner && len(br.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(br.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(br.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj Burn) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (br Burn) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(br.Amount)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Close an account by transferring all its SOL to the destination account.
+// CloseAccount Close an account by transferring all its SOL to the destination account.
 // Non-native accounts may only be closed if its token amount is zero.
 type CloseAccount struct {
 
@@ -42,14 +42,14 @@ type CloseAccount struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *CloseAccount) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (cloAcc *CloseAccount) SetAccounts(accounts []*base.AccountMeta) error {
+	cloAcc.Accounts, cloAcc.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice CloseAccount) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (cloAcc CloseAccount) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, cloAcc.Accounts...)
+	accounts = append(accounts, cloAcc.Signers...)
 	return
 }
 
@@ -64,52 +64,52 @@ func NewCloseAccountInstructionBuilder() *CloseAccount {
 
 // SetAccount sets the "account" account.
 // The account to close.
-func (inst *CloseAccount) SetAccount(account common.Address) *CloseAccount {
-	inst.Accounts[0] = base.Meta(account).WRITE()
-	return inst
+func (cloAcc *CloseAccount) SetAccount(account common.Address) *CloseAccount {
+	cloAcc.Accounts[0] = base.Meta(account).WRITE()
+	return cloAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to close.
-func (inst *CloseAccount) GetAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (cloAcc *CloseAccount) GetAccount() *base.AccountMeta {
+	return cloAcc.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The destination account.
-func (inst *CloseAccount) SetDestinationAccount(destination common.Address) *CloseAccount {
-	inst.Accounts[1] = base.Meta(destination).WRITE()
-	return inst
+func (cloAcc *CloseAccount) SetDestinationAccount(destination common.Address) *CloseAccount {
+	cloAcc.Accounts[1] = base.Meta(destination).WRITE()
+	return cloAcc
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The destination account.
-func (inst *CloseAccount) GetDestinationAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (cloAcc *CloseAccount) GetDestinationAccount() *base.AccountMeta {
+	return cloAcc.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner.
-func (inst *CloseAccount) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *CloseAccount {
-	inst.Accounts[2] = base.Meta(owner)
+func (cloAcc *CloseAccount) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *CloseAccount {
+	cloAcc.Accounts[2] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		cloAcc.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		cloAcc.Signers = append(cloAcc.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return cloAcc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner.
-func (inst *CloseAccount) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (cloAcc *CloseAccount) GetOwnerAccount() *base.AccountMeta {
+	return cloAcc.Accounts[2]
 }
 
-func (inst CloseAccount) Build() *Instruction {
+func (cloAcc CloseAccount) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   cloAcc,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_CloseAccount),
 	}}
 }
@@ -117,36 +117,36 @@ func (inst CloseAccount) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst CloseAccount) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (cloAcc CloseAccount) ValidateAndBuild() (*Instruction, error) {
+	if err := cloAcc.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return cloAcc.Build(), nil
 }
 
-func (inst *CloseAccount) Validate() error {
+func (cloAcc *CloseAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if cloAcc.Accounts[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if cloAcc.Accounts[1] == nil {
 			return errors.New("accounts.Destination is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if cloAcc.Accounts[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !cloAcc.Accounts[2].IsSigner && len(cloAcc.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(cloAcc.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(cloAcc.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj CloseAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (cloAcc CloseAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	return nil
 }
 

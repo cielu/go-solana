@@ -21,7 +21,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Like InitializeMint, but does not require the Rent sysvar to be provided.
+// InitializeMint2 Like InitializeMint, but does not require the Rent sysvar to be provided.
 type InitializeMint2 struct {
 	// Number of base 10 digits to the right of the decimal place.
 	Decimals *uint8
@@ -47,41 +47,41 @@ func NewInitializeMint2InstructionBuilder() *InitializeMint2 {
 
 // SetDecimals sets the "decimals" parameter.
 // Number of base 10 digits to the right of the decimal place.
-func (inst *InitializeMint2) SetDecimals(decimals uint8) *InitializeMint2 {
-	inst.Decimals = &decimals
-	return inst
+func (initMint *InitializeMint2) SetDecimals(decimals uint8) *InitializeMint2 {
+	initMint.Decimals = &decimals
+	return initMint
 }
 
 // SetMintAuthority sets the "mint_authority" parameter.
 // The authority/multisignature to mint tokens.
-func (inst *InitializeMint2) SetMintAuthority(mint_authority common.Address) *InitializeMint2 {
-	inst.MintAuthority = &mint_authority
-	return inst
+func (initMint *InitializeMint2) SetMintAuthority(mint_authority common.Address) *InitializeMint2 {
+	initMint.MintAuthority = &mint_authority
+	return initMint
 }
 
 // SetFreezeAuthority sets the "freeze_authority" parameter.
 // The freeze authority/multisignature of the mint.
-func (inst *InitializeMint2) SetFreezeAuthority(freeze_authority common.Address) *InitializeMint2 {
-	inst.FreezeAuthority = &freeze_authority
-	return inst
+func (initMint *InitializeMint2) SetFreezeAuthority(freeze_authority common.Address) *InitializeMint2 {
+	initMint.FreezeAuthority = &freeze_authority
+	return initMint
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint to initialize.
-func (inst *InitializeMint2) SetMintAccount(mint common.Address) *InitializeMint2 {
-	inst.AccountMeta[0] = base.Meta(mint).WRITE()
-	return inst
+func (initMint *InitializeMint2) SetMintAccount(mint common.Address) *InitializeMint2 {
+	initMint.AccountMeta[0] = base.Meta(mint).WRITE()
+	return initMint
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint to initialize.
-func (inst *InitializeMint2) GetMintAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (initMint *InitializeMint2) GetMintAccount() *base.AccountMeta {
+	return initMint.AccountMeta[0]
 }
 
-func (inst InitializeMint2) Build() *Instruction {
+func (initMint InitializeMint2) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   initMint,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_InitializeMint2),
 	}}
 }
@@ -89,47 +89,47 @@ func (inst InitializeMint2) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst InitializeMint2) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (initMint InitializeMint2) ValidateAndBuild() (*Instruction, error) {
+	if err := initMint.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return initMint.Build(), nil
 }
 
-func (inst *InitializeMint2) Validate() error {
+func (initMint *InitializeMint2) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Decimals == nil {
+		if initMint.Decimals == nil {
 			return errors.New("Decimals parameter is not set")
 		}
-		if inst.MintAuthority == nil {
+		if initMint.MintAuthority == nil {
 			return errors.New("MintAuthority parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMeta[0] == nil {
+		if initMint.AccountMeta[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
 	}
 	return nil
 }
 
-func (obj InitializeMint2) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (initMint InitializeMint2) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Decimals` param:
-	err = encoder.Encode(obj.Decimals)
+	err = encoder.Encode(initMint.Decimals)
 	if err != nil {
 		return err
 	}
 	// Serialize `MintAuthority` param:
-	err = encoder.Encode(obj.MintAuthority)
+	err = encoder.Encode(initMint.MintAuthority)
 	if err != nil {
 		return err
 	}
 	// Serialize `FreezeAuthority` param (optional):
 	{
-		if obj.FreezeAuthority == nil {
+		if initMint.FreezeAuthority == nil {
 			err = encoder.WriteBool(false)
 			if err != nil {
 				return err
@@ -139,7 +139,7 @@ func (obj InitializeMint2) MarshalWithEncoder(encoder *encodbin.Encoder) (err er
 			if err != nil {
 				return err
 			}
-			err = encoder.Encode(obj.FreezeAuthority)
+			err = encoder.Encode(initMint.FreezeAuthority)
 			if err != nil {
 				return err
 			}

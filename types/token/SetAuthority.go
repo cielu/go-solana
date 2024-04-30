@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Sets a new authority of a mint or account.
+// SetAuthority Sets a new authority of a mint or account.
 type SetAuthority struct {
 	// The type of authority to update.
 	AuthorityType *AuthorityType
@@ -43,14 +43,14 @@ type SetAuthority struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *SetAuthority) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 2)
+func (sAut *SetAuthority) SetAccounts(accounts []*base.AccountMeta) error {
+	sAut.Accounts, sAut.Signers = core.SliceSplitFrom(accounts, 2)
 	return nil
 }
 
-func (slice SetAuthority) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (sAut SetAuthority) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, sAut.Accounts...)
+	accounts = append(accounts, sAut.Signers...)
 	return
 }
 
@@ -65,53 +65,53 @@ func NewSetAuthorityInstructionBuilder() *SetAuthority {
 
 // SetAuthorityType sets the "authority_type" parameter.
 // The type of authority to update.
-func (inst *SetAuthority) SetAuthorityType(authority_type AuthorityType) *SetAuthority {
-	inst.AuthorityType = &authority_type
-	return inst
+func (sAut *SetAuthority) SetAuthorityType(authority_type AuthorityType) *SetAuthority {
+	sAut.AuthorityType = &authority_type
+	return sAut
 }
 
 // SetNewAuthority sets the "new_authority" parameter.
 // The new authority.
-func (inst *SetAuthority) SetNewAuthority(new_authority common.Address) *SetAuthority {
-	inst.NewAuthority = &new_authority
-	return inst
+func (sAut *SetAuthority) SetNewAuthority(new_authority common.Address) *SetAuthority {
+	sAut.NewAuthority = &new_authority
+	return sAut
 }
 
 // SetSubjectAccount sets the "subject" account.
 // The mint or account to change the authority of.
-func (inst *SetAuthority) SetSubjectAccount(subject common.Address) *SetAuthority {
-	inst.Accounts[0] = base.Meta(subject).WRITE()
-	return inst
+func (sAut *SetAuthority) SetSubjectAccount(subject common.Address) *SetAuthority {
+	sAut.Accounts[0] = base.Meta(subject).WRITE()
+	return sAut
 }
 
 // GetSubjectAccount gets the "subject" account.
 // The mint or account to change the authority of.
-func (inst *SetAuthority) GetSubjectAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (sAut *SetAuthority) GetSubjectAccount() *base.AccountMeta {
+	return sAut.Accounts[0]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The current authority of the mint or account.
-func (inst *SetAuthority) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *SetAuthority {
-	inst.Accounts[1] = base.Meta(authority)
+func (sAut *SetAuthority) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *SetAuthority {
+	sAut.Accounts[1] = base.Meta(authority)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[1].SIGNER()
+		sAut.Accounts[1].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		sAut.Signers = append(sAut.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return sAut
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The current authority of the mint or account.
-func (inst *SetAuthority) GetAuthorityAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (sAut *SetAuthority) GetAuthorityAccount() *base.AccountMeta {
+	return sAut.Accounts[1]
 }
 
-func (inst SetAuthority) Build() *Instruction {
+func (sAut SetAuthority) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   sAut,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_SetAuthority),
 	}}
 }
@@ -119,48 +119,48 @@ func (inst SetAuthority) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst SetAuthority) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (sAut SetAuthority) ValidateAndBuild() (*Instruction, error) {
+	if err := sAut.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return sAut.Build(), nil
 }
 
-func (inst *SetAuthority) Validate() error {
+func (sAut *SetAuthority) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.AuthorityType == nil {
+		if sAut.AuthorityType == nil {
 			return errors.New("AuthorityType parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if sAut.Accounts[0] == nil {
 			return errors.New("accounts.Subject is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if sAut.Accounts[1] == nil {
 			return errors.New("accounts.Authority is not set")
 		}
-		if !inst.Accounts[1].IsSigner && len(inst.Signers) == 0 {
+		if !sAut.Accounts[1].IsSigner && len(sAut.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(sAut.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(sAut.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj SetAuthority) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (sAut SetAuthority) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `AuthorityType` param:
-	err = encoder.Encode(obj.AuthorityType)
+	err = encoder.Encode(sAut.AuthorityType)
 	if err != nil {
 		return err
 	}
 	// Serialize `NewAuthority` param (optional):
 	{
-		if obj.NewAuthority == nil {
+		if sAut.NewAuthority == nil {
 			err = encoder.WriteBool(false)
 			if err != nil {
 				return err
@@ -170,7 +170,7 @@ func (obj SetAuthority) MarshalWithEncoder(encoder *encodbin.Encoder) (err error
 			if err != nil {
 				return err
 			}
-			err = encoder.Encode(obj.NewAuthority)
+			err = encoder.Encode(sAut.NewAuthority)
 			if err != nil {
 				return err
 			}

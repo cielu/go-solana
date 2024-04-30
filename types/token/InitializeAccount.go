@@ -21,7 +21,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Initializes a new account to hold tokens.  If this account is associated
+// InitializeAccount Initializes a new account to hold tokens.  If this account is associated
 // with the native mint then the token balance of the initialized account
 // will be equal to the amount of SOL in the account. If this account is
 // associated with another mint, that mint must be initialized before this
@@ -59,59 +59,59 @@ func NewInitializeAccountInstructionBuilder() *InitializeAccount {
 
 // SetAccount sets the "account" account.
 // The account to initialize.
-func (inst *InitializeAccount) SetAccount(account common.Address) *InitializeAccount {
-	inst.AccountMeta[0] = base.Meta(account).WRITE()
-	return inst
+func (initAcc *InitializeAccount) SetAccount(account common.Address) *InitializeAccount {
+	initAcc.AccountMeta[0] = base.Meta(account).WRITE()
+	return initAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
-func (inst *InitializeAccount) GetAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (initAcc *InitializeAccount) GetAccount() *base.AccountMeta {
+	return initAcc.AccountMeta[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
-func (inst *InitializeAccount) SetMintAccount(mint common.Address) *InitializeAccount {
-	inst.AccountMeta[1] = base.Meta(mint)
-	return inst
+func (initAcc *InitializeAccount) SetMintAccount(mint common.Address) *InitializeAccount {
+	initAcc.AccountMeta[1] = base.Meta(mint)
+	return initAcc
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
-func (inst *InitializeAccount) GetMintAccount() *base.AccountMeta {
-	return inst.AccountMeta[1]
+func (initAcc *InitializeAccount) GetMintAccount() *base.AccountMeta {
+	return initAcc.AccountMeta[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The new account's owner/multisignature.
-func (inst *InitializeAccount) SetOwnerAccount(owner common.Address) *InitializeAccount {
-	inst.AccountMeta[2] = base.Meta(owner)
-	return inst
+func (initAcc *InitializeAccount) SetOwnerAccount(owner common.Address) *InitializeAccount {
+	initAcc.AccountMeta[2] = base.Meta(owner)
+	return initAcc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The new account's owner/multisignature.
-func (inst *InitializeAccount) GetOwnerAccount() *base.AccountMeta {
-	return inst.AccountMeta[2]
+func (initAcc *InitializeAccount) GetOwnerAccount() *base.AccountMeta {
+	return initAcc.AccountMeta[2]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (inst *InitializeAccount) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeAccount {
-	inst.AccountMeta[3] = base.Meta(SysVarRentPubkey)
-	return inst
+func (initAcc *InitializeAccount) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeAccount {
+	initAcc.AccountMeta[3] = base.Meta(SysVarRentPubkey)
+	return initAcc
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (inst *InitializeAccount) GetSysVarRentPubkeyAccount() *base.AccountMeta {
-	return inst.AccountMeta[3]
+func (initAcc *InitializeAccount) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+	return initAcc.AccountMeta[3]
 }
 
-func (inst InitializeAccount) Build() *Instruction {
+func (initAcc InitializeAccount) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   initAcc,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_InitializeAccount),
 	}}
 }
@@ -119,33 +119,33 @@ func (inst InitializeAccount) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst InitializeAccount) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (initAcc InitializeAccount) ValidateAndBuild() (*Instruction, error) {
+	if err := initAcc.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return initAcc.Build(), nil
 }
 
-func (inst *InitializeAccount) Validate() error {
+func (initAcc *InitializeAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMeta[0] == nil {
+		if initAcc.AccountMeta[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if inst.AccountMeta[1] == nil {
+		if initAcc.AccountMeta[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMeta[2] == nil {
+		if initAcc.AccountMeta[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if inst.AccountMeta[3] == nil {
+		if initAcc.AccountMeta[3] == nil {
 			return errors.New("accounts.SysVarRentPubkey is not set")
 		}
 	}
 	return nil
 }
 
-func (obj InitializeAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (initAcc InitializeAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	return nil
 }
 

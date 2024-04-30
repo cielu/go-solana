@@ -21,7 +21,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Given a wrapped / native token account (a token account containing SOL)
+// SyncNative Given a wrapped / native token account (a token account containing SOL)
 // updates its amount field based on the account's underlying `lamports`.
 // This is useful if a non-wrapped SOL account uses `system_instruction::transfer`
 // to move lamports to a wrapped token account, and needs to have its token
@@ -43,20 +43,20 @@ func NewSyncNativeInstructionBuilder() *SyncNative {
 
 // SetTokenAccount sets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
-func (inst *SyncNative) SetTokenAccount(tokenAccount common.Address) *SyncNative {
-	inst.AccountMeta[0] = base.Meta(tokenAccount).WRITE()
-	return inst
+func (sNative *SyncNative) SetTokenAccount(tokenAccount common.Address) *SyncNative {
+	sNative.AccountMeta[0] = base.Meta(tokenAccount).WRITE()
+	return sNative
 }
 
 // GetTokenAccount gets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
-func (inst *SyncNative) GetTokenAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (sNative *SyncNative) GetTokenAccount() *base.AccountMeta {
+	return sNative.AccountMeta[0]
 }
 
-func (inst SyncNative) Build() *Instruction {
+func (sNative SyncNative) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   sNative,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_SyncNative),
 	}}
 }
@@ -64,24 +64,24 @@ func (inst SyncNative) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst SyncNative) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (sNative SyncNative) ValidateAndBuild() (*Instruction, error) {
+	if err := sNative.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return sNative.Build(), nil
 }
 
-func (inst *SyncNative) Validate() error {
+func (sNative *SyncNative) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMeta[0] == nil {
+		if sNative.AccountMeta[0] == nil {
 			return errors.New("accounts.TokenAccount is not set")
 		}
 	}
 	return nil
 }
 
-func (obj SyncNative) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (sNative SyncNative) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	return nil
 }
 

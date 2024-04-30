@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Initializes a multisignature account with N provided signers.
+// InitializeMultisig Initializes a multisignature account with N provided signers.
 //
 // Multisignature accounts can used in place of any single owner/delegate
 // accounts in any token instruction that require an owner/delegate to be
@@ -52,14 +52,14 @@ type InitializeMultisig struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *InitializeMultisig) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 2)
+func (initMs *InitializeMultisig) SetAccounts(accounts []*base.AccountMeta) error {
+	initMs.Accounts, initMs.Signers = core.SliceSplitFrom(accounts, 2)
 	return nil
 }
 
-func (slice InitializeMultisig) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (initMs InitializeMultisig) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, initMs.Accounts...)
+	accounts = append(accounts, initMs.Signers...)
 	return
 }
 
@@ -76,49 +76,49 @@ func NewInitializeMultisigInstructionBuilder() *InitializeMultisig {
 // SetM sets the "m" parameter.
 // The number of signers (M) required to validate this multisignature
 // account.
-func (inst *InitializeMultisig) SetM(m uint8) *InitializeMultisig {
-	inst.M = &m
-	return inst
+func (initMs *InitializeMultisig) SetM(m uint8) *InitializeMultisig {
+	initMs.M = &m
+	return initMs
 }
 
 // SetAccount sets the "account" account.
 // The multisignature account to initialize.
-func (inst *InitializeMultisig) SetAccount(account common.Address) *InitializeMultisig {
-	inst.Accounts[0] = base.Meta(account).WRITE()
-	return inst
+func (initMs *InitializeMultisig) SetAccount(account common.Address) *InitializeMultisig {
+	initMs.Accounts[0] = base.Meta(account).WRITE()
+	return initMs
 }
 
 // GetAccount gets the "account" account.
 // The multisignature account to initialize.
-func (inst *InitializeMultisig) GetAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (initMs *InitializeMultisig) GetAccount() *base.AccountMeta {
+	return initMs.Accounts[0]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (inst *InitializeMultisig) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMultisig {
-	inst.Accounts[1] = base.Meta(SysVarRentPubkey)
-	return inst
+func (initMs *InitializeMultisig) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMultisig {
+	initMs.Accounts[1] = base.Meta(SysVarRentPubkey)
+	return initMs
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (inst *InitializeMultisig) GetSysVarRentPubkeyAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (initMs *InitializeMultisig) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+	return initMs.Accounts[1]
 }
 
 // AddSigners adds the "signers" accounts.
 // ..2+N The signer accounts, must equal to N where 1 <= N <=11
-func (inst *InitializeMultisig) AddSigners(signers ...common.Address) *InitializeMultisig {
+func (initMs *InitializeMultisig) AddSigners(signers ...common.Address) *InitializeMultisig {
 	for _, signer := range signers {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		initMs.Signers = append(initMs.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return initMs
 }
 
-func (inst InitializeMultisig) Build() *Instruction {
+func (initMs InitializeMultisig) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   initMs,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_InitializeMultisig),
 	}}
 }
@@ -126,42 +126,42 @@ func (inst InitializeMultisig) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst InitializeMultisig) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (initMs InitializeMultisig) ValidateAndBuild() (*Instruction, error) {
+	if err := initMs.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return initMs.Build(), nil
 }
 
-func (inst *InitializeMultisig) Validate() error {
+func (initMs *InitializeMultisig) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.M == nil {
+		if initMs.M == nil {
 			return errors.New("M parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if initMs.Accounts[0] == nil {
 			return fmt.Errorf("accounts.Account is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if initMs.Accounts[1] == nil {
 			return fmt.Errorf("accounts.SysVarRentPubkey is not set")
 		}
-		if len(inst.Signers) == 0 {
+		if len(initMs.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(initMs.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(initMs.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj InitializeMultisig) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (initMs InitializeMultisig) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `M` param:
-	err = encoder.Encode(obj.M)
+	err = encoder.Encode(initMs.M)
 	if err != nil {
 		return err
 	}

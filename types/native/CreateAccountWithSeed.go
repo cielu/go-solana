@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Create a new account at an address derived from a base pubkey and a seed
+// CreateAccountWithSeed Create a new account at an address derived from a base pubkey and a seed
 type CreateAccountWithSeed struct {
 	// Base public key
 	Base *common.Address
@@ -60,73 +60,73 @@ func NewCreateAccountWithSeedInstructionBuilder() *CreateAccountWithSeed {
 }
 
 // Base public key
-func (inst *CreateAccountWithSeed) SetBase(base common.Address) *CreateAccountWithSeed {
-	inst.Base = &base
-	return inst
+func (cAcc *CreateAccountWithSeed) SetBase(base common.Address) *CreateAccountWithSeed {
+	cAcc.Base = &base
+	return cAcc
 }
 
 // String of ASCII chars, no longer than Pubkey::MAX_SEED_LEN
-func (inst *CreateAccountWithSeed) SetSeed(seed string) *CreateAccountWithSeed {
-	inst.Seed = &seed
-	return inst
+func (cAcc *CreateAccountWithSeed) SetSeed(seed string) *CreateAccountWithSeed {
+	cAcc.Seed = &seed
+	return cAcc
 }
 
 // Number of lamports to transfer to the new account
-func (inst *CreateAccountWithSeed) SetLamports(lamports uint64) *CreateAccountWithSeed {
-	inst.Lamports = &lamports
-	return inst
+func (cAcc *CreateAccountWithSeed) SetLamports(lamports uint64) *CreateAccountWithSeed {
+	cAcc.Lamports = &lamports
+	return cAcc
 }
 
 // Number of bytes of memory to allocate
-func (inst *CreateAccountWithSeed) SetSpace(space uint64) *CreateAccountWithSeed {
-	inst.Space = &space
-	return inst
+func (cAcc *CreateAccountWithSeed) SetSpace(space uint64) *CreateAccountWithSeed {
+	cAcc.Space = &space
+	return cAcc
 }
 
 // Owner program account address
-func (inst *CreateAccountWithSeed) SetOwner(owner common.Address) *CreateAccountWithSeed {
-	inst.Owner = &owner
-	return inst
+func (cAcc *CreateAccountWithSeed) SetOwner(owner common.Address) *CreateAccountWithSeed {
+	cAcc.Owner = &owner
+	return cAcc
 }
 
 // Funding account
-func (inst *CreateAccountWithSeed) SetFundingAccount(fundingAccount common.Address) *CreateAccountWithSeed {
-	inst.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
-	return inst
+func (cAcc *CreateAccountWithSeed) SetFundingAccount(fundingAccount common.Address) *CreateAccountWithSeed {
+	cAcc.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+	return cAcc
 }
 
-func (inst *CreateAccountWithSeed) GetFundingAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (cAcc *CreateAccountWithSeed) GetFundingAccount() *base.AccountMeta {
+	return cAcc.AccountMeta[0]
 }
 
 // Created account
-func (inst *CreateAccountWithSeed) SetCreatedAccount(createdAccount common.Address) *CreateAccountWithSeed {
-	inst.AccountMeta[1] = base.Meta(createdAccount).WRITE()
-	return inst
+func (cAcc *CreateAccountWithSeed) SetCreatedAccount(createdAccount common.Address) *CreateAccountWithSeed {
+	cAcc.AccountMeta[1] = base.Meta(createdAccount).WRITE()
+	return cAcc
 }
 
-func (inst *CreateAccountWithSeed) GetCreatedAccount() *base.AccountMeta {
-	return inst.AccountMeta[1]
+func (cAcc *CreateAccountWithSeed) GetCreatedAccount() *base.AccountMeta {
+	return cAcc.AccountMeta[1]
 }
 
 // Base account
-func (inst *CreateAccountWithSeed) SetBaseAccount(baseAccount common.Address) *CreateAccountWithSeed {
-	inst.AccountMeta[2] = base.Meta(baseAccount).SIGNER()
-	return inst
+func (cAcc *CreateAccountWithSeed) SetBaseAccount(baseAccount common.Address) *CreateAccountWithSeed {
+	cAcc.AccountMeta[2] = base.Meta(baseAccount).SIGNER()
+	return cAcc
 }
 
-func (inst *CreateAccountWithSeed) GetBaseAccount() *base.AccountMeta {
-	return inst.AccountMeta[2]
+func (cAcc *CreateAccountWithSeed) GetBaseAccount() *base.AccountMeta {
+	return cAcc.AccountMeta[2]
 }
 
-func (inst CreateAccountWithSeed) Build() *Instruction {
+func (cAcc CreateAccountWithSeed) Build() *Instruction {
 	{
-		if *inst.Base != inst.GetFundingAccount().PublicKey {
-			inst.AccountMeta[2] = base.Meta(*inst.Base).SIGNER()
+		if *cAcc.Base != cAcc.GetFundingAccount().PublicKey {
+			cAcc.AccountMeta[2] = base.Meta(*cAcc.Base).SIGNER()
 		}
 	}
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   cAcc,
 		TypeID: encodbin.TypeIDFromUint32(Instruction_CreateAccountWithSeed, binary.LittleEndian),
 	}}
 }
@@ -134,77 +134,77 @@ func (inst CreateAccountWithSeed) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst CreateAccountWithSeed) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (cAcc CreateAccountWithSeed) ValidateAndBuild() (*Instruction, error) {
+	if err := cAcc.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return cAcc.Build(), nil
 }
 
-func (inst *CreateAccountWithSeed) Validate() error {
+func (cAcc *CreateAccountWithSeed) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Base == nil {
+		if cAcc.Base == nil {
 			return errors.New("Base parameter is not set")
 		}
-		if inst.Seed == nil {
+		if cAcc.Seed == nil {
 			return errors.New("Seed parameter is not set")
 		}
-		if inst.Lamports == nil {
+		if cAcc.Lamports == nil {
 			return errors.New("Lamports parameter is not set")
 		}
-		if inst.Space == nil {
+		if cAcc.Space == nil {
 			return errors.New("Space parameter is not set")
 		}
-		if inst.Owner == nil {
+		if cAcc.Owner == nil {
 			return errors.New("Owner parameter is not set")
 		}
 	}
 
 	// Check whether all accounts are set:
 	{
-		if inst.AccountMeta[0] == nil {
+		if cAcc.AccountMeta[0] == nil {
 			return fmt.Errorf("FundingAccount is not set")
 		}
-		if inst.AccountMeta[1] == nil {
+		if cAcc.AccountMeta[1] == nil {
 			return fmt.Errorf("CreatedAccount is not set")
 		}
 	}
 	return nil
 }
 
-func (inst CreateAccountWithSeed) MarshalWithEncoder(encoder *encodbin.Encoder) error {
+func (cAcc CreateAccountWithSeed) MarshalWithEncoder(encoder *encodbin.Encoder) error {
 	// Serialize `Base` param:
 	{
-		err := encoder.Encode(*inst.Base)
+		err := encoder.Encode(*cAcc.Base)
 		if err != nil {
 			return err
 		}
 	}
 	// Serialize `Seed` param:
 	{
-		err := encoder.WriteRustString(*inst.Seed)
+		err := encoder.WriteRustString(*cAcc.Seed)
 		if err != nil {
 			return err
 		}
 	}
 	// Serialize `Lamports` param:
 	{
-		err := encoder.Encode(*inst.Lamports)
+		err := encoder.Encode(*cAcc.Lamports)
 		if err != nil {
 			return err
 		}
 	}
 	// Serialize `Space` param:
 	{
-		err := encoder.Encode(*inst.Space)
+		err := encoder.Encode(*cAcc.Space)
 		if err != nil {
 			return err
 		}
 	}
 	// Serialize `Owner` param:
 	{
-		err := encoder.Encode(*inst.Owner)
+		err := encoder.Encode(*cAcc.Owner)
 		if err != nil {
 			return err
 		}

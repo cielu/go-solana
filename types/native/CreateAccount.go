@@ -21,7 +21,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Create a new account
+// CreateAccount Create a new account
 type CreateAccount struct {
 	// Number of lamports to transfer to the new account
 	Lamports *uint64
@@ -49,68 +49,68 @@ func NewCreateAccountInstructionBuilder() *CreateAccount {
 }
 
 // Number of lamports to transfer to the new account
-func (inst *CreateAccount) SetLamports(lamports uint64) *CreateAccount {
-	inst.Lamports = &lamports
-	return inst
+func (cAcc *CreateAccount) SetLamports(lamports uint64) *CreateAccount {
+	cAcc.Lamports = &lamports
+	return cAcc
 }
 
 // Number of bytes of memory to allocate
-func (inst *CreateAccount) SetSpace(space uint64) *CreateAccount {
-	inst.Space = &space
-	return inst
+func (cAcc *CreateAccount) SetSpace(space uint64) *CreateAccount {
+	cAcc.Space = &space
+	return cAcc
 }
 
 // Address of program that will own the new account
-func (inst *CreateAccount) SetOwner(owner common.Address) *CreateAccount {
-	inst.Owner = &owner
-	return inst
+func (cAcc *CreateAccount) SetOwner(owner common.Address) *CreateAccount {
+	cAcc.Owner = &owner
+	return cAcc
 }
 
 // Funding account
-func (inst *CreateAccount) SetFundingAccount(fundingAccount common.Address) *CreateAccount {
-	inst.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
-	return inst
+func (cAcc *CreateAccount) SetFundingAccount(fundingAccount common.Address) *CreateAccount {
+	cAcc.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+	return cAcc
 }
 
-func (inst *CreateAccount) GetFundingAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (cAcc *CreateAccount) GetFundingAccount() *base.AccountMeta {
+	return cAcc.AccountMeta[0]
 }
 
 // New account
-func (inst *CreateAccount) SetNewAccount(newAccount common.Address) *CreateAccount {
-	inst.AccountMeta[1] = base.Meta(newAccount).WRITE().SIGNER()
-	return inst
+func (cAcc *CreateAccount) SetNewAccount(newAccount common.Address) *CreateAccount {
+	cAcc.AccountMeta[1] = base.Meta(newAccount).WRITE().SIGNER()
+	return cAcc
 }
 
-func (inst *CreateAccount) GetNewAccount() *base.AccountMeta {
-	return inst.AccountMeta[1]
+func (cAcc *CreateAccount) GetNewAccount() *base.AccountMeta {
+	return cAcc.AccountMeta[1]
 }
 
-func (inst CreateAccount) Build() *Instruction {
+func (cAcc CreateAccount) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   cAcc,
 		TypeID: encodbin.TypeIDFromUint32(Instruction_CreateAccount, binary.LittleEndian),
 	}}
 }
 
-func (inst CreateAccount) MarshalWithEncoder(encoder *encodbin.Encoder) error {
+func (cAcc CreateAccount) MarshalWithEncoder(encoder *encodbin.Encoder) error {
 	// Serialize `Lamports` param:
 	{
-		err := encoder.Encode(*inst.Lamports)
+		err := encoder.Encode(*cAcc.Lamports)
 		if err != nil {
 			return err
 		}
 	}
 	// Serialize `Space` param:
 	{
-		err := encoder.Encode(*inst.Space)
+		err := encoder.Encode(*cAcc.Space)
 		if err != nil {
 			return err
 		}
 	}
 	// Serialize `Owner` param:
 	{
-		err := encoder.Encode(*inst.Owner)
+		err := encoder.Encode(*cAcc.Owner)
 		if err != nil {
 			return err
 		}

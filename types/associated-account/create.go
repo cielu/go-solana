@@ -1,4 +1,4 @@
-package associated_account
+package associatedaccount
 
 import (
 	"github.com/cielu/go-solana/common"

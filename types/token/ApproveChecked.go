@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Approves a delegate.  A delegate is given the authority over tokens on
+// ApproveChecked  A delegate is given the authority over tokens on
 // behalf of the source account's owner.
 //
 // This instruction differs from Approve in that the token mint and
@@ -54,14 +54,14 @@ type ApproveChecked struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *ApproveChecked) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 4)
+func (apprCkd *ApproveChecked) SetAccounts(accounts []*base.AccountMeta) error {
+	apprCkd.Accounts, apprCkd.Signers = core.SliceSplitFrom(accounts, 4)
 	return nil
 }
 
-func (slice ApproveChecked) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (apprCkd ApproveChecked) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, apprCkd.Accounts...)
+	accounts = append(accounts, apprCkd.Signers...)
 	return
 }
 
@@ -76,79 +76,79 @@ func NewApproveCheckedInstructionBuilder() *ApproveChecked {
 
 // SetAmount sets the "amount" parameter.
 // The amount of tokens the delegate is approved for.
-func (inst *ApproveChecked) SetAmount(amount uint64) *ApproveChecked {
-	inst.Amount = &amount
-	return inst
+func (apprCkd *ApproveChecked) SetAmount(amount uint64) *ApproveChecked {
+	apprCkd.Amount = &amount
+	return apprCkd
 }
 
 // SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
-func (inst *ApproveChecked) SetDecimals(decimals uint8) *ApproveChecked {
-	inst.Decimals = &decimals
-	return inst
+func (apprCkd *ApproveChecked) SetDecimals(decimals uint8) *ApproveChecked {
+	apprCkd.Decimals = &decimals
+	return apprCkd
 }
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (inst *ApproveChecked) SetSourceAccount(source common.Address) *ApproveChecked {
-	inst.Accounts[0] = base.Meta(source).WRITE()
-	return inst
+func (apprCkd *ApproveChecked) SetSourceAccount(source common.Address) *ApproveChecked {
+	apprCkd.Accounts[0] = base.Meta(source).WRITE()
+	return apprCkd
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (inst *ApproveChecked) GetSourceAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (apprCkd *ApproveChecked) GetSourceAccount() *base.AccountMeta {
+	return apprCkd.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (inst *ApproveChecked) SetMintAccount(mint common.Address) *ApproveChecked {
-	inst.Accounts[1] = base.Meta(mint)
-	return inst
+func (apprCkd *ApproveChecked) SetMintAccount(mint common.Address) *ApproveChecked {
+	apprCkd.Accounts[1] = base.Meta(mint)
+	return apprCkd
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (inst *ApproveChecked) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (apprCkd *ApproveChecked) GetMintAccount() *base.AccountMeta {
+	return apprCkd.Accounts[1]
 }
 
 // SetDelegateAccount sets the "delegate" account.
 // The delegate.
-func (inst *ApproveChecked) SetDelegateAccount(delegate common.Address) *ApproveChecked {
-	inst.Accounts[2] = base.Meta(delegate)
-	return inst
+func (apprCkd *ApproveChecked) SetDelegateAccount(delegate common.Address) *ApproveChecked {
+	apprCkd.Accounts[2] = base.Meta(delegate)
+	return apprCkd
 }
 
 // GetDelegateAccount gets the "delegate" account.
 // The delegate.
-func (inst *ApproveChecked) GetDelegateAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (apprCkd *ApproveChecked) GetDelegateAccount() *base.AccountMeta {
+	return apprCkd.Accounts[2]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account owner.
-func (inst *ApproveChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *ApproveChecked {
-	inst.Accounts[3] = base.Meta(owner)
+func (apprCkd *ApproveChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *ApproveChecked {
+	apprCkd.Accounts[3] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[3].SIGNER()
+		apprCkd.Accounts[3].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		apprCkd.Signers = append(apprCkd.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return apprCkd
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account owner.
-func (inst *ApproveChecked) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[3]
+func (apprCkd *ApproveChecked) GetOwnerAccount() *base.AccountMeta {
+	return apprCkd.Accounts[3]
 }
 
-func (inst ApproveChecked) Build() *Instruction {
+func (apprCkd ApproveChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   apprCkd,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_ApproveChecked),
 	}}
 }
@@ -156,56 +156,56 @@ func (inst ApproveChecked) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst ApproveChecked) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (apprCkd ApproveChecked) ValidateAndBuild() (*Instruction, error) {
+	if err := apprCkd.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return apprCkd.Build(), nil
 }
 
-func (inst *ApproveChecked) Validate() error {
+func (apprCkd *ApproveChecked) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Amount == nil {
+		if apprCkd.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
-		if inst.Decimals == nil {
+		if apprCkd.Decimals == nil {
 			return errors.New("Decimals parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if apprCkd.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if apprCkd.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if apprCkd.Accounts[2] == nil {
 			return errors.New("accounts.Delegate is not set")
 		}
-		if inst.Accounts[3] == nil {
+		if apprCkd.Accounts[3] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if !inst.Accounts[3].IsSigner && len(inst.Signers) == 0 {
+		if !apprCkd.Accounts[3].IsSigner && len(apprCkd.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(apprCkd.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(apprCkd.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj ApproveChecked) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (apprCkd ApproveChecked) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(apprCkd.Amount)
 	if err != nil {
 		return err
 	}
 	// Serialize `Decimals` param:
-	err = encoder.Encode(obj.Decimals)
+	err = encoder.Encode(apprCkd.Decimals)
 	if err != nil {
 		return err
 	}

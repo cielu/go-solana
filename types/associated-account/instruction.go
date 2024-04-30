@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package associated_account
+package associatedaccount
 
 import (
 	"github.com/cielu/go-solana/common"

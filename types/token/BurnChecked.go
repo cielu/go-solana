@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Burns tokens by removing them from an account.  `BurnChecked` does not
+// BurnChecked Burns tokens by removing them from an account.  `BurnChecked` does not
 // support accounts associated with the native mint, use `CloseAccount`
 // instead.
 //
@@ -52,14 +52,14 @@ type BurnChecked struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *BurnChecked) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (brCkd *BurnChecked) SetAccounts(accounts []*base.AccountMeta) error {
+	brCkd.Accounts, brCkd.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice BurnChecked) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (brCkd BurnChecked) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, brCkd.Accounts...)
+	accounts = append(accounts, brCkd.Signers...)
 	return
 }
 
@@ -74,66 +74,66 @@ func NewBurnCheckedInstructionBuilder() *BurnChecked {
 
 // SetAmount sets the "amount" parameter.
 // The amount of tokens to burn.
-func (inst *BurnChecked) SetAmount(amount uint64) *BurnChecked {
-	inst.Amount = &amount
-	return inst
+func (brCkd *BurnChecked) SetAmount(amount uint64) *BurnChecked {
+	brCkd.Amount = &amount
+	return brCkd
 }
 
 // SetDecimals sets the "decimals" parameter.
 // Expected number of base 10 digits to the right of the decimal place.
-func (inst *BurnChecked) SetDecimals(decimals uint8) *BurnChecked {
-	inst.Decimals = &decimals
-	return inst
+func (brCkd *BurnChecked) SetDecimals(decimals uint8) *BurnChecked {
+	brCkd.Decimals = &decimals
+	return brCkd
 }
 
 // SetSourceAccount sets the "source" account.
 // The account to burn from.
-func (inst *BurnChecked) SetSourceAccount(source common.Address) *BurnChecked {
-	inst.Accounts[0] = base.Meta(source).WRITE()
-	return inst
+func (brCkd *BurnChecked) SetSourceAccount(source common.Address) *BurnChecked {
+	brCkd.Accounts[0] = base.Meta(source).WRITE()
+	return brCkd
 }
 
 // GetSourceAccount gets the "source" account.
 // The account to burn from.
-func (inst *BurnChecked) GetSourceAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (brCkd *BurnChecked) GetSourceAccount() *base.AccountMeta {
+	return brCkd.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (inst *BurnChecked) SetMintAccount(mint common.Address) *BurnChecked {
-	inst.Accounts[1] = base.Meta(mint).WRITE()
-	return inst
+func (brCkd *BurnChecked) SetMintAccount(mint common.Address) *BurnChecked {
+	brCkd.Accounts[1] = base.Meta(mint).WRITE()
+	return brCkd
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (inst *BurnChecked) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (brCkd *BurnChecked) GetMintAccount() *base.AccountMeta {
+	return brCkd.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
-func (inst *BurnChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *BurnChecked {
-	inst.Accounts[2] = base.Meta(owner)
+func (brCkd *BurnChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *BurnChecked {
+	brCkd.Accounts[2] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		brCkd.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		brCkd.Signers = append(brCkd.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return brCkd
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner/delegate.
-func (inst *BurnChecked) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (brCkd *BurnChecked) GetOwnerAccount() *base.AccountMeta {
+	return brCkd.Accounts[2]
 }
 
-func (inst BurnChecked) Build() *Instruction {
+func (brCkd BurnChecked) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   brCkd,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_BurnChecked),
 	}}
 }
@@ -141,53 +141,53 @@ func (inst BurnChecked) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst BurnChecked) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (brCkd BurnChecked) ValidateAndBuild() (*Instruction, error) {
+	if err := brCkd.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return brCkd.Build(), nil
 }
 
-func (inst *BurnChecked) Validate() error {
+func (brCkd *BurnChecked) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Amount == nil {
+		if brCkd.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
-		if inst.Decimals == nil {
+		if brCkd.Decimals == nil {
 			return errors.New("Decimals parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if brCkd.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if brCkd.Accounts[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if brCkd.Accounts[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !brCkd.Accounts[2].IsSigner && len(brCkd.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(brCkd.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(brCkd.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj BurnChecked) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (brCkd BurnChecked) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(brCkd.Amount)
 	if err != nil {
 		return err
 	}
 	// Serialize `Decimals` param:
-	err = encoder.Encode(obj.Decimals)
+	err = encoder.Encode(brCkd.Decimals)
 	if err != nil {
 		return err
 	}

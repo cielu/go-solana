@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Mints new tokens to an account.  The native mint does not support
+// MintTo Mints new tokens to an account.  The native mint does not support
 // minting.
 type MintTo struct {
 	// The amount of new tokens to mint.
@@ -44,14 +44,14 @@ type MintTo struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *MintTo) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (mto *MintTo) SetAccounts(accounts []*base.AccountMeta) error {
+	mto.Accounts, mto.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice MintTo) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (mto MintTo) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, mto.Accounts...)
+	accounts = append(accounts, mto.Signers...)
 	return
 }
 
@@ -66,59 +66,59 @@ func NewMintToInstructionBuilder() *MintTo {
 
 // SetAmount sets the "amount" parameter.
 // The amount of new tokens to mint.
-func (inst *MintTo) SetAmount(amount uint64) *MintTo {
-	inst.Amount = &amount
-	return inst
+func (mto *MintTo) SetAmount(amount uint64) *MintTo {
+	mto.Amount = &amount
+	return mto
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint.
-func (inst *MintTo) SetMintAccount(mint common.Address) *MintTo {
-	inst.Accounts[0] = base.Meta(mint).WRITE()
-	return inst
+func (mto *MintTo) SetMintAccount(mint common.Address) *MintTo {
+	mto.Accounts[0] = base.Meta(mint).WRITE()
+	return mto
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint.
-func (inst *MintTo) GetMintAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (mto *MintTo) GetMintAccount() *base.AccountMeta {
+	return mto.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
-func (inst *MintTo) SetDestinationAccount(destination common.Address) *MintTo {
-	inst.Accounts[1] = base.Meta(destination).WRITE()
-	return inst
+func (mto *MintTo) SetDestinationAccount(destination common.Address) *MintTo {
+	mto.Accounts[1] = base.Meta(destination).WRITE()
+	return mto
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The account to mint tokens to.
-func (inst *MintTo) GetDestinationAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (mto *MintTo) GetDestinationAccount() *base.AccountMeta {
+	return mto.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
-func (inst *MintTo) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *MintTo {
-	inst.Accounts[2] = base.Meta(authority)
+func (mto *MintTo) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *MintTo {
+	mto.Accounts[2] = base.Meta(authority)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		mto.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		mto.Signers = append(mto.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return mto
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint's minting authority.
-func (inst *MintTo) GetAuthorityAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (mto *MintTo) GetAuthorityAccount() *base.AccountMeta {
+	return mto.Accounts[2]
 }
 
-func (inst MintTo) Build() *Instruction {
+func (mto MintTo) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   mto,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_MintTo),
 	}}
 }
@@ -126,45 +126,45 @@ func (inst MintTo) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst MintTo) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (mto MintTo) ValidateAndBuild() (*Instruction, error) {
+	if err := mto.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return mto.Build(), nil
 }
 
-func (inst *MintTo) Validate() error {
+func (mto *MintTo) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Amount == nil {
+		if mto.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if mto.Accounts[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if mto.Accounts[1] == nil {
 			return errors.New("accounts.Destination is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if mto.Accounts[2] == nil {
 			return errors.New("accounts.Authority is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !mto.Accounts[2].IsSigner && len(mto.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(mto.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(mto.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj MintTo) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (mto MintTo) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(mto.Amount)
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Like InitializeAccount2, but does not require the Rent sysvar to be provided.
+// InitializeAccount3 Like InitializeAccount2, but does not require the Rent sysvar to be provided.
 type InitializeAccount3 struct {
 	// The new account's owner/multisignature.
 	Owner *common.Address
@@ -44,40 +44,40 @@ func NewInitializeAccount3InstructionBuilder() *InitializeAccount3 {
 
 // SetOwner sets the "owner" parameter.
 // The new account's owner/multisignature.
-func (inst *InitializeAccount3) SetOwner(owner common.Address) *InitializeAccount3 {
-	inst.Owner = &owner
-	return inst
+func (initAcc3 *InitializeAccount3) SetOwner(owner common.Address) *InitializeAccount3 {
+	initAcc3.Owner = &owner
+	return initAcc3
 }
 
 // SetAccount sets the "account" account.
 // The account to initialize.
-func (inst *InitializeAccount3) SetAccount(account common.Address) *InitializeAccount3 {
-	inst.AccountMeta[0] = base.Meta(account).WRITE()
-	return inst
+func (initAcc3 *InitializeAccount3) SetAccount(account common.Address) *InitializeAccount3 {
+	initAcc3.AccountMeta[0] = base.Meta(account).WRITE()
+	return initAcc3
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
-func (inst *InitializeAccount3) GetAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (initAcc3 *InitializeAccount3) GetAccount() *base.AccountMeta {
+	return initAcc3.AccountMeta[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
-func (inst *InitializeAccount3) SetMintAccount(mint common.Address) *InitializeAccount3 {
-	inst.AccountMeta[1] = base.Meta(mint)
-	return inst
+func (initAcc3 *InitializeAccount3) SetMintAccount(mint common.Address) *InitializeAccount3 {
+	initAcc3.AccountMeta[1] = base.Meta(mint)
+	return initAcc3
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
-func (inst *InitializeAccount3) GetMintAccount() *base.AccountMeta {
-	return inst.AccountMeta[1]
+func (initAcc3 *InitializeAccount3) GetMintAccount() *base.AccountMeta {
+	return initAcc3.AccountMeta[1]
 }
 
-func (inst InitializeAccount3) Build() *Instruction {
+func (initAcc3 InitializeAccount3) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   initAcc3,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_InitializeAccount3),
 	}}
 }
@@ -85,36 +85,36 @@ func (inst InitializeAccount3) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst InitializeAccount3) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (initAcc3 InitializeAccount3) ValidateAndBuild() (*Instruction, error) {
+	if err := initAcc3.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return initAcc3.Build(), nil
 }
 
-func (inst *InitializeAccount3) Validate() error {
+func (initAcc3 *InitializeAccount3) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Owner == nil {
+		if initAcc3.Owner == nil {
 			return errors.New("Owner parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMeta[0] == nil {
+		if initAcc3.AccountMeta[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if inst.AccountMeta[1] == nil {
+		if initAcc3.AccountMeta[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
 	}
 	return nil
 }
 
-func (obj InitializeAccount3) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (initAcc3 InitializeAccount3) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Owner` param:
-	err = encoder.Encode(obj.Owner)
+	err = encoder.Encode(initAcc3.Owner)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Like InitializeMultisig, but does not require the Rent sysvar to be provided.
+// InitializeMultisig2 Like InitializeMultisig, but does not require the Rent sysvar to be provided.
 type InitializeMultisig2 struct {
 	// The number of signers (M) required to validate this multisignature account.
 	M *uint8
@@ -37,14 +37,14 @@ type InitializeMultisig2 struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *InitializeMultisig2) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 1)
+func (initMs *InitializeMultisig2) SetAccounts(accounts []*base.AccountMeta) error {
+	initMs.Accounts, initMs.Signers = core.SliceSplitFrom(accounts, 1)
 	return nil
 }
 
-func (slice InitializeMultisig2) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (initMs InitializeMultisig2) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, initMs.Accounts...)
+	accounts = append(accounts, initMs.Signers...)
 	return
 }
 
@@ -59,36 +59,36 @@ func NewInitializeMultisig2InstructionBuilder() *InitializeMultisig2 {
 
 // SetM sets the "m" parameter.
 // The number of signers (M) required to validate this multisignature account.
-func (inst *InitializeMultisig2) SetM(m uint8) *InitializeMultisig2 {
-	inst.M = &m
-	return inst
+func (initMs *InitializeMultisig2) SetM(m uint8) *InitializeMultisig2 {
+	initMs.M = &m
+	return initMs
 }
 
 // SetAccount sets the "account" account.
 // The multisignature account to initialize.
-func (inst *InitializeMultisig2) SetAccount(account common.Address) *InitializeMultisig2 {
-	inst.Accounts[0] = base.Meta(account).WRITE()
-	return inst
+func (initMs *InitializeMultisig2) SetAccount(account common.Address) *InitializeMultisig2 {
+	initMs.Accounts[0] = base.Meta(account).WRITE()
+	return initMs
 }
 
 // GetAccount gets the "account" account.
 // The multisignature account to initialize.
-func (inst *InitializeMultisig2) GetAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (initMs *InitializeMultisig2) GetAccount() *base.AccountMeta {
+	return initMs.Accounts[0]
 }
 
 // AddSigners adds the "signers" accounts.
 // The signer accounts, must equal to N where 1 <= N <= 11.
-func (inst *InitializeMultisig2) AddSigners(signers ...common.Address) *InitializeMultisig2 {
+func (initMs *InitializeMultisig2) AddSigners(signers ...common.Address) *InitializeMultisig2 {
 	for _, signer := range signers {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		initMs.Signers = append(initMs.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return initMs
 }
 
-func (inst InitializeMultisig2) Build() *Instruction {
+func (initMs InitializeMultisig2) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   initMs,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_InitializeMultisig2),
 	}}
 }
@@ -96,39 +96,39 @@ func (inst InitializeMultisig2) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst InitializeMultisig2) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (initMs InitializeMultisig2) ValidateAndBuild() (*Instruction, error) {
+	if err := initMs.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return initMs.Build(), nil
 }
 
-func (inst *InitializeMultisig2) Validate() error {
+func (initMs *InitializeMultisig2) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.M == nil {
+		if initMs.M == nil {
 			return errors.New("M parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if initMs.Accounts[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if len(inst.Signers) == 0 {
+		if len(initMs.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(initMs.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(initMs.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj InitializeMultisig2) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (initMs InitializeMultisig2) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `M` param:
-	err = encoder.Encode(obj.M)
+	err = encoder.Encode(initMs.M)
 	if err != nil {
 		return err
 	}

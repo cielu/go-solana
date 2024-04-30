@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Revokes the delegate's authority.
+// Revoke the delegate's authority.
 type Revoke struct {
 
 	// [0] = [WRITE] source
@@ -38,14 +38,14 @@ type Revoke struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *Revoke) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 2)
+func (rvk *Revoke) SetAccounts(accounts []*base.AccountMeta) error {
+	rvk.Accounts, rvk.Signers = core.SliceSplitFrom(accounts, 2)
 	return nil
 }
 
-func (slice Revoke) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (rvk Revoke) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, rvk.Accounts...)
+	accounts = append(accounts, rvk.Signers...)
 	return
 }
 
@@ -60,39 +60,39 @@ func NewRevokeInstructionBuilder() *Revoke {
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (inst *Revoke) SetSourceAccount(source common.Address) *Revoke {
-	inst.Accounts[0] = base.Meta(source).WRITE()
-	return inst
+func (rvk *Revoke) SetSourceAccount(source common.Address) *Revoke {
+	rvk.Accounts[0] = base.Meta(source).WRITE()
+	return rvk
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (inst *Revoke) GetSourceAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (rvk *Revoke) GetSourceAccount() *base.AccountMeta {
+	return rvk.Accounts[0]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account's owner.
-func (inst *Revoke) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Revoke {
-	inst.Accounts[1] = base.Meta(owner)
+func (rvk *Revoke) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Revoke {
+	rvk.Accounts[1] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[1].SIGNER()
+		rvk.Accounts[1].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		rvk.Signers = append(rvk.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return rvk
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account's owner.
-func (inst *Revoke) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (rvk *Revoke) GetOwnerAccount() *base.AccountMeta {
+	return rvk.Accounts[1]
 }
 
-func (inst Revoke) Build() *Instruction {
+func (rvk Revoke) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   rvk,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_Revoke),
 	}}
 }
@@ -100,33 +100,33 @@ func (inst Revoke) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst Revoke) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (rvk Revoke) ValidateAndBuild() (*Instruction, error) {
+	if err := rvk.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return rvk.Build(), nil
 }
 
-func (inst *Revoke) Validate() error {
+func (rvk *Revoke) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if rvk.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if rvk.Accounts[1] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if !inst.Accounts[1].IsSigner && len(inst.Signers) == 0 {
+		if !rvk.Accounts[1].IsSigner && len(rvk.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(rvk.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(rvk.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj Revoke) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (rvk Revoke) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	return nil
 }
 

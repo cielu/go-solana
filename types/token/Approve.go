@@ -23,7 +23,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Approves a delegate.  A delegate is given the authority over tokens on
+// Approve A delegate is given the authority over tokens on
 // behalf of the source account's owner.
 type Approve struct {
 	// The amount of tokens the delegate is approved for.
@@ -44,14 +44,14 @@ type Approve struct {
 	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (obj *Approve) SetAccounts(accounts []*base.AccountMeta) error {
-	obj.Accounts, obj.Signers = core.SliceSplitFrom(accounts, 3)
+func (appr *Approve) SetAccounts(accounts []*base.AccountMeta) error {
+	appr.Accounts, appr.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (slice Approve) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, slice.Accounts...)
-	accounts = append(accounts, slice.Signers...)
+func (appr Approve) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, appr.Accounts...)
+	accounts = append(accounts, appr.Signers...)
 	return
 }
 
@@ -66,59 +66,59 @@ func NewApproveInstructionBuilder() *Approve {
 
 // SetAmount sets the "amount" parameter.
 // The amount of tokens the delegate is approved for.
-func (inst *Approve) SetAmount(amount uint64) *Approve {
-	inst.Amount = &amount
-	return inst
+func (appr *Approve) SetAmount(amount uint64) *Approve {
+	appr.Amount = &amount
+	return appr
 }
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (inst *Approve) SetSourceAccount(source common.Address) *Approve {
-	inst.Accounts[0] = base.Meta(source).WRITE()
-	return inst
+func (appr *Approve) SetSourceAccount(source common.Address) *Approve {
+	appr.Accounts[0] = base.Meta(source).WRITE()
+	return appr
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (inst *Approve) GetSourceAccount() *base.AccountMeta {
-	return inst.Accounts[0]
+func (appr *Approve) GetSourceAccount() *base.AccountMeta {
+	return appr.Accounts[0]
 }
 
 // SetDelegateAccount sets the "delegate" account.
 // The delegate.
-func (inst *Approve) SetDelegateAccount(delegate common.Address) *Approve {
-	inst.Accounts[1] = base.Meta(delegate)
-	return inst
+func (appr *Approve) SetDelegateAccount(delegate common.Address) *Approve {
+	appr.Accounts[1] = base.Meta(delegate)
+	return appr
 }
 
 // GetDelegateAccount gets the "delegate" account.
 // The delegate.
-func (inst *Approve) GetDelegateAccount() *base.AccountMeta {
-	return inst.Accounts[1]
+func (appr *Approve) GetDelegateAccount() *base.AccountMeta {
+	return appr.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account owner.
-func (inst *Approve) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Approve {
-	inst.Accounts[2] = base.Meta(owner)
+func (appr *Approve) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Approve {
+	appr.Accounts[2] = base.Meta(owner)
 	if len(multisigSigners) == 0 {
-		inst.Accounts[2].SIGNER()
+		appr.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		inst.Signers = append(inst.Signers, base.Meta(signer).SIGNER())
+		appr.Signers = append(appr.Signers, base.Meta(signer).SIGNER())
 	}
-	return inst
+	return appr
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account owner.
-func (inst *Approve) GetOwnerAccount() *base.AccountMeta {
-	return inst.Accounts[2]
+func (appr *Approve) GetOwnerAccount() *base.AccountMeta {
+	return appr.Accounts[2]
 }
 
-func (inst Approve) Build() *Instruction {
+func (appr Approve) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   appr,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_Approve),
 	}}
 }
@@ -126,45 +126,45 @@ func (inst Approve) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst Approve) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (appr Approve) ValidateAndBuild() (*Instruction, error) {
+	if err := appr.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return appr.Build(), nil
 }
 
-func (inst *Approve) Validate() error {
+func (appr *Approve) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Amount == nil {
+		if appr.Amount == nil {
 			return errors.New("Amount parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.Accounts[0] == nil {
+		if appr.Accounts[0] == nil {
 			return errors.New("accounts.Source is not set")
 		}
-		if inst.Accounts[1] == nil {
+		if appr.Accounts[1] == nil {
 			return errors.New("accounts.Delegate is not set")
 		}
-		if inst.Accounts[2] == nil {
+		if appr.Accounts[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if !inst.Accounts[2].IsSigner && len(inst.Signers) == 0 {
+		if !appr.Accounts[2].IsSigner && len(appr.Signers) == 0 {
 			return fmt.Errorf("accounts.Signers is not set")
 		}
-		if len(inst.Signers) > MAX_SIGNERS {
-			return fmt.Errorf("too many signers; got %v, but max is 11", len(inst.Signers))
+		if len(appr.Signers) > MAX_SIGNERS {
+			return fmt.Errorf("too many signers; got %v, but max is 11", len(appr.Signers))
 		}
 	}
 	return nil
 }
 
-func (obj Approve) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (appr Approve) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Amount` param:
-	err = encoder.Encode(obj.Amount)
+	err = encoder.Encode(appr.Amount)
 	if err != nil {
 		return err
 	}

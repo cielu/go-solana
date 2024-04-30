@@ -21,7 +21,7 @@ import (
 	"github.com/cielu/go-solana/types/base"
 )
 
-// Initializes a new mint and optionally deposits all the newly minted
+// InitializeMint Initializes a new mint and optionally deposits all the newly minted
 // tokens in an account.
 //
 // The `InitializeMint` instruction requires no signers and MUST be
@@ -58,54 +58,54 @@ func NewInitializeMintInstructionBuilder() *InitializeMint {
 
 // SetDecimals sets the "decimals" parameter.
 // Number of base 10 digits to the right of the decimal place.
-func (inst *InitializeMint) SetDecimals(decimals uint8) *InitializeMint {
-	inst.Decimals = &decimals
-	return inst
+func (initMint *InitializeMint) SetDecimals(decimals uint8) *InitializeMint {
+	initMint.Decimals = &decimals
+	return initMint
 }
 
 // SetMintAuthority sets the "mint_authority" parameter.
 // The authority/multisignature to mint tokens.
-func (inst *InitializeMint) SetMintAuthority(mint_authority common.Address) *InitializeMint {
-	inst.MintAuthority = &mint_authority
-	return inst
+func (initMint *InitializeMint) SetMintAuthority(mint_authority common.Address) *InitializeMint {
+	initMint.MintAuthority = &mint_authority
+	return initMint
 }
 
 // SetFreezeAuthority sets the "freeze_authority" parameter.
 // The freeze authority/multisignature of the mint.
-func (inst *InitializeMint) SetFreezeAuthority(freeze_authority common.Address) *InitializeMint {
-	inst.FreezeAuthority = &freeze_authority
-	return inst
+func (initMint *InitializeMint) SetFreezeAuthority(freeze_authority common.Address) *InitializeMint {
+	initMint.FreezeAuthority = &freeze_authority
+	return initMint
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint to initialize.
-func (inst *InitializeMint) SetMintAccount(mint common.Address) *InitializeMint {
-	inst.AccountMeta[0] = base.Meta(mint).WRITE()
-	return inst
+func (initMint *InitializeMint) SetMintAccount(mint common.Address) *InitializeMint {
+	initMint.AccountMeta[0] = base.Meta(mint).WRITE()
+	return initMint
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint to initialize.
-func (inst *InitializeMint) GetMintAccount() *base.AccountMeta {
-	return inst.AccountMeta[0]
+func (initMint *InitializeMint) GetMintAccount() *base.AccountMeta {
+	return initMint.AccountMeta[0]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (inst *InitializeMint) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMint {
-	inst.AccountMeta[1] = base.Meta(SysVarRentPubkey)
-	return inst
+func (initMint *InitializeMint) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMint {
+	initMint.AccountMeta[1] = base.Meta(SysVarRentPubkey)
+	return initMint
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (inst *InitializeMint) GetSysVarRentPubkeyAccount() *base.AccountMeta {
-	return inst.AccountMeta[1]
+func (initMint *InitializeMint) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+	return initMint.AccountMeta[1]
 }
 
-func (inst InitializeMint) Build() *Instruction {
+func (initMint InitializeMint) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   initMint,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_InitializeMint),
 	}}
 }
@@ -113,50 +113,50 @@ func (inst InitializeMint) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst InitializeMint) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (initMint InitializeMint) ValidateAndBuild() (*Instruction, error) {
+	if err := initMint.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return initMint.Build(), nil
 }
 
-func (inst *InitializeMint) Validate() error {
+func (initMint *InitializeMint) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Decimals == nil {
+		if initMint.Decimals == nil {
 			return errors.New("Decimals parameter is not set")
 		}
-		if inst.MintAuthority == nil {
+		if initMint.MintAuthority == nil {
 			return errors.New("MintAuthority parameter is not set")
 		}
 	}
 
 	// Check whether all (required) accounts are set:
 	{
-		if inst.AccountMeta[0] == nil {
+		if initMint.AccountMeta[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if inst.AccountMeta[1] == nil {
+		if initMint.AccountMeta[1] == nil {
 			return errors.New("accounts.SysVarRentPubkey is not set")
 		}
 	}
 	return nil
 }
 
-func (obj InitializeMint) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (initMint InitializeMint) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Decimals` param:
-	err = encoder.Encode(obj.Decimals)
+	err = encoder.Encode(initMint.Decimals)
 	if err != nil {
 		return err
 	}
 	// Serialize `MintAuthority` param:
-	err = encoder.Encode(obj.MintAuthority)
+	err = encoder.Encode(initMint.MintAuthority)
 	if err != nil {
 		return err
 	}
 	// Serialize `FreezeAuthority` param (optional):
 	{
-		if obj.FreezeAuthority == nil {
+		if initMint.FreezeAuthority == nil {
 			err = encoder.WriteBool(false)
 			if err != nil {
 				return err
@@ -166,7 +166,7 @@ func (obj InitializeMint) MarshalWithEncoder(encoder *encodbin.Encoder) (err err
 			if err != nil {
 				return err
 			}
-			err = encoder.Encode(obj.FreezeAuthority)
+			err = encoder.Encode(initMint.FreezeAuthority)
 			if err != nil {
 				return err
 			}
