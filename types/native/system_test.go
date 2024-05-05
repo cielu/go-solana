@@ -46,7 +46,7 @@ func TestSolTransfer(t *testing.T) {
 	}
 
 	binary, err := transaction.MarshalBinary()
-	res, err := c.SendTransaction(ctx, common.SolData{binary, "base58"})
+	res, err := c.SendTransaction(ctx, binary)
 	if err != nil {
 		println(err.Error())
 	}

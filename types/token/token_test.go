@@ -62,7 +62,7 @@ func TestTokenTransfer(t *testing.T) {
 
 	binary, err := transaction.MarshalBinary()
 
-	res, err := c.SendTransaction(ctx, common.SolData{RawData: binary})
+	res, err := c.SendTransaction(ctx, binary)
 	if err != nil {
 		println(err.Error())
 	}

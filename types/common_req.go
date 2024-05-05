@@ -126,7 +126,7 @@ type RpcSendTxCfg struct {
 	Encoding EnumEncoding `json:"encoding,omitempty"`
 	// Default: false
 	// when true, skip the preflight transaction checks
-	SkipPreflight *bool `json:"skipPreflight,omitempty"`
+	SkipPreflight bool `json:"skipPreflight,omitempty"`
 	// Default: finalized
 	// Commitment level to use for preflight.
 	PreflightCommitment string `json:"preflightCommitment,omitempty"`

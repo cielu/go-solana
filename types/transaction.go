@@ -37,7 +37,7 @@ type CompiledInstruction struct {
 	// and that can be an issue.
 	Accounts []uint16 `json:"accounts"`
 	// The program input data encoded in a base-58 string.
-	Data common.SolData `json:"data"`
+	Data common.Base58 `json:"data"`
 }
 
 func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, payer common.Address) (*Transaction, error) {
@@ -164,7 +164,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
 			Accounts:       accountIndex,
-			Data:           common.SolData{RawData: data, Encoding: "base58"},
+			Data:           data,
 		})
 	}
 
@@ -250,10 +250,7 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 						StackHeight:    stackHeight,
 						ProgramIDIndex: uint16(ins["programIdIndex"].(float64)),
 						Accounts:       accounts,
-						Data: common.SolData{
-							RawData:  insData,
-							Encoding: "base58",
-						},
+						Data:           insData,
 					})
 				}
 				msgHeader, ok := message["header"].(map[string]interface{})

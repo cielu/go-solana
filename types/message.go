@@ -106,9 +106,9 @@ func (m *Message) MarshalBinary() ([]byte, error) {
 			buf = append(buf, byte(accountIdx))
 		}
 
-		encodbin.EncodeCompactU16Length(&buf, len(instruction.Data.RawData))
+		encodbin.EncodeCompactU16Length(&buf, len(instruction.Data))
 
-		buf = append(buf, instruction.Data.RawData...)
+		buf = append(buf, instruction.Data...)
 	}
 	return buf, nil
 }
@@ -336,7 +336,7 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 					return fmt.Errorf("unable to decode dataBytes for ix[%d]: %w", instructionIndex, err)
 				}
 				// setBytes
-				m.Instructions[instructionIndex].Data.SetBytes(dataBytes)
+				m.Instructions[instructionIndex].Data = dataBytes
 			}
 		}
 	}
