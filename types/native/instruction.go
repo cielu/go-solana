@@ -56,7 +56,7 @@ func (inst *Instruction) ProgramID() common.Address {
 }
 
 func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
-	return inst.Impl.(base.AccountsGettable).GetAccounts()
+	return base.GetAccounts(inst.Impl.([]*base.AccountMeta))
 }
 
 func (inst *Instruction) Data() ([]byte, error) {

@@ -55,8 +55,9 @@ func (inst *Instruction) SetProgramID(programID common.Address) {
 }
 
 func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
-	return inst.Impl.(base.AccountsGettable).GetAccounts()
+	return base.GetAccounts(inst.Impl.([]*base.AccountMeta))
 }
+
 func (inst *Instruction) Data() ([]byte, error) {
 	buf := new(bytes.Buffer)
 	if err := encodbin.NewBinEncoder(buf).Encode(inst); err != nil {

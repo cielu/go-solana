@@ -24,7 +24,7 @@ type SetComputeUnitPrice struct {
 	MicroLamports uint64
 }
 
-func (obj *SetComputeUnitPrice) SetAccounts(accounts []*base.AccountMeta) error {
+func (obj *SetComputeUnitPrice) SetAccounts([]*base.AccountMeta) error {
 	return nil
 }
 

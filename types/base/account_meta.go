@@ -8,12 +8,22 @@ type AccountMeta struct {
 	IsSigner   bool
 }
 
-type AccountsSettable interface {
-	SetAccounts(accounts []*AccountMeta) error
-}
+// type AccountsSettable interface {
+// 	SetAccounts(accounts []*AccountMeta) error
+// }
+//
+// type AccountsGettable interface {
+// 	GetAccounts() (accounts []*AccountMeta)
+// }
 
-type AccountsGettable interface {
-	GetAccounts() (accounts []*AccountMeta)
+func GetAccounts(slice []*AccountMeta) (accounts []*AccountMeta) {
+	// range slice
+	for _, meta := range slice {
+		if meta != nil {
+			accounts = append(accounts, meta)
+		}
+	}
+	return
 }
 
 // Meta intializes a new AccountMeta with the provided pubKey.

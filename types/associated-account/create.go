@@ -56,8 +56,7 @@ func NewCreateInstructionBuilder() *Create {
 }
 
 func (inst Create) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, inst.AccountMetaSlice...)
-	return
+	return base.GetAccounts(inst.AccountMetaSlice)
 }
 
 func (inst *Create) SetPayer(payer common.Address) *Create {

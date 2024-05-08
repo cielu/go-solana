@@ -26,7 +26,7 @@ type SetComputeUnitLimit struct {
 	Units uint32
 }
 
-func (inst *SetComputeUnitLimit) SetAccounts(accounts []*base.AccountMeta) error {
+func (inst *SetComputeUnitLimit) SetAccounts([]*base.AccountMeta) error {
 	return nil
 }
 
