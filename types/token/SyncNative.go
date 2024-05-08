@@ -41,6 +41,11 @@ func NewSyncNativeInstructionBuilder() *SyncNative {
 	return nd
 }
 
+func (sync SyncNative) GetAccounts() (accounts []*base.AccountMeta) {
+	accounts = append(accounts, sync.AccountMeta...)
+	return
+}
+
 // SetTokenAccount sets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
 func (sNative *SyncNative) SetTokenAccount(tokenAccount common.Address) *SyncNative {
