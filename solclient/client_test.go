@@ -41,7 +41,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	account := common.Base58ToAddress("So11111111111111111111111111111111111111112")
+	account := common.Base58ToAddress("89jFVQvaVeLs3h35BC3P592UKF5xB8fK2eyjdBvSFeWw")
 
 	// res, err := c.GetAccountInfo(ctx, account)
 
@@ -51,6 +51,14 @@ func TestClient_GetAccountInfo(t *testing.T) {
 	if err != nil {
 		t.Error("GetAccountInfo Failed: %w", err)
 	}
+	// Define Data detail
+
+	// var dataDetail AccountData
+
+	// encodbin.NewBinDecoder(res.Accounts[0].Data.RawData).Decode(&dataDetail)
+	//
+	// core.BeautifyConsole("dataDetail", dataDetail)
+
 	core.BeautifyConsole("AccountInfo:", res)
 }
 

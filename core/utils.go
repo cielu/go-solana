@@ -98,7 +98,7 @@ func DecodeBase58Str(input string) []byte {
 }
 
 // BeautifyConsole console the content with json format
-func BeautifyConsole(title, content any) {
+func BeautifyConsole(title string, content any) {
 	// MarshalIndent
 	jsonData, _ := json.MarshalIndent(content, "", "    ")
 	// print data

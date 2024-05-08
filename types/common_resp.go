@@ -45,8 +45,8 @@ type BlockReward struct {
 	Commission  *uint8         `json:"commission"`
 	Lamports    *big.Int       `json:"lamports"`
 	PostBalance uint64         `json:"postBalance"`
-	RewardType string         `json:"rewardType"`
-	Pubkey     common.Address `json:"pubkey"`
+	RewardType  string         `json:"rewardType"`
+	Pubkey      common.Address `json:"pubkey"`
 }
 
 type UiTokenAmount struct {
@@ -159,10 +159,10 @@ type BlockInfo struct {
 	Err               json.RawMessage    `json:"err"`
 	BlockHeight       uint64             `json:"blockHeight"`
 	BlockTime         int64              `json:"blockTime"`
-	ParentSlot        uint64        `json:"parentSlot"`
-	BlockHash         common.Hash   `json:"blockHash"`
-	PreviousBlockhash common.Hash   `json:"previousBlockhash"`
-	Rewards           []BlockReward `json:"rewards"`
+	ParentSlot        uint64             `json:"parentSlot"`
+	BlockHash         common.Hash        `json:"blockHash"`
+	PreviousBlockhash common.Hash        `json:"previousBlockhash"`
+	Rewards           []BlockReward      `json:"rewards"`
 	BlockTransaction  []BlockTransaction `json:"transactions"`
 }
 
