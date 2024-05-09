@@ -24,7 +24,7 @@ type Subscription interface {
 }
 
 // AccountSubscribe Subscribe to an account to receive notifications when the lamports or data for a given account public key changes
-func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- types.AccountInfoWithCtx, account common.Address, cfg ...types.RpcCommitmentWithEncodingCfg) (Subscription, error) {
+func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- types.AccountNotifies, account common.Address, cfg ...types.RpcCommitmentWithEncodingCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "account", ch, account, getRpcCfg(cfg))
 	if err != nil {
@@ -35,7 +35,7 @@ func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- types.AccountI
 
 // BlockSubscribe Subscribe to receive notification anytime a new block is confirmed or finalized.
 // filter can receive: string | types.MentionsAccountProgramCfg
-func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- types.BlockInfoWithCtx, filter any, cfg ...types.RpcGetBlockContextCfg) (Subscription, error) {
+func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- types.BlockNotifies, filter any, cfg ...types.RpcGetBlockContextCfg) (Subscription, error) {
 	// SolSubscribe
 	switch filter.(type) {
 	case string:
@@ -53,7 +53,7 @@ func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- types.BlockInfoW
 
 // LogsSubscribe Subscribe to transaction logging
 // mentions can receive: string | types.MentionsCfg
-func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- types.LogsInfoWithCtx, mentions any, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
+func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- types.LogsNotifies, mentions any, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	switch mentions.(type) {
 	case string:
@@ -73,7 +73,7 @@ func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- types.LogsInfoWit
 }
 
 // ProgramSubscribe to a program to receive notifications when the lamports or data for an account owned by the given program changes
-func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- types.ProgramInfoWithCtx, address common.Address, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
+func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- types.ProgramNotifies, address common.Address, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "program", ch, address, getRpcCfg(cfg))
 	if err != nil {
@@ -83,7 +83,7 @@ func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- types.ProgramI
 }
 
 // SignatureSubscribe Subscribe to receive a notification when the transaction with the given signature reaches the specified commitment level.
-func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- types.SignatureInfoWithCtx, signature common.Signature, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
+func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- types.SignatureNotifies, signature common.Signature, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "signature", ch, signature, getRpcCfg(cfg))
 	if err != nil {
@@ -93,7 +93,7 @@ func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- types.Signat
 }
 
 // SlotSubscribe Subscribe to receive notification anytime a slot is processed by the validator
-func (sc *Client) SlotSubscribe(ctx context.Context, ch chan<- types.SlotInfoWithCtx) (Subscription, error) {
+func (sc *Client) SlotSubscribe(ctx context.Context, ch chan<- types.SlotNotifies) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "slot", ch)
 	if err != nil {

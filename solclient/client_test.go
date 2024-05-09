@@ -229,6 +229,23 @@ func TestClient_GetRecentPerformanceSamples(t *testing.T) {
 	core.BeautifyConsole("Res:", res)
 }
 
+func TestClient_GetSignatureStatuses(t *testing.T) {
+	var (
+		c          = newClient()
+		ctx        = context.Background()
+		// signatures = []common.Signature{
+		// 	common.Base58ToSignature("4BC9UMSQrLqEbTvcya6Ukt3Lvq1ZzWpCYRZG6ygGCu26mJYQ1uAiQNVVbu3jPz5SBS2oWKmbhNTR3h6x6wyBELS5"),
+		// }
+		account = common.Base58ToAddress("Vote111111111111111111111111111111111111111")
+	)
+	// res, err := c.GetSignatureStatuses(ctx, signatures, types.RpcSearchTxHistoryCfg{ true })
+	res, err := c.GetSignaturesForAddress(ctx, account)
+	if err != nil {
+		t.Error("Res Failed: %w", err)
+	}
+	core.BeautifyConsole("Res:", res)
+}
+
 func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
 	var (
 		c   = newClient()
@@ -280,7 +297,7 @@ func TestClient_GetTransaction(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	signature := common.Base58ToSignature("4mQwRJD8yjNf7wMzTMsKX6fkzK2uLMk9UZRCKnjLRaePkd4LrYsGJPagQ4pqYLeT4MLV1FCRMbApyqT2b5mRUhPn")
+	signature := common.Base58ToSignature("4BC9UMSQrLqEbTvcya6Ukt3Lvq1ZzWpCYRZG6ygGCu26mJYQ1uAiQNVVbu3jPz5SBS2oWKmbhNTR3h6x6wyBELS5")
 
 	res, err := c.GetTransaction(ctx, signature)
 	if err != nil {

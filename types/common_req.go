@@ -70,7 +70,7 @@ type RpcCombinedCfg struct {
 
 type RpcSearchTxHistoryCfg struct {
 	// if true - a Solana node will search its ledger cache for any signatures not found in the recent status cache
-	SearchTransactionHistory bool `json:"searchTransactionHistory,omitempty"`
+	SearchTxHistory bool `json:"searchTransactionHistory,omitempty"`
 }
 
 type RpcSignaturesForAddressCfg struct {

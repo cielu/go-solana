@@ -332,6 +332,22 @@ type RpcPrioritizationFee struct {
 	PrioritizationFee uint64 `json:"prioritizationFee"`
 }
 
+type SignatureStatus struct {
+	// The slot that contains the block with the transaction
+	Slot uint64 `json:"slot"`
+	// Error if transaction failed, null if transaction succeeded. See TransactionError definitions for more info.
+	Err json.RawMessage `json:"err"`
+	// estimated production time, as Unix timestamp (seconds since the Unix epoch) of when transaction was processed. null if not available.
+	Confirmations *uint64 `json:"confirmations,omitempty"`
+	// The transaction's cluster confirmation status; Either processed, confirmed, or finalized.
+	ConfirmationStatus string `json:"confirmationStatus,omitempty"`
+}
+
+type SignatureStatusWithCtx struct {
+	Context         ContextSlot       `json:"context"`
+	SignatureStatus []SignatureStatus `json:"value,omitempty"`
+}
+
 type SignatureInfo struct {
 	// transaction signature as base-58 encoded string
 	Signature common.Signature `json:"signature,omitempty"`
@@ -403,7 +419,7 @@ type VoteAccount struct {
 	// Vote account address, as base-58 encoded string
 	VotePubkey common.Address `json:"votePubkey"`
 	// Validator identity, as base-58 encoded string
-	NodePubkey common.Address
+	NodePubkey common.Address `json:"nodePubkey"`
 	// the stake, in lamports, delegated to this vote account and active in this epoch
 	ActivatedStake uint64 `json:"activatedStake"`
 	// bool, whether the vote account is staked for this epoch
@@ -423,33 +439,35 @@ type RpcVoteAccounts struct {
 	Delinquent []VoteAccount `json:"delinquent"`
 }
 
-type BlockInfoWithCtx struct {
-	Context   ContextSlot `json:"context"`
-	BlockInfo BlockInfo   `json:"value"`
-}
-
 type LogsValue struct {
 	Signature common.Signature `json:"signature"`
 	Err       json.RawMessage  `json:"err"`
 	Logs      []string         `json:"logs"`
 }
 
-type LogsInfoWithCtx struct {
+type AccountNotifies AccountInfoWithCtx
+
+type BlockNotifies struct {
+	Context   ContextSlot `json:"context"`
+	BlockInfo BlockInfo   `json:"value"`
+}
+
+type LogsNotifies struct {
 	Context ContextSlot `json:"context"`
 	Value   LogsValue   `json:"value"`
 }
 
-type ProgramInfoWithCtx struct {
+type ProgramNotifies struct {
 	Context ContextSlot  `json:"context"`
 	Value   TokenAccount `json:"value"`
 }
 
-type SignatureInfoWithCtx struct {
+type SignatureNotifies struct {
 	Context ContextSlot `json:"context"`
-	Value   string      `json:"value"`
+	Value   interface{} `json:"value"`
 }
 
-type SlotInfoWithCtx struct {
+type SlotNotifies struct {
 	Parent uint64 `json:"parent"`
 	Root   uint64 `json:"root"`
 	Slot   uint64 `json:"slot"`

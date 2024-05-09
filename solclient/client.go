@@ -214,7 +214,7 @@ func (sc *Client) GetInflationRate(ctx context.Context) (res types.InflationRate
 }
 
 // GetInflationReward Returns the inflation / staking reward for a list of addresses for an epoch
-func (sc *Client) GetInflationReward(ctx context.Context, args ...interface{}) (res map[string]interface{}, err error) {
+func (sc *Client) GetInflationReward(ctx context.Context, args ...interface{}) (res []types.InflationReward, err error) {
 	var (
 		accounts []common.Address
 		cfg      *types.RpcCommitmentCfg
@@ -371,8 +371,8 @@ func (sc *Client) GetRecentPrioritizationFees(ctx context.Context, args ...inter
 }
 
 // GetSignatureStatuses Returns the statuses of a list of signatures. Each signature must be a txid, the first signature of a transaction.
-func (sc *Client) GetSignatureStatuses(ctx context.Context, signatures []common.Signature, cfg ...types.RpcSearchTxHistoryCfg) (res map[string]interface{}, err error) {
-	// require accounts len <= 100
+func (sc *Client) GetSignatureStatuses(ctx context.Context, signatures []common.Signature, cfg ...types.RpcSearchTxHistoryCfg) (res types.SignatureStatusWithCtx, err error) {
+	// require signatures len <= 256
 	if len(signatures) > 256 {
 		return res, errors.New("signatures maximum is 256)")
 	}
@@ -520,8 +520,8 @@ func (sc *Client) MinimumLedgerSlot(ctx context.Context) (res uint64, err error)
 }
 
 // RequestAirdrop Requests an airdrop of lamports to a Pubkey
-func (sc *Client) RequestAirdrop(ctx context.Context, address common.Address, lamports *big.Int) (res common.Signature, err error) {
-	err = sc.c.CallContext(ctx, &res, "requestAirdrop", address, lamports)
+func (sc *Client) RequestAirdrop(ctx context.Context, address common.Address, lamport *big.Int) (res common.Signature, err error) {
+	err = sc.c.CallContext(ctx, &res, "requestAirdrop", address, lamport)
 	return
 }
 
