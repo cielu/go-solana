@@ -16,19 +16,19 @@ type Transfer struct {
 	//
 	// [1] = [WRITE] RecipientAccount
 	// ··········· Recipient account
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 	Signers     []*base.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
 func NewTransferInstructionBuilder() *Transfer {
 	nd := &Transfer{
-		AccountMeta: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*base.AccountMeta, 2),
 	}
 	return nd
 }
 
 func (trans Transfer) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, trans.AccountMeta...)
+	accounts = append(accounts, trans.AccountMetaSlice...)
 	accounts = append(accounts, trans.Signers...)
 	return
 }
@@ -40,13 +40,13 @@ func (trans *Transfer) SetLamports(lamports uint64) *Transfer {
 
 // Funding account
 func (trans *Transfer) SetFundingAccount(fundingAccount common.Address) *Transfer {
-	trans.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+	trans.AccountMetaSlice[0] = base.Meta(fundingAccount).WRITE().SIGNER()
 	return trans
 }
 
 // Recipient account
 func (trans *Transfer) SetRecipientAccount(recipientAccount common.Address) *Transfer {
-	trans.AccountMeta[1] = base.Meta(recipientAccount).WRITE()
+	trans.AccountMetaSlice[1] = base.Meta(recipientAccount).WRITE()
 	return trans
 }
 

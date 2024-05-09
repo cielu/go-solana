@@ -45,68 +45,68 @@ type InitializeAccount struct {
 	//
 	// [3] = [] $(SysVarRentPubkey)
 	// ··········· Rent sysvar.
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeAccountInstructionBuilder creates a new `InitializeAccount` instruction builder.
 func NewInitializeAccountInstructionBuilder() *InitializeAccount {
 	nd := &InitializeAccount{
-		AccountMeta: make([]*base.AccountMeta, 4),
+		AccountMetaSlice: make([]*base.AccountMeta, 4),
 	}
-	nd.AccountMeta[3] = base.Meta(base.SysVarRentPubkey)
+	nd.AccountMetaSlice[3] = base.Meta(base.SysVarRentPubkey)
 	return nd
 }
 
 // SetAccount sets the "account" account.
 // The account to initialize.
 func (initAcc *InitializeAccount) SetAccount(account common.Address) *InitializeAccount {
-	initAcc.AccountMeta[0] = base.Meta(account).WRITE()
+	initAcc.AccountMetaSlice[0] = base.Meta(account).WRITE()
 	return initAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
 func (initAcc *InitializeAccount) GetAccount() *base.AccountMeta {
-	return initAcc.AccountMeta[0]
+	return initAcc.AccountMetaSlice[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
 func (initAcc *InitializeAccount) SetMintAccount(mint common.Address) *InitializeAccount {
-	initAcc.AccountMeta[1] = base.Meta(mint)
+	initAcc.AccountMetaSlice[1] = base.Meta(mint)
 	return initAcc
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
 func (initAcc *InitializeAccount) GetMintAccount() *base.AccountMeta {
-	return initAcc.AccountMeta[1]
+	return initAcc.AccountMetaSlice[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The new account's owner/multisignature.
 func (initAcc *InitializeAccount) SetOwnerAccount(owner common.Address) *InitializeAccount {
-	initAcc.AccountMeta[2] = base.Meta(owner)
+	initAcc.AccountMetaSlice[2] = base.Meta(owner)
 	return initAcc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The new account's owner/multisignature.
 func (initAcc *InitializeAccount) GetOwnerAccount() *base.AccountMeta {
-	return initAcc.AccountMeta[2]
+	return initAcc.AccountMetaSlice[2]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (initAcc *InitializeAccount) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeAccount {
-	initAcc.AccountMeta[3] = base.Meta(SysVarRentPubkey)
+	initAcc.AccountMetaSlice[3] = base.Meta(SysVarRentPubkey)
 	return initAcc
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (initAcc *InitializeAccount) GetSysVarRentPubkeyAccount() *base.AccountMeta {
-	return initAcc.AccountMeta[3]
+	return initAcc.AccountMetaSlice[3]
 }
 
 func (initAcc InitializeAccount) Build() *Instruction {
@@ -129,16 +129,16 @@ func (initAcc InitializeAccount) ValidateAndBuild() (*Instruction, error) {
 func (initAcc *InitializeAccount) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if initAcc.AccountMeta[0] == nil {
+		if initAcc.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if initAcc.AccountMeta[1] == nil {
+		if initAcc.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if initAcc.AccountMeta[2] == nil {
+		if initAcc.AccountMetaSlice[2] == nil {
 			return errors.New("accounts.Owner is not set")
 		}
-		if initAcc.AccountMeta[3] == nil {
+		if initAcc.AccountMetaSlice[3] == nil {
 			return errors.New("accounts.SysVarRentPubkey is not set")
 		}
 	}

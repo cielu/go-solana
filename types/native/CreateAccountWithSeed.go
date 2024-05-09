@@ -48,13 +48,13 @@ type CreateAccountWithSeed struct {
 	//
 	// [2] = [SIGNER] BaseAccount
 	// ··········· Base account
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateAccountWithSeedInstructionBuilder creates a new `CreateAccountWithSeed` instruction builder.
 func NewCreateAccountWithSeedInstructionBuilder() *CreateAccountWithSeed {
 	nd := &CreateAccountWithSeed{
-		AccountMeta: make([]*base.AccountMeta, 3),
+		AccountMetaSlice: make([]*base.AccountMeta, 3),
 	}
 	return nd
 }
@@ -91,38 +91,38 @@ func (cAcc *CreateAccountWithSeed) SetOwner(owner common.Address) *CreateAccount
 
 // Funding account
 func (cAcc *CreateAccountWithSeed) SetFundingAccount(fundingAccount common.Address) *CreateAccountWithSeed {
-	cAcc.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+	cAcc.AccountMetaSlice[0] = base.Meta(fundingAccount).WRITE().SIGNER()
 	return cAcc
 }
 
 func (cAcc *CreateAccountWithSeed) GetFundingAccount() *base.AccountMeta {
-	return cAcc.AccountMeta[0]
+	return cAcc.AccountMetaSlice[0]
 }
 
 // Created account
 func (cAcc *CreateAccountWithSeed) SetCreatedAccount(createdAccount common.Address) *CreateAccountWithSeed {
-	cAcc.AccountMeta[1] = base.Meta(createdAccount).WRITE()
+	cAcc.AccountMetaSlice[1] = base.Meta(createdAccount).WRITE()
 	return cAcc
 }
 
 func (cAcc *CreateAccountWithSeed) GetCreatedAccount() *base.AccountMeta {
-	return cAcc.AccountMeta[1]
+	return cAcc.AccountMetaSlice[1]
 }
 
 // Base account
 func (cAcc *CreateAccountWithSeed) SetBaseAccount(baseAccount common.Address) *CreateAccountWithSeed {
-	cAcc.AccountMeta[2] = base.Meta(baseAccount).SIGNER()
+	cAcc.AccountMetaSlice[2] = base.Meta(baseAccount).SIGNER()
 	return cAcc
 }
 
 func (cAcc *CreateAccountWithSeed) GetBaseAccount() *base.AccountMeta {
-	return cAcc.AccountMeta[2]
+	return cAcc.AccountMetaSlice[2]
 }
 
 func (cAcc CreateAccountWithSeed) Build() *Instruction {
 	{
 		if *cAcc.Base != cAcc.GetFundingAccount().PublicKey {
-			cAcc.AccountMeta[2] = base.Meta(*cAcc.Base).SIGNER()
+			cAcc.AccountMetaSlice[2] = base.Meta(*cAcc.Base).SIGNER()
 		}
 	}
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
@@ -163,10 +163,10 @@ func (cAcc *CreateAccountWithSeed) Validate() error {
 
 	// Check whether all accounts are set:
 	{
-		if cAcc.AccountMeta[0] == nil {
+		if cAcc.AccountMetaSlice[0] == nil {
 			return fmt.Errorf("FundingAccount is not set")
 		}
-		if cAcc.AccountMeta[1] == nil {
+		if cAcc.AccountMetaSlice[1] == nil {
 			return fmt.Errorf("CreatedAccount is not set")
 		}
 	}

@@ -1,10 +1,9 @@
-package associatedaccount
+package base
 
 import (
 	"crypto/sha256"
 	"errors"
 	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/types/base"
 	"math"
 )
 
@@ -149,13 +148,13 @@ func FindProgramAddress(seed [][]byte, programID common.Address) (common.Address
 }
 
 func FindAssociatedTokenAddress(wallet common.Address, mint common.Address, options ...common.Address) (common.Address, uint8, error) {
-	return FindAssociatedTokenAddressAndBumpSeed(wallet, mint, base.SPLAssociatedTokenAccountProgramID, options...)
+	return FindAssociatedTokenAddressAndBumpSeed(wallet, mint, SPLAssociatedTokenAccountProgramID, options...)
 }
 
 func FindAssociatedTokenAddressAndBumpSeed(walletAddress common.Address, splTokenMintAddress common.Address, programID common.Address, options ...common.Address) (common.Address, uint8, error) {
-	tokenProgramID := base.TokenProgramID
-	if len(options) > 0 && options[0] == base.Token2022ProgramID {
-		tokenProgramID = base.Token2022ProgramID
+	tokenProgramID := TokenProgramID
+	if len(options) > 0 && options[0] == Token2022ProgramID {
+		tokenProgramID = Token2022ProgramID
 	}
 	return FindProgramAddress([][]byte{walletAddress[:], tokenProgramID[:], splTokenMintAddress[:]}, programID)
 }

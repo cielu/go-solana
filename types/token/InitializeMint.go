@@ -44,15 +44,15 @@ type InitializeMint struct {
 	//
 	// [1] = [] $(SysVarRentPubkey)
 	// ··········· Rent sysvar.
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeMintInstructionBuilder creates a new `InitializeMint` instruction builder.
 func NewInitializeMintInstructionBuilder() *InitializeMint {
 	nd := &InitializeMint{
-		AccountMeta: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*base.AccountMeta, 2),
 	}
-	nd.AccountMeta[1] = base.Meta(base.SysVarRentPubkey)
+	nd.AccountMetaSlice[1] = base.Meta(base.SysVarRentPubkey)
 	return nd
 }
 
@@ -80,27 +80,27 @@ func (initMint *InitializeMint) SetFreezeAuthority(freeze_authority common.Addre
 // SetMintAccount sets the "mint" account.
 // The mint to initialize.
 func (initMint *InitializeMint) SetMintAccount(mint common.Address) *InitializeMint {
-	initMint.AccountMeta[0] = base.Meta(mint).WRITE()
+	initMint.AccountMetaSlice[0] = base.Meta(mint).WRITE()
 	return initMint
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint to initialize.
 func (initMint *InitializeMint) GetMintAccount() *base.AccountMeta {
-	return initMint.AccountMeta[0]
+	return initMint.AccountMetaSlice[0]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (initMint *InitializeMint) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMint {
-	initMint.AccountMeta[1] = base.Meta(SysVarRentPubkey)
+	initMint.AccountMetaSlice[1] = base.Meta(SysVarRentPubkey)
 	return initMint
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
 func (initMint *InitializeMint) GetSysVarRentPubkeyAccount() *base.AccountMeta {
-	return initMint.AccountMeta[1]
+	return initMint.AccountMetaSlice[1]
 }
 
 func (initMint InitializeMint) Build() *Instruction {
@@ -133,10 +133,10 @@ func (initMint *InitializeMint) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if initMint.AccountMeta[0] == nil {
+		if initMint.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
-		if initMint.AccountMeta[1] == nil {
+		if initMint.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.SysVarRentPubkey is not set")
 		}
 	}

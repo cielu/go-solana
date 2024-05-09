@@ -31,13 +31,13 @@ type InitializeAccount3 struct {
 	//
 	// [1] = [] mint
 	// ··········· The mint this account will be associated with.
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeAccount3InstructionBuilder creates a new `InitializeAccount3` instruction builder.
 func NewInitializeAccount3InstructionBuilder() *InitializeAccount3 {
 	nd := &InitializeAccount3{
-		AccountMeta: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*base.AccountMeta, 2),
 	}
 	return nd
 }
@@ -52,27 +52,27 @@ func (initAcc3 *InitializeAccount3) SetOwner(owner common.Address) *InitializeAc
 // SetAccount sets the "account" account.
 // The account to initialize.
 func (initAcc3 *InitializeAccount3) SetAccount(account common.Address) *InitializeAccount3 {
-	initAcc3.AccountMeta[0] = base.Meta(account).WRITE()
+	initAcc3.AccountMetaSlice[0] = base.Meta(account).WRITE()
 	return initAcc3
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
 func (initAcc3 *InitializeAccount3) GetAccount() *base.AccountMeta {
-	return initAcc3.AccountMeta[0]
+	return initAcc3.AccountMetaSlice[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
 func (initAcc3 *InitializeAccount3) SetMintAccount(mint common.Address) *InitializeAccount3 {
-	initAcc3.AccountMeta[1] = base.Meta(mint)
+	initAcc3.AccountMetaSlice[1] = base.Meta(mint)
 	return initAcc3
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
 func (initAcc3 *InitializeAccount3) GetMintAccount() *base.AccountMeta {
-	return initAcc3.AccountMeta[1]
+	return initAcc3.AccountMetaSlice[1]
 }
 
 func (initAcc3 InitializeAccount3) Build() *Instruction {
@@ -102,10 +102,10 @@ func (initAcc3 *InitializeAccount3) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if initAcc3.AccountMeta[0] == nil {
+		if initAcc3.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.Account is not set")
 		}
-		if initAcc3.AccountMeta[1] == nil {
+		if initAcc3.AccountMetaSlice[1] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
 	}

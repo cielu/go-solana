@@ -46,17 +46,13 @@ type Create struct {
 	//
 	// [6] = [] SysVarRent
 	// ··········· SysVarRentPubkey
-	AccountMetaSlice []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateInstructionBuilder creates a new `Create` instruction builder.
 func NewCreateInstructionBuilder() *Create {
 	nd := &Create{}
 	return nd
-}
-
-func (inst Create) GetAccounts() (accounts []*base.AccountMeta) {
-	return base.GetAccounts(inst.AccountMetaSlice)
 }
 
 func (inst *Create) SetPayer(payer common.Address) *Create {
@@ -82,12 +78,12 @@ func (inst *Create) SetTokenProgramID(tokenProgramID common.Address) *Create {
 func (inst Create) Build() *Instruction {
 
 	// Find the associatedTokenAddress;
-	associatedTokenAddress, _, _ := FindAssociatedTokenAddress(
+	associatedTokenAddress, _, _ := base.FindAssociatedTokenAddress(
 		inst.Wallet,
 		inst.Mint,
 	)
 	if inst.TokenProgramID == base.Token2022ProgramID {
-		associatedTokenAddress, _, _ = FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
+		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
 	}
 
 	keys := []*base.AccountMeta{

@@ -30,33 +30,33 @@ type SyncNative struct {
 
 	// [0] = [WRITE] tokenAccount
 	// ··········· The native token account to sync with its underlying lamports.
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewSyncNativeInstructionBuilder creates a new `SyncNative` instruction builder.
 func NewSyncNativeInstructionBuilder() *SyncNative {
 	nd := &SyncNative{
-		AccountMeta: make([]*base.AccountMeta, 1),
+		AccountMetaSlice: make([]*base.AccountMeta, 1),
 	}
 	return nd
 }
 
 func (sync SyncNative) GetAccounts() (accounts []*base.AccountMeta) {
-	accounts = append(accounts, sync.AccountMeta...)
+	accounts = append(accounts, sync.AccountMetaSlice...)
 	return
 }
 
 // SetTokenAccount sets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
 func (sNative *SyncNative) SetTokenAccount(tokenAccount common.Address) *SyncNative {
-	sNative.AccountMeta[0] = base.Meta(tokenAccount).WRITE()
+	sNative.AccountMetaSlice[0] = base.Meta(tokenAccount).WRITE()
 	return sNative
 }
 
 // GetTokenAccount gets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
 func (sNative *SyncNative) GetTokenAccount() *base.AccountMeta {
-	return sNative.AccountMeta[0]
+	return sNative.AccountMetaSlice[0]
 }
 
 func (sNative SyncNative) Build() *Instruction {
@@ -79,7 +79,7 @@ func (sNative SyncNative) ValidateAndBuild() (*Instruction, error) {
 func (sNative *SyncNative) Validate() error {
 	// Check whether all (required) accounts are set:
 	{
-		if sNative.AccountMeta[0] == nil {
+		if sNative.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.TokenAccount is not set")
 		}
 	}

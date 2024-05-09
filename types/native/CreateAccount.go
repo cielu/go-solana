@@ -37,13 +37,13 @@ type CreateAccount struct {
 	//
 	// [1] = [WRITE, SIGNER] NewAccount
 	// ··········· New account
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateAccountInstructionBuilder creates a new `CreateAccount` instruction builder.
 func NewCreateAccountInstructionBuilder() *CreateAccount {
 	nd := &CreateAccount{
-		AccountMeta: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*base.AccountMeta, 2),
 	}
 	return nd
 }
@@ -68,22 +68,22 @@ func (cAcc *CreateAccount) SetOwner(owner common.Address) *CreateAccount {
 
 // Funding account
 func (cAcc *CreateAccount) SetFundingAccount(fundingAccount common.Address) *CreateAccount {
-	cAcc.AccountMeta[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+	cAcc.AccountMetaSlice[0] = base.Meta(fundingAccount).WRITE().SIGNER()
 	return cAcc
 }
 
 func (cAcc *CreateAccount) GetFundingAccount() *base.AccountMeta {
-	return cAcc.AccountMeta[0]
+	return cAcc.AccountMetaSlice[0]
 }
 
 // New account
 func (cAcc *CreateAccount) SetNewAccount(newAccount common.Address) *CreateAccount {
-	cAcc.AccountMeta[1] = base.Meta(newAccount).WRITE().SIGNER()
+	cAcc.AccountMetaSlice[1] = base.Meta(newAccount).WRITE().SIGNER()
 	return cAcc
 }
 
 func (cAcc *CreateAccount) GetNewAccount() *base.AccountMeta {
-	return cAcc.AccountMeta[1]
+	return cAcc.AccountMetaSlice[1]
 }
 
 func (cAcc CreateAccount) Build() *Instruction {

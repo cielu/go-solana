@@ -154,7 +154,7 @@ func (inst *Instruction) SetProgramID(tokenProgramID common.Address) {
 }
 
 func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
-	return base.GetAccounts(inst.Impl.([]*base.AccountMeta))
+	return inst.Impl.(base.AccountsGettable).GetAccounts()
 }
 
 func (inst *Instruction) Data() ([]byte, error) {

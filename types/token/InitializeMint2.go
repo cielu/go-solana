@@ -34,13 +34,13 @@ type InitializeMint2 struct {
 
 	// [0] = [WRITE] mint
 	// ··········· The mint to initialize.
-	AccountMeta []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeMint2InstructionBuilder creates a new `InitializeMint2` instruction builder.
 func NewInitializeMint2InstructionBuilder() *InitializeMint2 {
 	nd := &InitializeMint2{
-		AccountMeta: make([]*base.AccountMeta, 1),
+		AccountMetaSlice: make([]*base.AccountMeta, 1),
 	}
 	return nd
 }
@@ -69,14 +69,14 @@ func (initMint *InitializeMint2) SetFreezeAuthority(freeze_authority common.Addr
 // SetMintAccount sets the "mint" account.
 // The mint to initialize.
 func (initMint *InitializeMint2) SetMintAccount(mint common.Address) *InitializeMint2 {
-	initMint.AccountMeta[0] = base.Meta(mint).WRITE()
+	initMint.AccountMetaSlice[0] = base.Meta(mint).WRITE()
 	return initMint
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint to initialize.
 func (initMint *InitializeMint2) GetMintAccount() *base.AccountMeta {
-	return initMint.AccountMeta[0]
+	return initMint.AccountMetaSlice[0]
 }
 
 func (initMint InitializeMint2) Build() *Instruction {
@@ -109,7 +109,7 @@ func (initMint *InitializeMint2) Validate() error {
 
 	// Check whether all (required) accounts are set:
 	{
-		if initMint.AccountMeta[0] == nil {
+		if initMint.AccountMetaSlice[0] == nil {
 			return errors.New("accounts.Mint is not set")
 		}
 	}
