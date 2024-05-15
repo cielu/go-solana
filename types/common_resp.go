@@ -154,7 +154,7 @@ type BlockTransaction struct {
 	// Transaction
 	Transaction *Transaction `json:"transaction"`
 	// Version Of Transaction
-	Version uint16 `json:"version"`
+	Version TxVersion `json:"version"`
 }
 
 type BlockInfo struct {
