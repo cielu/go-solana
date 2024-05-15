@@ -142,7 +142,7 @@ type TransactionMeta struct {
 
 type BlockTransaction struct {
 	// Transaction status metadata object
-	Meta TransactionMeta `json:"meta"`
+	Meta *TransactionMeta `json:"meta"`
 	// The slot this transaction was processed in.
 	Slot uint64 `json:"slot"`
 
@@ -152,7 +152,9 @@ type BlockTransaction struct {
 	BlockTime *int64 `json:"blockTime" bin:"optional"`
 
 	// Transaction
-	Transaction Transaction `json:"transaction"`
+	Transaction *Transaction `json:"transaction"`
+	// Version Of Transaction
+	Version uint16 `json:"version"`
 }
 
 type BlockInfo struct {
