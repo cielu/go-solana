@@ -297,9 +297,12 @@ func TestClient_GetTransaction(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	signature := common.Base58ToSignature("4BC9UMSQrLqEbTvcya6Ukt3Lvq1ZzWpCYRZG6ygGCu26mJYQ1uAiQNVVbu3jPz5SBS2oWKmbhNTR3h6x6wyBELS5")
+	signature := common.Base58ToSignature("5KNhYcoQLN57iB3oZoLWUeC1oLfhu58GoN1YNV2mhvr3bJQxZW9kmj3k95hwXT2imaAV9NreKDSAo7hSrxt8n6Wb")
 
-	res, err := c.GetTransaction(ctx, signature)
+	res, err := c.GetTransaction(ctx, signature, types.RpcGetTransactionCfg{
+		Encoding:              types.EncodingBase64,
+		MaxSupportedTxVersion: 1,
+	})
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
