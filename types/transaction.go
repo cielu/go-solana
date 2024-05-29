@@ -195,6 +195,25 @@ func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	return output, nil
 }
 
+func (tx *Transaction) NoSignedMarshalBinary() ([]byte, error) {
+
+	messageContent, err := tx.Message.MarshalBinary()
+	if err != nil {
+		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
+	}
+
+	var signatureCount []byte
+	encodbin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
+	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
+	output = append(output, signatureCount...)
+	for _, sig := range tx.Signatures {
+		output = append(output, sig[:]...)
+	}
+	output = append(output, messageContent...)
+
+	return output, nil
+}
+
 // UnmarshalJSON parses the transaction Content
 func (tx *Transaction) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
