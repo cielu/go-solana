@@ -7,11 +7,12 @@ import (
 	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/solclient"
 	"github.com/cielu/go-solana/types"
+	computebudget "github.com/cielu/go-solana/types/compute-budget"
 	"testing"
 )
 
 func newClient() *solclient.Client {
-	rpcUrl := "https://delicate-capable-wish.solana-devnet.quiknode.pro/e48425abfdab96e8263779f8e3334e4a5da10696/"
+	rpcUrl := ""
 	c, err := solclient.Dial(rpcUrl)
 	if err != nil {
 		panic("Dial rpc endpoint failed")
@@ -21,30 +22,37 @@ func newClient() *solclient.Client {
 
 func TestSolTransfer(t *testing.T) {
 	var (
-		c   = newClient()
-		ctx = context.Background()
+		c        = newClient()
+		ctx      = context.Background()
+		execInst = []types.Instruction{}
 	)
+	//
+	setLimitInst := computebudget.NewSetComputeUnitLimitInstruction(1000000)
+	execInst = append(execInst, setLimitInst.Build())
 
-	instruction := NewTransferInstruction(
-		common.StrToAddress("F8HCC3DyoR6KN9SSK9NL1V6weRgsEvp8hjL26EnTxNTF"),
-		common.StrToAddress("4DBkBYx6NTSg75BQrQGyDUNbb21j1H7Dt416gdmW4785"),
-		1e6,
-	).Build()
+	setPriceInst := computebudget.NewSetComputeUnitPriceInstruction(10000)
+	execInst = append(execInst, setPriceInst.Build())
+
+	transferInst := NewTransferInstruction(
+		common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
+		common.StrToAddress("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
+		1e1,
+	)
+	execInst = append(execInst, transferInst.Build())
 
 	latestHash, err := c.GetLatestBlockhash(ctx)
 	if err != nil {
-		println("get latest blockHash err:", err)
+		println("Get latest blockHash err:", err)
 	}
 
-	transaction, err := types.NewTransaction([]types.Instruction{instruction}, latestHash.LastBlock.Blockhash, common.StrToAddress("F8HCC3DyoR6KN9SSK9NL1V6weRgsEvp8hjL26EnTxNTF"))
-	key, _ := crypto.AccountFromBase58Key("3HE29Pg2c2tjbCkVxJpDKhLZuqPLEfoeF3gwjE8MTP3WzvQmLFCxHtKHkGnqNMBPPgFwTWP4vmb9b9a7hGybgtDb")
+	transaction, err := types.NewTransaction(execInst, latestHash.LastBlock.Blockhash, common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"))
+	key, _ := crypto.AccountFromBase58Key("")
 	signErr := transaction.Sign([]crypto.Account{
 		key,
 	})
 	if signErr != nil {
 		fmt.Println("signErr:", signErr)
 	}
-
 	binary, err := transaction.MarshalBinary()
 	res, err := c.SendTransaction(ctx, binary)
 	if err != nil {
