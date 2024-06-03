@@ -24,11 +24,11 @@ type SetComputeUnitPrice struct {
 	MicroLamports uint64
 }
 
-func (obj *SetComputeUnitPrice) SetAccounts([]*base.AccountMeta) error {
+func (obj *SetComputeUnitPrice) SetAccounts(accounts []*base.AccountMeta) error {
 	return nil
 }
 
-func (slice SetComputeUnitPrice) GetAccounts() (accounts []*base.AccountMeta) {
+func (obj SetComputeUnitPrice) GetAccounts() (accounts []*base.AccountMeta) {
 	return
 }
 
@@ -38,14 +38,14 @@ func NewSetComputeUnitPriceInstructionBuilder() *SetComputeUnitPrice {
 	return nd
 }
 
-func (inst *SetComputeUnitPrice) SetMicroLamports(microLamports uint64) *SetComputeUnitPrice {
-	inst.MicroLamports = microLamports
-	return inst
+func (obj *SetComputeUnitPrice) SetMicroLamports(microLamports uint64) *SetComputeUnitPrice {
+	obj.MicroLamports = microLamports
+	return obj
 }
 
-func (inst SetComputeUnitPrice) Build() *Instruction {
+func (obj SetComputeUnitPrice) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   obj,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_SetComputeUnitPrice),
 	}}
 }
@@ -53,17 +53,17 @@ func (inst SetComputeUnitPrice) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst SetComputeUnitPrice) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (obj SetComputeUnitPrice) ValidateAndBuild() (*Instruction, error) {
+	if err := obj.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return obj.Build(), nil
 }
 
-func (inst *SetComputeUnitPrice) Validate() error {
+func (obj *SetComputeUnitPrice) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.MicroLamports == 0 {
+		if obj.MicroLamports == 0 {
 			return errors.New("MicroLamports parameter is not set")
 		}
 	}
@@ -73,6 +73,14 @@ func (inst *SetComputeUnitPrice) Validate() error {
 func (obj SetComputeUnitPrice) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `MicroLamports` param:
 	err = encoder.Encode(obj.MicroLamports)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
+	// Deserialize `MicroLamports`:
+	err = decoder.Decode(&obj.MicroLamports)
 	if err != nil {
 		return err
 	}
