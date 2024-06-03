@@ -26,11 +26,11 @@ type SetComputeUnitLimit struct {
 	Units uint32
 }
 
-func (inst *SetComputeUnitLimit) SetAccounts([]*base.AccountMeta) error {
+func (setLimit *SetComputeUnitLimit) SetAccounts(accounts []*base.AccountMeta) error {
 	return nil
 }
 
-func (inst SetComputeUnitLimit) GetAccounts() (accounts []*base.AccountMeta) {
+func (setLimit SetComputeUnitLimit) GetAccounts() (accounts []*base.AccountMeta) {
 	return
 }
 
@@ -40,15 +40,15 @@ func NewSetComputeUnitLimitInstructionBuilder() *SetComputeUnitLimit {
 	return nd
 }
 
-// Unit limit
-func (inst *SetComputeUnitLimit) SetUnits(units uint32) *SetComputeUnitLimit {
-	inst.Units = units
-	return inst
+// SetUnits limit
+func (setLimit *SetComputeUnitLimit) SetUnits(units uint32) *SetComputeUnitLimit {
+	setLimit.Units = units
+	return setLimit
 }
 
-func (inst SetComputeUnitLimit) Build() *Instruction {
+func (setLimit SetComputeUnitLimit) Build() *Instruction {
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   inst,
+		Impl:   obj,
 		TypeID: encodbin.TypeIDFromUint8(Instruction_SetComputeUnitLimit),
 	}}
 }
@@ -56,29 +56,29 @@ func (inst SetComputeUnitLimit) Build() *Instruction {
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (inst SetComputeUnitLimit) ValidateAndBuild() (*Instruction, error) {
-	if err := inst.Validate(); err != nil {
+func (setLimit SetComputeUnitLimit) ValidateAndBuild() (*Instruction, error) {
+	if err := setLimit.Validate(); err != nil {
 		return nil, err
 	}
-	return inst.Build(), nil
+	return setLimit.Build(), nil
 }
 
-func (inst *SetComputeUnitLimit) Validate() error {
+func (setLimit *SetComputeUnitLimit) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if inst.Units == 0 {
+		if setLimit.Units == 0 {
 			return errors.New("Units parameter is not set")
 		}
-		if inst.Units > MAX_COMPUTE_UNIT_LIMIT {
+		if setLimit.Units > MAX_COMPUTE_UNIT_LIMIT {
 			return errors.New("Units parameter exceeds the maximum compute unit")
 		}
 	}
 	return nil
 }
 
-func (obj SetComputeUnitLimit) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (setLimit SetComputeUnitLimit) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Units` param:
-	err = encoder.Encode(obj.Units)
+	err = encoder.Encode(setLimit.Units)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (obj SetComputeUnitLimit) MarshalWithEncoder(encoder *encodbin.Encoder) (er
 
 // NewSetComputeUnitLimitInstruction declares a new SetComputeUnitLimit instruction with the provided parameters and accounts.
 func NewSetComputeUnitLimitInstruction(
-	// Parameters:
+// Parameters:
 	units uint32,
 ) *SetComputeUnitLimit {
 	return NewSetComputeUnitLimitInstructionBuilder().SetUnits(units)

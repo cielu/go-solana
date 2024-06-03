@@ -24,11 +24,11 @@ type SetComputeUnitPrice struct {
 	MicroLamports uint64
 }
 
-func (obj *SetComputeUnitPrice) SetAccounts(accounts []*base.AccountMeta) error {
+func (setPrice *SetComputeUnitPrice) SetAccounts(accounts []*base.AccountMeta) error {
 	return nil
 }
 
-func (obj SetComputeUnitPrice) GetAccounts() (accounts []*base.AccountMeta) {
+func (setPrice SetComputeUnitPrice) GetAccounts() (accounts []*base.AccountMeta) {
 	return
 }
 
@@ -38,49 +38,43 @@ func NewSetComputeUnitPriceInstructionBuilder() *SetComputeUnitPrice {
 	return nd
 }
 
-func (obj *SetComputeUnitPrice) SetMicroLamports(microLamports uint64) *SetComputeUnitPrice {
-	obj.MicroLamports = microLamports
-	return obj
+func (setPrice *SetComputeUnitPrice) SetMicroLamports(microLamports uint64) *SetComputeUnitPrice {
+	setPrice.MicroLamports = microLamports
+	return setPrice
 }
 
-func (obj SetComputeUnitPrice) Build() *Instruction {
-	return &Instruction{BaseVariant: encodbin.BaseVariant{
-		Impl:   obj,
-		TypeID: encodbin.TypeIDFromUint8(Instruction_SetComputeUnitPrice),
-	}}
+func (setPrice SetComputeUnitPrice) Build() *Instruction {
+	return &Instruction{
+		BaseVariant: encodbin.BaseVariant{
+			Impl:   setPrice,
+			TypeID: encodbin.TypeIDFromUint8(Instruction_SetComputeUnitPrice),
+		},
+	}
 }
 
 // ValidateAndBuild validates the instruction parameters and accounts;
 // if there is a validation error, it returns the error.
 // Otherwise, it builds and returns the instruction.
-func (obj SetComputeUnitPrice) ValidateAndBuild() (*Instruction, error) {
-	if err := obj.Validate(); err != nil {
+func (setPrice SetComputeUnitPrice) ValidateAndBuild() (*Instruction, error) {
+	if err := setPrice.Validate(); err != nil {
 		return nil, err
 	}
-	return obj.Build(), nil
+	return setPrice.Build(), nil
 }
 
-func (obj *SetComputeUnitPrice) Validate() error {
+func (setPrice *SetComputeUnitPrice) Validate() error {
 	// Check whether all (required) parameters are set:
 	{
-		if obj.MicroLamports == 0 {
+		if setPrice.MicroLamports == 0 {
 			return errors.New("MicroLamports parameter is not set")
 		}
 	}
 	return nil
 }
 
-func (obj SetComputeUnitPrice) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
+func (setPrice SetComputeUnitPrice) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `MicroLamports` param:
-	err = encoder.Encode(obj.MicroLamports)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
-	// Deserialize `MicroLamports`:
-	err = decoder.Decode(&obj.MicroLamports)
+	err = encoder.Encode(setPrice.MicroLamports)
 	if err != nil {
 		return err
 	}

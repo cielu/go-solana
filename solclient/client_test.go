@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/types"
+	computebudget "github.com/cielu/go-solana/types/compute-budget"
 	"os"
 	"testing"
 )
@@ -317,5 +319,45 @@ func TestClient_GetVoteAccounts(t *testing.T) {
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
+	core.BeautifyConsole("Res:", res)
+}
+
+func TestClient_SetComputeBudgetPrice(t *testing.T) {
+	var (
+		c   = newClient()
+		ctx = context.Background()
+	)
+
+	var (
+		instrs []types.Instruction
+	)
+
+	recentHas, err := c.GetLatestBlockhash(ctx)
+	if err != nil {
+		fmt.Println("GetLatestBlockhash Failed:", err)
+		return
+	}
+
+	payer, _ := crypto.AccountFromBase58Key("")
+
+
+	instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(500).Build())
+
+	fmt.Printf("%+v\n", instrs[0])
+	// return
+	tx, err := types.NewTransaction(instrs, recentHas.LastBlock.Blockhash, payer.Address)
+
+	sigTx, err := tx.Sign([]crypto.Account{payer})
+	//
+	if err != nil {
+		fmt.Println("Sign Tx Failed:", err)
+		return
+	}
+
+	res, err := c.SendTransaction(ctx, sigTx)
+	if err != nil {
+		t.Error("Res Failed: %w", err)
+	}
+
 	core.BeautifyConsole("Res:", res)
 }

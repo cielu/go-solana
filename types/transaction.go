@@ -333,12 +333,12 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err erro
 	return nil
 }
 
-type privateKeyGetter func(key common.Address) *crypto.Account
+// Sign accounts
+func (tx *Transaction) Sign(accounts []crypto.Account) ([]byte, error) {
 
-func (tx *Transaction) Sign(accounts []crypto.Account) (err error) {
 	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
-		return fmt.Errorf("unable to encode message for signing: %w", err)
+		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
 	}
 
 	signerKeys := tx.Message.signerKeys()
@@ -352,9 +352,10 @@ signerMatch:
 				continue signerMatch
 			}
 		}
-		return fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
+		return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
 	}
-	return nil
+
+	return tx.MarshalBinary()
 }
 
 func (tx Transaction) ToBase64() (string, error) {
