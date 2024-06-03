@@ -30,7 +30,7 @@ func (inst *SetComputeUnitLimit) SetAccounts([]*base.AccountMeta) error {
 	return nil
 }
 
-func (inst SetComputeUnitLimit) GetAccounts() (accounts []base.AccountMeta) {
+func (inst SetComputeUnitLimit) GetAccounts() (accounts []*base.AccountMeta) {
 	return
 }
 
@@ -76,7 +76,7 @@ func (inst *SetComputeUnitLimit) Validate() error {
 	return nil
 }
 
-func (obj SetComputeUnitLimit) MarshalWithEncoder(encoder encodbin.Encoder) (err error) {
+func (obj SetComputeUnitLimit) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 	// Serialize `Units` param:
 	err = encoder.Encode(obj.Units)
 	if err != nil {
