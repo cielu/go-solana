@@ -8,6 +8,7 @@ import (
 	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/types"
 	computebudget "github.com/cielu/go-solana/types/compute-budget"
+	"github.com/cielu/go-solana/types/native"
 	"os"
 	"testing"
 )
@@ -335,20 +336,27 @@ func TestClient_SetComputeBudgetPrice(t *testing.T) {
 		instrs []types.Instruction
 	)
 
-	recentHas, err := c.GetLatestBlockhash(ctx)
+	recentHash, err := c.GetLatestBlockhash(ctx)
 	if err != nil {
 		fmt.Println("GetLatestBlockhash Failed:", err)
 		return
 	}
 
-	payer, _ := crypto.AccountFromBase58Key("")
+	payer, _ := crypto.AccountFromBase58Key("payer private key")
 
+	instrs = append(instrs, computebudget.NewSetComputeUnitLimitInstruction(1000000).Build())
 
-	instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(500).Build())
+	instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(10000).Build())
 
-	fmt.Printf("%+v\n", instrs[0])
+	transferInst := native.NewTransferInstruction(
+		common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
+		common.StrToAddress("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
+		1e1,
+	)
+
+	instrs = append(instrs, transferInst.Build())
 	// return
-	tx, err := types.NewTransaction(instrs, recentHas.LastBlock.Blockhash, payer.Address)
+	tx, err := types.NewTransaction(instrs, recentHash.LastBlock.Blockhash, payer.Address)
 
 	sigTx, err := tx.Sign([]crypto.Account{payer})
 	//

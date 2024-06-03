@@ -12,7 +12,7 @@ import (
 )
 
 func newClient() *solclient.Client {
-	rpcUrl := ""
+	rpcUrl := "https://api.mainnet-beta.solana.com"
 	c, err := solclient.Dial(rpcUrl)
 	if err != nil {
 		panic("Dial rpc endpoint failed")
@@ -24,7 +24,7 @@ func TestSolTransfer(t *testing.T) {
 	var (
 		c        = newClient()
 		ctx      = context.Background()
-		execInst = []types.Instruction{}
+		execInst []types.Instruction
 	)
 	//
 	setLimitInst := computebudget.NewSetComputeUnitLimitInstruction(1000000)
@@ -46,15 +46,14 @@ func TestSolTransfer(t *testing.T) {
 	}
 
 	transaction, err := types.NewTransaction(execInst, latestHash.LastBlock.Blockhash, common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"))
+
 	key, _ := crypto.AccountFromBase58Key("")
-	signErr := transaction.Sign([]crypto.Account{
-		key,
-	})
-	if signErr != nil {
-		fmt.Println("signErr:", signErr)
+	// /
+	signTx, err := transaction.Sign([]crypto.Account{key})
+	if err != nil {
+		fmt.Println("signErr:", err)
 	}
-	binary, err := transaction.MarshalBinary()
-	res, err := c.SendTransaction(ctx, binary)
+	res, err := c.SendTransaction(ctx, signTx)
 	if err != nil {
 		println(err.Error())
 	}
