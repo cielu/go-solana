@@ -48,15 +48,15 @@ import (
 //		h.removeRequestOp(op) // timeout, etc.
 //	}
 type handler struct {
-	reg                  *serviceRegistry
-	unsubscribeCb        *callback
-	idgen                func() ID                      // subscription ID generator
-	respWait             map[string]*requestOp          // active client requests
-	clientSubs           map[string]*ClientSubscription // active client subscriptions
-	callWG               sync.WaitGroup                 // pending call goroutines
-	rootCtx              context.Context                // canceled by close()
-	cancelRoot           func()                         // cancel function for rootCtx
-	conn                 jsonWriter                     // where responses will be sent
+	reg           *serviceRegistry
+	unsubscribeCb *callback
+	idgen         func() ID                      // subscription ID generator
+	respWait      map[string]*requestOp          // active client requests
+	clientSubs    map[string]*ClientSubscription // active client subscriptions
+	callWG        sync.WaitGroup                 // pending call goroutines
+	rootCtx       context.Context                // canceled by close()
+	cancelRoot    func()                         // cancel function for rootCtx
+	conn          jsonWriter                     // where responses will be sent
 	// log                  log.Logger
 	allowSubscribe       bool
 	batchRequestLimit    int
@@ -74,15 +74,15 @@ type callProc struct {
 func newHandler(connCtx context.Context, conn jsonWriter, idgen func() ID, reg *serviceRegistry, batchRequestLimit, batchResponseMaxSize int) *handler {
 	rootCtx, cancelRoot := context.WithCancel(connCtx)
 	h := &handler{
-		reg:                  reg,
-		idgen:                idgen,
-		conn:                 conn,
-		respWait:             make(map[string]*requestOp),
-		clientSubs:           make(map[string]*ClientSubscription),
-		rootCtx:              rootCtx,
-		cancelRoot:           cancelRoot,
-		allowSubscribe:       true,
-		serverSubs:           make(map[ID]*Subscription),
+		reg:            reg,
+		idgen:          idgen,
+		conn:           conn,
+		respWait:       make(map[string]*requestOp),
+		clientSubs:     make(map[string]*ClientSubscription),
+		rootCtx:        rootCtx,
+		cancelRoot:     cancelRoot,
+		allowSubscribe: true,
+		serverSubs:     make(map[ID]*Subscription),
 		// log:                  log.Root(),
 		batchRequestLimit:    batchRequestLimit,
 		batchResponseMaxSize: batchResponseMaxSize,
