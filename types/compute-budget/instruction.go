@@ -61,7 +61,7 @@ func (inst *Instruction) Data() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (inst Instruction) MarshalWithEncoder(encoder *encodbin.Encoder) error {
+func (inst *Instruction) MarshalWithEncoder(encoder *encodbin.Encoder) error {
 	err := encoder.WriteUint8(inst.TypeID.Uint8())
 	if err != nil {
 		return fmt.Errorf("unable to write variant type: %w", err)

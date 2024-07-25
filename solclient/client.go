@@ -449,14 +449,14 @@ func (sc *Client) GetTokenAccountBalance(ctx context.Context, account common.Add
 }
 
 // GetTokenAccountsByDelegate Returns all SPL Token accounts by approved Delegate.
-func (sc *Client) GetTokenAccountsByDelegate(ctx context.Context, account common.Address, mintProg types.RpcMintWithProgramID, cfg ...types.RpcAccountInfoCfg) (res types.TokenAccountsWithCtx, err error) {
+func (sc *Client) GetTokenAccountsByDelegate(ctx context.Context, delegate common.Address, mintProg types.RpcMintWithProgramID, cfg ...types.RpcAccountInfoCfg) (res types.TokenAccountsWithCtx, err error) {
 	// `params` should have at least 2 argument(s)
-	err = sc.c.CallContext(ctx, &res, "getTokenAccountsByDelegate", account, mintProg, getRpcCfg(cfg))
+	err = sc.c.CallContext(ctx, &res, "getTokenAccountsByDelegate", delegate, mintProg, getRpcCfg(cfg))
 	return
 }
 
 // GetTokenAccountsByOwner Returns all SPL Token accounts by token owner.
-func (sc *Client) GetTokenAccountsByOwner(ctx context.Context, account common.Address, mintProg types.RpcMintWithProgramID, cfg ...types.RpcAccountInfoCfg) (res types.TokenAccountsWithCtx, err error) {
+func (sc *Client) GetTokenAccountsByOwner(ctx context.Context, splToken common.Address, mintProg types.RpcMintWithProgramID, cfg ...types.RpcAccountInfoCfg) (res types.TokenAccountsWithCtx, err error) {
 	// use base64
 	tmpCfg := getRpcCfg(cfg)
 	// isNull
@@ -467,25 +467,25 @@ func (sc *Client) GetTokenAccountsByOwner(ctx context.Context, account common.Ad
 	if tmpCfg.Encoding == "" {
 		tmpCfg.Encoding = types.EncodingBase64
 	}
-	err = sc.c.CallContext(ctx, &res, "getTokenAccountsByOwner", account, mintProg, tmpCfg)
+	err = sc.c.CallContext(ctx, &res, "getTokenAccountsByOwner", splToken, mintProg, tmpCfg)
 	return
 }
 
 // GetTokenLargestAccounts Returns the 20 largest accounts of a particular SPL Token type.
-func (sc *Client) GetTokenLargestAccounts(ctx context.Context, account common.Address, cfg ...types.RpcCommitmentCfg) (res types.TokenLargestHolders, err error) {
-	err = sc.c.CallContext(ctx, &res, "getTokenLargestAccounts", account, getRpcCfg(cfg))
+func (sc *Client) GetTokenLargestAccounts(ctx context.Context, splToken common.Address, cfg ...types.RpcCommitmentCfg) (res types.TokenLargestHolders, err error) {
+	err = sc.c.CallContext(ctx, &res, "getTokenLargestAccounts", splToken, getRpcCfg(cfg))
 	return
 }
 
 // GetTokenSupply Returns the total supply of an SPL Token type.
-func (sc *Client) GetTokenSupply(ctx context.Context, account common.Address, cfg ...types.RpcCommitmentCfg) (res types.TokenAccountWithCtx, err error) {
-	err = sc.c.CallContext(ctx, &res, "getTokenSupply", account, getRpcCfg(cfg))
+func (sc *Client) GetTokenSupply(ctx context.Context, splToken common.Address, cfg ...types.RpcCommitmentCfg) (res types.TokenAccountWithCtx, err error) {
+	err = sc.c.CallContext(ctx, &res, "getTokenSupply", splToken, getRpcCfg(cfg))
 	return
 }
 
 // GetTransaction Returns transaction details for a confirmed transaction
-func (sc *Client) GetTransaction(ctx context.Context, account common.Signature, cfg ...types.RpcGetTransactionCfg) (res types.BlockTransaction, err error) {
-	err = sc.c.CallContext(ctx, &res, "getTransaction", account, getRpcCfg(cfg))
+func (sc *Client) GetTransaction(ctx context.Context, signature common.Signature, cfg ...types.RpcGetTransactionCfg) (res types.BlockTransaction, err error) {
+	err = sc.c.CallContext(ctx, &res, "getTransaction", signature, getRpcCfg(cfg))
 	return
 }
 

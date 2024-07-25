@@ -304,8 +304,8 @@ type LastBlockWithCtx struct {
 }
 
 type AccountsInfoWithCtx struct {
-	Context  ContextSlot   `json:"context"`
-	Accounts []AccountInfo `json:"value,omitempty"`
+	Context  ContextSlot    `json:"context"`
+	Accounts []*AccountInfo `json:"value,omitempty"`
 }
 
 // ProgramAccount program account

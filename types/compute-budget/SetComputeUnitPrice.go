@@ -80,7 +80,7 @@ func (obj SetComputeUnitPrice) MarshalWithEncoder(encoder *encodbin.Encoder) (er
 }
 func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
 	// Deserialize `MicroLamports`:
-	err = decoder.Decode(&obj.MicroLamports)
+	err = decoder.Decode(obj.MicroLamports)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func (obj *SetComputeUnitPrice) UnmarshalWithDecoder(decoder *encodbin.Decoder) 
 
 // NewSetComputeUnitPriceInstruction declares a new SetComputeUnitPrice instruction with the provided parameters and accounts.
 func NewSetComputeUnitPriceInstruction(
-	// Parameters:
+// Parameters:
 	microLamports uint64,
 ) *SetComputeUnitPrice {
 	return NewSetComputeUnitPriceInstructionBuilder().SetMicroLamports(microLamports)

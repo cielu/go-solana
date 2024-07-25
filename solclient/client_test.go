@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/types"
+	computebudget "github.com/cielu/go-solana/types/compute-budget"
+	"github.com/cielu/go-solana/types/native"
 	"os"
 	"testing"
 )
@@ -297,9 +300,12 @@ func TestClient_GetTransaction(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	signature := common.Base58ToSignature("4BC9UMSQrLqEbTvcya6Ukt3Lvq1ZzWpCYRZG6ygGCu26mJYQ1uAiQNVVbu3jPz5SBS2oWKmbhNTR3h6x6wyBELS5")
+	signature := common.Base58ToSignature("5KNhYcoQLN57iB3oZoLWUeC1oLfhu58GoN1YNV2mhvr3bJQxZW9kmj3k95hwXT2imaAV9NreKDSAo7hSrxt8n6Wb")
 
-	res, err := c.GetTransaction(ctx, signature)
+	res, err := c.GetTransaction(ctx, signature, types.RpcGetTransactionCfg{
+		Encoding:              types.EncodingBase64,
+		MaxSupportedTxVersion: 1,
+	})
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
@@ -317,5 +323,52 @@ func TestClient_GetVoteAccounts(t *testing.T) {
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
+	core.BeautifyConsole("Res:", res)
+}
+
+func TestClient_SetComputeBudgetPrice(t *testing.T) {
+	var (
+		c   = newClient()
+		ctx = context.Background()
+	)
+
+	var (
+		instrs []types.Instruction
+	)
+
+	recentHash, err := c.GetLatestBlockhash(ctx)
+	if err != nil {
+		fmt.Println("GetLatestBlockhash Failed:", err)
+		return
+	}
+
+	payer, _ := crypto.AccountFromBase58Key("payer private key")
+
+	instrs = append(instrs, computebudget.NewSetComputeUnitLimitInstruction(1000000).Build())
+
+	instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(10000).Build())
+
+	transferInst := native.NewTransferInstruction(
+		common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
+		common.StrToAddress("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
+		1e1,
+	)
+
+	instrs = append(instrs, transferInst.Build())
+	// return
+	tx, err := types.NewTransaction(instrs, recentHash.LastBlock.Blockhash, payer.Address)
+
+	sigTx, err := tx.Sign([]crypto.Account{payer})
+	//
+	if err != nil {
+		fmt.Println("Sign Tx Failed:", err)
+		return
+	}
+
+	res, err := c.SendTransaction(ctx, sigTx)
+	if err != nil {
+		t.Error("Res Failed: %w", err)
+	}
+
 	core.BeautifyConsole("Res:", res)
 }
