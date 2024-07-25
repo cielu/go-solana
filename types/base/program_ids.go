@@ -42,11 +42,13 @@ var (
 
 	ComputeBudget = common.StrToAddress("ComputeBudget111111111111111111111111111111")
 
+	AssetExecutorProgramID = common.StrToAddress("J7Dai94nSeunCgErhYTRfWkssbhLFUeZsiymX4S6DNrL")
+
 	//
-	SPLNameServiceProgramID            = common.StrToAddress("namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX")
-	MetaplexTokenMetaProgramID         = common.StrToAddress("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
-	ComputeBudgetProgramID             = common.StrToAddress("ComputeBudget111111111111111111111111111111")
-	AddressLookupTableProgramID        = common.StrToAddress("AddressLookupTab1e1111111111111111111111111")
+	SPLNameServiceProgramID     = common.StrToAddress("namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX")
+	MetaplexTokenMetaProgramID  = common.StrToAddress("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+	ComputeBudgetProgramID      = common.StrToAddress("ComputeBudget111111111111111111111111111111")
+	AddressLookupTableProgramID = common.StrToAddress("AddressLookupTab1e1111111111111111111111111")
 )
 
 // SPL:
@@ -77,7 +79,6 @@ var (
 	// by inspecting the transaction log from a trusted provider.
 	MemoProgramID = common.StrToAddress("MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr")
 )
-
 
 var (
 	// The Mint for native SOL Token accounts

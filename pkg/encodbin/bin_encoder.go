@@ -54,6 +54,10 @@ func (vid TypeID) Uint8() uint8 {
 	return Uint8FromTypeID(vid)
 }
 
+func (vid TypeID) Uint64() uint64 {
+	return Uint64FromTypeID(vid, binary.LittleEndian)
+}
+
 func (vid TypeID) Bytes() []byte {
 	return vid[:]
 }
@@ -61,6 +65,12 @@ func (vid TypeID) Bytes() []byte {
 // Uint32FromTypeID parses a TypeID bytes to a uint32.
 func Uint32FromTypeID(vid TypeID, order binary.ByteOrder) (out uint32) {
 	out = order.Uint32(vid[:])
+	return out
+}
+
+// Uint64FromTypeID parses a TypeID bytes to a uint64.
+func Uint64FromTypeID(vid TypeID, order binary.ByteOrder) (out uint64) {
+	out = order.Uint64(vid[:])
 	return out
 }
 
@@ -118,6 +128,12 @@ var TypeSize = struct {
 func TypeIDFromUint32(v uint32, bo binary.ByteOrder) TypeID {
 	out := make([]byte, TypeSize.Uint32)
 	bo.PutUint32(out, v)
+	return TypeIDFromBytes(out)
+}
+
+func TypeIDFromUint64(v uint64, bo binary.ByteOrder) TypeID {
+	out := make([]byte, TypeSize.Uint64)
+	bo.PutUint64(out, v)
 	return TypeIDFromBytes(out)
 }
 
