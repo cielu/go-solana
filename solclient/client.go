@@ -456,7 +456,7 @@ func (sc *Client) GetTokenAccountsByDelegate(ctx context.Context, delegate commo
 }
 
 // GetTokenAccountsByOwner Returns all SPL Token accounts by token owner.
-func (sc *Client) GetTokenAccountsByOwner(ctx context.Context, splToken common.Address, mintProg types.RpcMintWithProgramID, cfg ...types.RpcAccountInfoCfg) (res types.TokenAccountsWithCtx, err error) {
+func (sc *Client) GetTokenAccountsByOwner(ctx context.Context, owner common.Address, program types.RpcMintWithProgramID, cfg ...types.RpcAccountInfoCfg) (res types.TokenAccountsWithCtx, err error) {
 	// use base64
 	tmpCfg := getRpcCfg(cfg)
 	// isNull
@@ -467,7 +467,7 @@ func (sc *Client) GetTokenAccountsByOwner(ctx context.Context, splToken common.A
 	if tmpCfg.Encoding == "" {
 		tmpCfg.Encoding = types.EncodingBase64
 	}
-	err = sc.c.CallContext(ctx, &res, "getTokenAccountsByOwner", splToken, mintProg, tmpCfg)
+	err = sc.c.CallContext(ctx, &res, "getTokenAccountsByOwner", owner, program, tmpCfg)
 	return
 }
 
