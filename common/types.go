@@ -75,8 +75,14 @@ func Base64ToAddress(b string) Address {
 	return BytesToAddress(d)
 }
 
+// IsEmpty address is empty
 func (a Address) IsEmpty() bool {
 	return a == Address{}
+}
+
+// Equals compares address a eq b
+func (a Address) Equals(b Address) bool  {
+	return a==b
 }
 
 // Cmp compares two addresses.
