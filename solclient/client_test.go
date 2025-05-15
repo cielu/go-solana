@@ -88,7 +88,7 @@ func TestClient_GetBlock(t *testing.T) {
 		t.Error("GetBlock Failed: %w", err)
 	}
 	// range block transactions
-	for i, tx := range res.BlockTransaction {
+	for i, tx := range res.TransactionInfo {
 		fmt.Println("Tx index:", i+1)
 		fmt.Println("Signature:", tx.Transaction.Signatures[0])
 		// foreach Instruction

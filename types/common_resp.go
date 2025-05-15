@@ -140,7 +140,7 @@ type TransactionMeta struct {
 	LoadedAddresses LoadedAddresses `json:"loadedAddresses"`
 }
 
-type BlockTransaction struct {
+type TransactionInfo struct {
 	// Transaction status metadata object
 	Meta *TransactionMeta `json:"meta"`
 	// The slot this transaction was processed in.
@@ -158,14 +158,14 @@ type BlockTransaction struct {
 }
 
 type BlockInfo struct {
-	Err               json.RawMessage    `json:"err"`
-	BlockHeight       uint64             `json:"blockHeight"`
-	BlockTime         int64              `json:"blockTime"`
-	ParentSlot        uint64             `json:"parentSlot"`
-	BlockHash         common.Hash        `json:"blockHash"`
-	PreviousBlockhash common.Hash        `json:"previousBlockhash"`
-	Rewards           []BlockReward      `json:"rewards"`
-	BlockTransaction  []BlockTransaction `json:"transactions"`
+	Err               json.RawMessage   `json:"err"`
+	BlockHeight       uint64            `json:"blockHeight"`
+	BlockTime         int64             `json:"blockTime"`
+	ParentSlot        uint64            `json:"parentSlot"`
+	BlockHash         common.Hash       `json:"blockHash"`
+	PreviousBlockhash common.Hash       `json:"previousBlockhash"`
+	Rewards           []BlockReward     `json:"rewards"`
+	Transactions      []TransactionInfo `json:"transactions"`
 }
 
 type BlockCommitment struct {

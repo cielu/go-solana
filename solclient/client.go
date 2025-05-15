@@ -484,7 +484,7 @@ func (sc *Client) GetTokenSupply(ctx context.Context, splToken common.Address, c
 }
 
 // GetTransaction Returns transaction details for a confirmed transaction
-func (sc *Client) GetTransaction(ctx context.Context, signature common.Signature, cfg ...types.RpcGetTransactionCfg) (res types.BlockTransaction, err error) {
+func (sc *Client) GetTransaction(ctx context.Context, signature common.Signature, cfg ...types.RpcGetTransactionCfg) (res types.TransactionInfo, err error) {
 	err = sc.c.CallContext(ctx, &res, "getTransaction", signature, getRpcCfg(cfg))
 	return
 }

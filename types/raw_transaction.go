@@ -12,11 +12,10 @@ type RawTransaction struct {
 }
 
 func NewRawTransaction(blockHash common.Hash, payer string, inst []Instruction, signers []string) *RawTransaction {
-	t := RawTransaction{
+	return &RawTransaction{
 		instructions: inst,
 		blockHash:    blockHash,
 		payer:        common.StrToAddress(payer),
 		signers:      signers,
 	}
-	return &t
 }
