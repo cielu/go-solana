@@ -44,6 +44,7 @@ func (i Uint128) getByteOrder() binary.ByteOrder {
 func (i Int128) getByteOrder() binary.ByteOrder {
 	return Uint128(i).getByteOrder()
 }
+
 func (i Float128) getByteOrder() binary.ByteOrder {
 	return Uint128(i).getByteOrder()
 }
@@ -69,7 +70,7 @@ func (i Uint128) BigInt() *big.Int {
 }
 
 func (i Uint128) String() string {
-	//Same for Int128, Float128
+	// Same for Int128, Float128
 	return i.DecimalString()
 }
 
@@ -170,6 +171,18 @@ func (i Uint128) MarshalWithEncoder(enc *Encoder) error {
 		order = i.getByteOrder()
 	}
 	return enc.WriteUint128(i, order)
+}
+
+// SetBigInt bigInt to Uint128
+func (i *Uint128) SetBigInt(b *big.Int) error {
+	if b.Sign() < 0 {
+		return fmt.Errorf("cannot assign negative integer: %v", b)
+	} else if b.BitLen() > 128 {
+		return fmt.Errorf("value overflows Uint128")
+	}
+	i.Lo = b.Uint64()
+	i.Hi = b.Rsh(b, 64).Uint64()
+	return nil
 }
 
 // Int128
