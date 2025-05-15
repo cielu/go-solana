@@ -28,6 +28,12 @@ func NewUint128LittleEndian() *Uint128 {
 	}
 }
 
+func ReverseBytes(s []byte) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
+	}
+}
+
 func (i Uint128) getByteOrder() binary.ByteOrder {
 	if i.Endianness == nil {
 		return defaultByteOrder
@@ -48,7 +54,7 @@ func (i Uint128) Bytes() []byte {
 	if order == binary.LittleEndian {
 		order.PutUint64(buf[:8], i.Lo)
 		order.PutUint64(buf[8:], i.Hi)
-		// ReverseBytes(buf)
+		ReverseBytes(buf)
 	} else {
 		order.PutUint64(buf[:8], i.Hi)
 		order.PutUint64(buf[8:], i.Lo)
@@ -80,12 +86,6 @@ func (i Uint128) MarshalJSON() (data []byte, err error) {
 	return []byte(`"` + i.String() + `"`), nil
 }
 
-// func ReverseBytes(s []byte) {
-// 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-// 		s[i], s[j] = s[j], s[i]
-// 	}
-// }
-
 func (i *Uint128) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
@@ -109,7 +109,7 @@ func (i *Uint128) unmarshalJSON_decimal(s string) error {
 		return fmt.Errorf("could not parse %q", s)
 	}
 	oo := parsed.FillBytes(make([]byte, 16))
-	// ReverseBytes(oo)
+	ReverseBytes(oo)
 
 	dec := NewBinDecoder(oo)
 
