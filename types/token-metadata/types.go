@@ -19,6 +19,7 @@ package tokenmeta
 
 import (
 	"fmt"
+
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )

@@ -84,6 +84,7 @@ func (inst Create) Build() *Instruction {
 	case base.Token2022ProgramID:
 		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
 	default:
+		inst.TokenProgramID = base.TokenProgramID
 		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint)
 	}
 
