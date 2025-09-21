@@ -16,14 +16,14 @@ type Uint128 struct {
 	Endianness binary.ByteOrder
 }
 
-func NewUint128BigEndian() *Uint128 {
-	return &Uint128{
+func NewUint128BigEndian() Uint128 {
+	return Uint128{
 		Endianness: binary.BigEndian,
 	}
 }
 
-func NewUint128LittleEndian() *Uint128 {
-	return &Uint128{
+func NewUint128LittleEndian() Uint128 {
+	return Uint128{
 		Endianness: binary.LittleEndian,
 	}
 }
