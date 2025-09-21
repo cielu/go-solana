@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// Uint128
+// Uint128 en
 type Uint128 struct {
 	Lo         uint64
 	Hi         uint64
@@ -34,60 +34,159 @@ func ReverseBytes(s []byte) {
 	}
 }
 
-func (i Uint128) getByteOrder() binary.ByteOrder {
-	if i.Endianness == nil {
+func (u Uint128) IsZero() bool {
+	// NOTE: we do not compare against Zero, because that is a global variable
+	// that could be modified.
+	return u == Uint128{}
+}
+
+// Cmp compares u and v and returns:
+//
+//	-1 if u <  v
+//	 0 if u == v
+//	+1 if u >  v
+func (u Uint128) Cmp(v Uint128) int {
+	if u == v {
+		return 0
+	} else if u.Hi < v.Hi || (u.Hi == v.Hi && u.Lo < v.Lo) {
+		return -1
+	} else {
+		return 1
+	}
+}
+
+// Cmp64 compares u and v and returns:
+//
+//	-1 if u <  v
+//	 0 if u == v
+//	+1 if u >  v
+func (u Uint128) Cmp64(v uint64) int {
+	if u.Hi == 0 && u.Lo == v {
+		return 0
+	} else if u.Hi == 0 && u.Lo < v {
+		return -1
+	} else {
+		return 1
+	}
+}
+
+// Xor returns u^v.
+func (u Uint128) Xor(v Uint128) Uint128 {
+	return Uint128{u.Lo ^ v.Lo, u.Hi ^ v.Hi, u.Endianness}
+}
+
+// Xor64 returns u^v.
+func (u Uint128) Xor64(v uint64) Uint128 {
+	return Uint128{u.Lo ^ v, u.Hi ^ 0, u.Endianness}
+}
+
+// Lsh returns u<<n.
+func (u Uint128) Lsh(n uint) (s Uint128) {
+	if n > 64 {
+		s.Lo = 0
+		s.Hi = u.Lo << (n - 64)
+	} else {
+		s.Lo = u.Lo << n
+		s.Hi = u.Hi<<n | u.Lo>>(64-n)
+	}
+	return
+}
+
+// Rsh returns u>>n.
+func (u Uint128) Rsh(n uint) (s Uint128) {
+	if n > 64 {
+		s.Lo = u.Hi >> (n - 64)
+		s.Hi = 0
+	} else {
+		s.Lo = u.Lo>>n | u.Hi<<(64-n)
+		s.Hi = u.Hi >> n
+	}
+	return
+}
+
+func getByteOrder(endia binary.ByteOrder) binary.ByteOrder {
+	if endia == nil {
 		return defaultByteOrder
 	}
-	return i.Endianness
+	return endia
 }
 
 func (i Int128) getByteOrder() binary.ByteOrder {
-	return Uint128(i).getByteOrder()
+	return getByteOrder(i.Endianness)
 }
 
 func (i Float128) getByteOrder() binary.ByteOrder {
-	return Uint128(i).getByteOrder()
+	return getByteOrder(i.Endianness)
 }
 
-func (i Uint128) Bytes() []byte {
+func (u Uint128) Bytes() []byte {
 	buf := make([]byte, 16)
-	order := i.getByteOrder()
+	order := getByteOrder(u.Endianness)
 	if order == binary.LittleEndian {
-		order.PutUint64(buf[:8], i.Lo)
-		order.PutUint64(buf[8:], i.Hi)
+		order.PutUint64(buf[:8], u.Lo)
+		order.PutUint64(buf[8:], u.Hi)
 		ReverseBytes(buf)
 	} else {
-		order.PutUint64(buf[:8], i.Hi)
-		order.PutUint64(buf[8:], i.Lo)
+		order.PutUint64(buf[:8], u.Hi)
+		order.PutUint64(buf[8:], u.Lo)
 	}
 	return buf
 }
 
-func (i Uint128) BigInt() *big.Int {
-	buf := i.Bytes()
+func (u Uint128) BigInt() *big.Int {
+	buf := u.Bytes()
 	value := (&big.Int{}).SetBytes(buf)
 	return value
 }
 
-func (i Uint128) String() string {
+func (u Uint128) String() string {
 	// Same for Int128, Float128
-	return i.DecimalString()
+	return u.DecimalString()
 }
 
-func (i Uint128) DecimalString() string {
-	return i.BigInt().String()
+func (u Uint128) DecimalString() string {
+	return u.BigInt().String()
 }
 
-func (i Uint128) HexString() string {
-	number := i.Bytes()
+func (u Uint128) HexString() string {
+	number := u.Bytes()
 	return fmt.Sprintf("0x%s", hex.EncodeToString(number))
 }
 
-func (i Uint128) MarshalJSON() (data []byte, err error) {
-	return []byte(`"` + i.String() + `"`), nil
+// FromBigInt bigInt to Uint128
+func (u *Uint128) FromBigInt(b *big.Int) error {
+	if b.Sign() < 0 {
+		return fmt.Errorf("cannot assign negative integer: %v", b)
+	} else if b.BitLen() > 128 {
+		return fmt.Errorf("value overflows Uint128")
+	}
+	u.Lo = b.Uint64()
+	u.Hi = b.Rsh(b, 64).Uint64()
+	return nil
 }
 
-func (i *Uint128) UnmarshalJSON(data []byte) error {
+// FromString parses s as a Uint128 value.
+func FromString(s string) (u Uint128, err error) {
+	_, err = fmt.Sscan(s, &u)
+	return
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (u Uint128) MarshalText() ([]byte, error) {
+	return []byte(u.String()), nil
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (u *Uint128) UnmarshalText(b []byte) error {
+	_, err := fmt.Sscan(string(b), u)
+	return err
+}
+
+func (u Uint128) MarshalJSON() (data []byte, err error) {
+	return []byte(`"` + u.String() + `"`), nil
+}
+
+func (u *Uint128) UnmarshalJSON(data []byte) error {
 	if string(data) == "null" {
 		return nil
 	}
@@ -98,13 +197,13 @@ func (i *Uint128) UnmarshalJSON(data []byte) error {
 	}
 
 	if strings.HasPrefix(s, "0x") || strings.HasPrefix(s, "0X") {
-		return i.unmarshalJSON_hex(s)
+		return u.unmarshalJSON_hex(s)
 	}
 
-	return i.unmarshalJSON_decimal(s)
+	return u.unmarshalJSON_decimal(s)
 }
 
-func (i *Uint128) unmarshalJSON_decimal(s string) error {
+func (u *Uint128) unmarshalJSON_decimal(s string) error {
 	parsed, ok := (&big.Int{}).SetString(s, 0)
 	if !ok {
 		return fmt.Errorf("could not parse %q", s)
@@ -114,17 +213,17 @@ func (i *Uint128) unmarshalJSON_decimal(s string) error {
 
 	dec := NewBinDecoder(oo)
 
-	out, err := dec.ReadUint128(i.getByteOrder())
+	out, err := dec.ReadUint128(getByteOrder(u.Endianness))
 	if err != nil {
 		return err
 	}
-	i.Lo = out.Lo
-	i.Hi = out.Hi
+	u.Lo = out.Lo
+	u.Hi = out.Hi
 
 	return nil
 }
 
-func (i *Uint128) unmarshalJSON_hex(s string) error {
+func (u *Uint128) unmarshalJSON_hex(s string) error {
 	truncatedVal := s[2:]
 	if len(truncatedVal) != 16 {
 		return fmt.Errorf("uint128 expects 16 characters after 0x, had %v", len(truncatedVal))
@@ -135,54 +234,42 @@ func (i *Uint128) unmarshalJSON_hex(s string) error {
 		return err
 	}
 
-	order := i.getByteOrder()
+	order := getByteOrder(u.Endianness)
 	if order == binary.LittleEndian {
-		i.Lo = order.Uint64(data[:8])
-		i.Hi = order.Uint64(data[8:])
+		u.Lo = order.Uint64(data[:8])
+		u.Hi = order.Uint64(data[8:])
 	} else {
-		i.Hi = order.Uint64(data[:8])
-		i.Lo = order.Uint64(data[8:])
+		u.Hi = order.Uint64(data[:8])
+		u.Lo = order.Uint64(data[8:])
 	}
 
 	return nil
 }
 
-func (i *Uint128) UnmarshalWithDecoder(dec *Decoder) error {
+func (u *Uint128) UnmarshalWithDecoder(dec *Decoder) error {
 	var order binary.ByteOrder
 	if dec != nil && dec.currentFieldOpt != nil {
 		order = dec.currentFieldOpt.Order
 	} else {
-		order = i.getByteOrder()
+		order = getByteOrder(u.Endianness)
 	}
 	value, err := dec.ReadUint128(order)
 	if err != nil {
 		return err
 	}
 
-	*i = value
+	*u = value
 	return nil
 }
 
-func (i Uint128) MarshalWithEncoder(enc *Encoder) error {
+func (u Uint128) MarshalWithEncoder(enc *Encoder) error {
 	var order binary.ByteOrder
 	if enc != nil && enc.currentFieldOpt != nil {
 		order = enc.currentFieldOpt.Order
 	} else {
-		order = i.getByteOrder()
+		order = getByteOrder(u.Endianness)
 	}
-	return enc.WriteUint128(i, order)
-}
-
-// SetBigInt bigInt to Uint128
-func (i *Uint128) SetBigInt(b *big.Int) error {
-	if b.Sign() < 0 {
-		return fmt.Errorf("cannot assign negative integer: %v", b)
-	} else if b.BitLen() > 128 {
-		return fmt.Errorf("value overflows Uint128")
-	}
-	i.Lo = b.Uint64()
-	i.Hi = b.Rsh(b, 64).Uint64()
-	return nil
+	return enc.WriteUint128(u, order)
 }
 
 // Int128

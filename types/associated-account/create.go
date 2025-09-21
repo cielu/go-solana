@@ -77,13 +77,14 @@ func (inst *Create) SetTokenProgramID(tokenProgramID common.Address) *Create {
 
 func (inst Create) Build() *Instruction {
 
+	var associatedTokenAddress common.Address
+
 	// Find the associatedTokenAddress;
-	associatedTokenAddress, _, _ := base.FindAssociatedTokenAddress(
-		inst.Wallet,
-		inst.Mint,
-	)
-	if inst.TokenProgramID == base.Token2022ProgramID {
+	switch inst.TokenProgramID {
+	case base.Token2022ProgramID:
 		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
+	default:
+		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint)
 	}
 
 	keys := []*base.AccountMeta{
@@ -144,6 +145,5 @@ func NewCreateInstruction(
 	return NewCreateInstructionBuilder().
 		SetPayer(payer).
 		SetWallet(walletAddress).
-		SetMint(splTokenMintAddress).
-		SetTokenProgramID(base.TokenProgramID)
+		SetMint(splTokenMintAddress)
 }

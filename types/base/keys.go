@@ -3,14 +3,15 @@ package base
 import (
 	"crypto/sha256"
 	"errors"
-	"github.com/cielu/go-solana/common"
 	"math"
+
+	"github.com/cielu/go-solana/common"
 )
 
 const (
-	// Maximum length of derived pubkey seed.
+	// MaxSeedLength Maximum length of derived pubkey seed.
 	MaxSeedLength = 32
-	// Maximum number of seeds.
+	// MaxSeeds Maximum number of seeds.
 	MaxSeeds = 16
 	// Number of bytes in a signature.
 )
@@ -19,7 +20,7 @@ const PDA_MARKER = "ProgramDerivedAddress"
 
 var ErrMaxSeedLengthExceeded = errors.New("Max seed length exceeded")
 
-// Create a program address.
+// CreateProgramAddress Create a program address.
 // Ported from https://github.com/solana-labs/solana/blob/216983c50e0a618facc39aa07472ba6d23f1b33a/sdk/program/src/pubkey.rs#L204
 func CreateProgramAddress(seeds [][]byte, programID common.Address) (common.Address, error) {
 	if len(seeds) > MaxSeeds {
@@ -32,7 +33,7 @@ func CreateProgramAddress(seeds [][]byte, programID common.Address) (common.Addr
 		}
 	}
 
-	buf := []byte{}
+	var buf []byte
 	for _, seed := range seeds {
 		buf = append(buf, seed...)
 	}
@@ -132,13 +133,13 @@ func IsOnCurve(b []byte) bool {
 	return isOnCurve
 }
 
-// Find a valid program address and its corresponding bump seed.
+// FindProgramAddress Find a valid program address and its corresponding bump seed.
 func FindProgramAddress(seed [][]byte, programID common.Address) (common.Address, uint8, error) {
 	var address common.Address
 	var err error
 	bumpSeed := uint8(math.MaxUint8)
 	for bumpSeed != 0 {
-		address, err = CreateProgramAddress(append(seed, []byte{byte(bumpSeed)}), programID)
+		address, err = CreateProgramAddress(append(seed, []byte{bumpSeed}), programID)
 		if err == nil {
 			return address, bumpSeed, nil
 		}
@@ -147,14 +148,14 @@ func FindProgramAddress(seed [][]byte, programID common.Address) (common.Address
 	return common.Address{}, bumpSeed, errors.New("unable to find a valid program address")
 }
 
-func FindAssociatedTokenAddress(wallet common.Address, mint common.Address, options ...common.Address) (common.Address, uint8, error) {
-	return FindAssociatedTokenAddressAndBumpSeed(wallet, mint, SPLAssociatedTokenAccountProgramID, options...)
+func FindAssociatedTokenAddress(account common.Address, mint common.Address, options ...common.Address) (common.Address, uint8, error) {
+	return FindAssociatedTokenAddressAndBumpSeed(account, mint, SPLAssociatedTokenAccountProgramID, options...)
 }
 
-func FindAssociatedTokenAddressAndBumpSeed(walletAddress common.Address, splTokenMintAddress common.Address, programID common.Address, options ...common.Address) (common.Address, uint8, error) {
+func FindAssociatedTokenAddressAndBumpSeed(account common.Address, splTokenMintAddress common.Address, programID common.Address, options ...common.Address) (common.Address, uint8, error) {
 	tokenProgramID := TokenProgramID
 	if len(options) > 0 && options[0] == Token2022ProgramID {
 		tokenProgramID = Token2022ProgramID
 	}
-	return FindProgramAddress([][]byte{walletAddress[:], tokenProgramID[:], splTokenMintAddress[:]}, programID)
+	return FindProgramAddress([][]byte{account[:], tokenProgramID[:], splTokenMintAddress[:]}, programID)
 }
