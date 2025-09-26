@@ -138,7 +138,8 @@ func (inst Create) Build() *Instruction {
 
 	typeID := encodbin.NoTypeIDDefaultID
 	// custom associated account create type
-	if inst.CreateType > 0 {
+	switch inst.CreateType {
+	case 1: // CreateIdempotent
 		typeID = encodbin.TypeIDFromUint8(inst.CreateType)
 	}
 
