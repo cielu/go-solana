@@ -17,26 +17,27 @@ package computebudget
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
 
 const (
-	// Deprecated
+	// Instruction_RequestUnitsDeprecated Deprecated
 	// after feature remove_deprecated_request_unit_ix::id() is activated
 	Instruction_RequestUnitsDeprecated uint8 = iota
 
-	// Request a specific transaction-wide program heap region size in bytes.
+	// Instruction_RequestHeapFrame Request a specific transaction-wide program heap region size in bytes.
 	// The value requested must be a multiple of 1024. This new heap region
-	// size applies to each program executed in the transaction, including all
-	// calls to CPIs.
+	// size applies to each program executed in the transaction,
+	// including all calls to CPIs.
 	Instruction_RequestHeapFrame
 
-	// Set a specific compute unit limit that the transaction is allowed to consume.
+	// Instruction_SetComputeUnitLimit Set a specific compute unit limit that the transaction is allowed to consume.
 	Instruction_SetComputeUnitLimit
 
-	// Set a compute unit price in "micro-lamports" to pay a higher transaction
+	// Instruction_SetComputeUnitPrice Set a compute unit price in "micro-lamports" to pay a higher transaction
 	// fee for higher transaction prioritization.
 	Instruction_SetComputeUnitPrice
 )

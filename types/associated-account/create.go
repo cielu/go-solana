@@ -25,6 +25,7 @@ type Create struct {
 	Wallet         common.Address `bin:"-" borsh_skip:"true"`
 	Mint           common.Address `bin:"-" borsh_skip:"true"`
 	TokenProgramID common.Address `bin:"-" borsh_skip:"true"`
+	CreateType     uint8          `bin:"-" borsh_skip:"true"`
 
 	// [0] = [WRITE, SIGNER] Payer
 	// ··········· Funding account
@@ -72,6 +73,13 @@ func (inst *Create) SetMint(mint common.Address) *Create {
 
 func (inst *Create) SetTokenProgramID(tokenProgramID common.Address) *Create {
 	inst.TokenProgramID = tokenProgramID
+	return inst
+}
+
+// SetCreateIdempotent 0 = Create, 1 = CreateIdempotent
+func (inst *Create) SetCreateIdempotent() *Create {
+	// setType --> 1
+	inst.CreateType = 1
 	return inst
 }
 
@@ -128,9 +136,15 @@ func (inst Create) Build() *Instruction {
 
 	inst.AccountMetaSlice = keys
 
+	typeID := encodbin.NoTypeIDDefaultID
+	// custom associated account create type
+	if inst.CreateType > 0 {
+		typeID = encodbin.TypeIDFromUint8(inst.CreateType)
+	}
+
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
 		Impl:   inst,
-		TypeID: encodbin.NoTypeIDDefaultID,
+		TypeID: typeID,
 	}}
 }
 

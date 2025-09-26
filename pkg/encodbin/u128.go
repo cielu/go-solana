@@ -70,6 +70,27 @@ func (u Uint128) Cmp64(v uint64) int {
 	}
 }
 
+// And returns u&v.
+func (u Uint128) And(v Uint128) Uint128 {
+	return Uint128{u.Lo & v.Lo, u.Hi & v.Hi, u.Endianness}
+}
+
+// And64 returns u&v.
+func (u Uint128) And64(v uint64) Uint128 {
+	return Uint128{u.Lo & v, u.Hi & 0, u.Endianness}
+}
+
+// Or returns u|v.
+func (u Uint128) Or(v Uint128) Uint128 {
+	return Uint128{u.Lo | v.Lo, u.Hi | v.Hi, u.Endianness}
+}
+
+// Or64 returns u|v.
+func (u Uint128) Or64(v uint64) Uint128 {
+	return Uint128{u.Lo | v, u.Hi | 0, u.Endianness}
+}
+
+
 // Xor returns u^v.
 func (u Uint128) Xor(v Uint128) Uint128 {
 	return Uint128{u.Lo ^ v.Lo, u.Hi ^ v.Hi, u.Endianness}
