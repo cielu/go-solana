@@ -10,9 +10,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math/big"
+
 	"github.com/cielu/go-solana/core"
 	"github.com/mr-tron/base58"
-	"math/big"
 )
 
 // Lengths of signatures and addresses in bytes.
@@ -435,6 +436,21 @@ func Base58ToSignature(b string) Signature {
 	d, _ := base58.Decode(b)
 	// bytes to address
 	return BytesToSignature(d)
+}
+
+// StrToSignature returns Signature with byte values of b.
+// Notice: only support base58/base64 str
+func StrToSignature(b string) Signature {
+	// decode base58 str
+	if d, err := base58.Decode(b); err == nil {
+		return BytesToSignature(d)
+	}
+	// decode base64 str
+	if d, err := base64.StdEncoding.DecodeString(b); err == nil {
+		return BytesToSignature(d)
+	}
+	// empty
+	return Signature{}
 }
 
 // Cmp compares two addresses.

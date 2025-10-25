@@ -3,21 +3,21 @@ package solclient
 import (
 	"context"
 	"fmt"
+	"testing"
+
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/crypto"
 	"github.com/cielu/go-solana/types"
 	computebudget "github.com/cielu/go-solana/types/compute-budget"
 	"github.com/cielu/go-solana/types/native"
-	"os"
-	"testing"
 )
 
 // remove this, if not
 func init() {
-	os.Setenv("http_proxy", "http://127.0.0.1:7890")
-	os.Setenv("https_proxy", "http://127.0.0.1:7890")
-	os.Setenv("all_proxy", "socks5://127.0.0.1:7890")
+	// os.Setenv("http_proxy", "http://127.0.0.1:7890")
+	// os.Setenv("https_proxy", "http://127.0.0.1:7890")
+	// os.Setenv("all_proxy", "socks5://127.0.0.1:7890")
 }
 
 func newClient() *Client {
@@ -88,7 +88,7 @@ func TestClient_GetBlock(t *testing.T) {
 		t.Error("GetBlock Failed: %w", err)
 	}
 	// range block transactions
-	for i, tx := range res.TransactionInfo {
+	for i, tx := range res.Transactions {
 		fmt.Println("Tx index:", i+1)
 		fmt.Println("Signature:", tx.Transaction.Signatures[0])
 		// foreach Instruction
@@ -255,6 +255,7 @@ func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
 		ctx = context.Background()
 	)
 	account := common.Base58ToAddress("2gKXoChNdN3LpMijfLdx4AVs62JBseXTHtrqxCSYreWs")
+
 	prog := common.Base58ToAddress("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 	//
 	res, err := c.GetTokenAccountsByDelegate(ctx, account, types.RpcMintWithProgramID{ProgramId: &prog})
@@ -348,7 +349,7 @@ func TestClient_SetComputeBudgetPrice(t *testing.T) {
 
 	instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(10000).Build())
 
-	transferInst := native.NewTransferInstruction(
+	transferInst := system.NewTransferInstruction(
 		common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
 		common.StrToAddress("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
 		1e1,

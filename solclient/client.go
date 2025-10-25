@@ -6,10 +6,11 @@ package solclient
 import (
 	"context"
 	"errors"
+	"math/big"
+
 	"github.com/cielu/go-solana/common"
 	"github.com/cielu/go-solana/rpc"
 	"github.com/cielu/go-solana/types"
-	"math/big"
 )
 
 // Client defines typed wrappers for the Ethereum RPC API.

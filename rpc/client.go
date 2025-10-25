@@ -21,12 +21,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/core"
 	"net/url"
 	"reflect"
 	"strconv"
 	"sync/atomic"
 	"time"
+
+	"github.com/cielu/go-solana/core"
 )
 
 var (
@@ -532,7 +533,12 @@ func (c *Client) SupportsSubscriptions() bool {
 }
 
 func (c *Client) newMessage(method string, paramsIn ...interface{}) (*jsonrpcMessage, error) {
-	msg := &jsonrpcMessage{Version: vsn, ID: c.nextID(), Method: method}
+	// jsonRpcMessage
+	msg := &jsonrpcMessage{
+		Version: vsn,
+		ID: c.nextID(),
+		Method: method,
+	}
 	if paramsIn != nil { // prevent sending "params":null
 		var err error
 		if msg.Params, err = json.Marshal(paramsIn); err != nil {
