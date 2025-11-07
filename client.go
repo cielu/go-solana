@@ -11,7 +11,7 @@ import (
 	"github.com/cielu/go-solana/rpc"
 )
 
-// Client defines typed wrappers for the Ethereum RPC API.
+// Client defines typed wrappers for the solana RPC API.
 type Client struct {
 	c *rpc.Client
 }

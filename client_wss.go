@@ -6,6 +6,8 @@ package solana
 import (
 	"context"
 	"errors"
+
+	"github.com/cielu/go-solana/rpc"
 )
 
 // Subscription represents an event subscription where events are
@@ -21,8 +23,32 @@ type Subscription interface {
 	Err() <-chan error
 }
 
+// WsClient defines typed wrappers for the Solana RPC Subscribe.
+type WsClient struct {
+	c *rpc.Client
+}
+
+// DialWs connects a client to the given URL.
+func DialWs(rawurl string) (*WsClient, error) {
+	return DialWsContext(context.Background(), rawurl)
+}
+
+// DialWsContext connects a client to the given URL with context.
+func DialWsContext(ctx context.Context, rawurl string) (*WsClient, error) {
+	c, err := rpc.DialContext(ctx, rawurl)
+	if err != nil {
+		return nil, err
+	}
+	return NewWsClient(c), nil
+}
+
+// NewWsClient creates a client that uses the given RPC client.
+func NewWsClient(c *rpc.Client) *WsClient {
+	return &WsClient{c}
+}
+
 // AccountSubscribe Subscribe to an account to receive notifications when the lamports or data for a given account public key changes
-func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- AccountNotifies, account PublicKey, cfg ...RpcCommitmentWithEncodingCfg) (Subscription, error) {
+func (sc *WsClient) AccountSubscribe(ctx context.Context, ch chan<- AccountNotifies, account PublicKey, cfg ...RpcCommitmentWithEncodingCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "account", ch, account, getRpcCfg(cfg))
 	if err != nil {
@@ -33,7 +59,7 @@ func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- AccountNotifie
 
 // BlockSubscribe Subscribe to receive notification anytime a new block is confirmed or finalized.
 // filter can receive: string | types.MentionsAccountProgramCfg
-func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- BlockNotifies, filter any, cfg ...RpcGetBlockContextCfg) (Subscription, error) {
+func (sc *WsClient) BlockSubscribe(ctx context.Context, ch chan<- BlockNotifies, filter any, cfg ...RpcGetBlockContextCfg) (Subscription, error) {
 	// SolSubscribe
 	switch filter.(type) {
 	case string:
@@ -51,7 +77,7 @@ func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- BlockNotifies, f
 
 // LogsSubscribe Subscribe to transaction logging
 // mentions can receive: string | types.MentionsCfg
-func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- LogsNotifies, mentions any, cfg ...RpcCommitmentCfg) (Subscription, error) {
+func (sc *WsClient) LogsSubscribe(ctx context.Context, ch chan<- LogsNotifies, mentions any, cfg ...RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	switch mentions.(type) {
 	case string:
@@ -71,7 +97,7 @@ func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- LogsNotifies, men
 }
 
 // ProgramSubscribe to a program to receive notifications when the lamports or data for an account owned by the given program changes
-func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- ProgramNotifies, address PublicKey, cfg ...RpcCommitmentCfg) (Subscription, error) {
+func (sc *WsClient) ProgramSubscribe(ctx context.Context, ch chan<- ProgramNotifies, address PublicKey, cfg ...RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "program", ch, address, getRpcCfg(cfg))
 	if err != nil {
@@ -81,7 +107,7 @@ func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- ProgramNotifie
 }
 
 // SignatureSubscribe Subscribe to receive a notification when the transaction with the given signature reaches the specified commitment level.
-func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- SignatureNotifies, signature Signature, cfg ...RpcCommitmentCfg) (Subscription, error) {
+func (sc *WsClient) SignatureSubscribe(ctx context.Context, ch chan<- SignatureNotifies, signature Signature, cfg ...RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "signature", ch, signature, getRpcCfg(cfg))
 	if err != nil {
@@ -91,7 +117,7 @@ func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- SignatureNot
 }
 
 // SlotSubscribe Subscribe to receive notification anytime a slot is processed by the validator
-func (sc *Client) SlotSubscribe(ctx context.Context, ch chan<- SlotNotifies) (Subscription, error) {
+func (sc *WsClient) SlotSubscribe(ctx context.Context, ch chan<- SlotNotifies) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "slot", ch)
 	if err != nil {
