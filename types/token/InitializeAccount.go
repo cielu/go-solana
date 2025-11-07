@@ -16,7 +16,8 @@ package token
 
 import (
 	"errors"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -45,67 +46,67 @@ type InitializeAccount struct {
 	//
 	// [3] = [] $(SysVarRentPubkey)
 	// ··········· Rent sysvar.
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeAccountInstructionBuilder creates a new `InitializeAccount` instruction builder.
 func NewInitializeAccountInstructionBuilder() *InitializeAccount {
 	nd := &InitializeAccount{
-		AccountMetaSlice: make([]*base.AccountMeta, 4),
+		AccountMetaSlice: make([]*solana.AccountMeta, 4),
 	}
-	nd.AccountMetaSlice[3] = base.Meta(base.SysVarRentPubkey)
+	nd.AccountMetaSlice[3] = solana.Meta(base.SysVarRentPubkey)
 	return nd
 }
 
 // SetAccount sets the "account" account.
 // The account to initialize.
-func (initAcc *InitializeAccount) SetAccount(account common.Address) *InitializeAccount {
-	initAcc.AccountMetaSlice[0] = base.Meta(account).WRITE()
+func (initAcc *InitializeAccount) SetAccount(account solana.PublicKey) *InitializeAccount {
+	initAcc.AccountMetaSlice[0] = solana.Meta(account).WRITE()
 	return initAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
-func (initAcc *InitializeAccount) GetAccount() *base.AccountMeta {
+func (initAcc *InitializeAccount) GetAccount() *solana.AccountMeta {
 	return initAcc.AccountMetaSlice[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
-func (initAcc *InitializeAccount) SetMintAccount(mint common.Address) *InitializeAccount {
-	initAcc.AccountMetaSlice[1] = base.Meta(mint)
+func (initAcc *InitializeAccount) SetMintAccount(mint solana.PublicKey) *InitializeAccount {
+	initAcc.AccountMetaSlice[1] = solana.Meta(mint)
 	return initAcc
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
-func (initAcc *InitializeAccount) GetMintAccount() *base.AccountMeta {
+func (initAcc *InitializeAccount) GetMintAccount() *solana.AccountMeta {
 	return initAcc.AccountMetaSlice[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The new account's owner/multisignature.
-func (initAcc *InitializeAccount) SetOwnerAccount(owner common.Address) *InitializeAccount {
-	initAcc.AccountMetaSlice[2] = base.Meta(owner)
+func (initAcc *InitializeAccount) SetOwnerAccount(owner solana.PublicKey) *InitializeAccount {
+	initAcc.AccountMetaSlice[2] = solana.Meta(owner)
 	return initAcc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The new account's owner/multisignature.
-func (initAcc *InitializeAccount) GetOwnerAccount() *base.AccountMeta {
+func (initAcc *InitializeAccount) GetOwnerAccount() *solana.AccountMeta {
 	return initAcc.AccountMetaSlice[2]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initAcc *InitializeAccount) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeAccount {
-	initAcc.AccountMetaSlice[3] = base.Meta(SysVarRentPubkey)
+func (initAcc *InitializeAccount) SetSysVarRentPubkeyAccount(SysVarRentPubkey solana.PublicKey) *InitializeAccount {
+	initAcc.AccountMetaSlice[3] = solana.Meta(SysVarRentPubkey)
 	return initAcc
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initAcc *InitializeAccount) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+func (initAcc *InitializeAccount) GetSysVarRentPubkeyAccount() *solana.AccountMeta {
 	return initAcc.AccountMetaSlice[3]
 }
 
@@ -152,9 +153,9 @@ func (initAcc InitializeAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (
 // NewInitializeAccountInstruction declares a new InitializeAccount instruction with the provided parameters and accounts.
 func NewInitializeAccountInstruction(
 	// Accounts:
-	account common.Address,
-	mint common.Address,
-	owner common.Address) *InitializeAccount {
+	account solana.PublicKey,
+	mint solana.PublicKey,
+	owner solana.PublicKey) *InitializeAccount {
 	return NewInitializeAccountInstructionBuilder().
 		SetAccount(account).
 		SetMintAccount(mint).

@@ -1,10 +1,9 @@
 package token
 
 import (
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 type TransferChecked struct {
@@ -28,16 +27,16 @@ type TransferChecked struct {
 	//
 	// [4...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (tc *TransferChecked) SetAccounts(accounts []*base.AccountMeta) error {
+func (tc *TransferChecked) SetAccounts(accounts []*solana.AccountMeta) error {
 	tc.Accounts, tc.Signers = core.SliceSplitFrom(accounts, 4)
 	return nil
 }
 
-func (tc TransferChecked) GetAccounts() (accounts []*base.AccountMeta) {
+func (tc TransferChecked) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, tc.Accounts...)
 	accounts = append(accounts, tc.Signers...)
 	return
@@ -46,8 +45,8 @@ func (tc TransferChecked) GetAccounts() (accounts []*base.AccountMeta) {
 // NewTransferCheckedInstructionBuilder creates a new `TransferChecked` instruction builder.
 func NewTransferCheckedInstructionBuilder() *TransferChecked {
 	nd := &TransferChecked{
-		Accounts: make([]*base.AccountMeta, 4),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 4),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -68,59 +67,59 @@ func (tc *TransferChecked) SetDecimals(decimals uint8) *TransferChecked {
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (tc *TransferChecked) SetSourceAccount(source common.Address) *TransferChecked {
-	tc.Accounts[0] = base.Meta(source).WRITE()
+func (tc *TransferChecked) SetSourceAccount(source solana.PublicKey) *TransferChecked {
+	tc.Accounts[0] = solana.Meta(source).WRITE()
 	return tc
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (tc *TransferChecked) GetSourceAccount() *base.AccountMeta {
+func (tc *TransferChecked) GetSourceAccount() *solana.AccountMeta {
 	return tc.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (tc *TransferChecked) SetMintAccount(mint common.Address) *TransferChecked {
-	tc.Accounts[1] = base.Meta(mint)
+func (tc *TransferChecked) SetMintAccount(mint solana.PublicKey) *TransferChecked {
+	tc.Accounts[1] = solana.Meta(mint)
 	return tc
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (tc *TransferChecked) GetMintAccount() *base.AccountMeta {
+func (tc *TransferChecked) GetMintAccount() *solana.AccountMeta {
 	return tc.Accounts[1]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The destination account.
-func (tc *TransferChecked) SetDestinationAccount(destination common.Address) *TransferChecked {
-	tc.Accounts[2] = base.Meta(destination).WRITE()
+func (tc *TransferChecked) SetDestinationAccount(destination solana.PublicKey) *TransferChecked {
+	tc.Accounts[2] = solana.Meta(destination).WRITE()
 	return tc
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The destination account.
-func (tc *TransferChecked) GetDestinationAccount() *base.AccountMeta {
+func (tc *TransferChecked) GetDestinationAccount() *solana.AccountMeta {
 	return tc.Accounts[2]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account's owner/delegate.
-func (tc *TransferChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *TransferChecked {
-	tc.Accounts[3] = base.Meta(owner)
+func (tc *TransferChecked) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *TransferChecked {
+	tc.Accounts[3] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		tc.Accounts[3].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		tc.Signers = append(tc.Signers, base.Meta(signer).SIGNER())
+		tc.Signers = append(tc.Signers, solana.Meta(signer).SIGNER())
 	}
 	return tc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account's owner/delegate.
-func (tc *TransferChecked) GetOwnerAccount() *base.AccountMeta {
+func (tc *TransferChecked) GetOwnerAccount() *solana.AccountMeta {
 	return tc.Accounts[3]
 }
 
@@ -152,11 +151,11 @@ func NewTransferCheckedInstruction(
 	amount uint64,
 	decimals uint8,
 	// Accounts:
-	source common.Address,
-	mint common.Address,
-	destination common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	source solana.PublicKey,
+	mint solana.PublicKey,
+	destination solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *TransferChecked {
 	return NewTransferCheckedInstructionBuilder().
 		SetAmount(amount).

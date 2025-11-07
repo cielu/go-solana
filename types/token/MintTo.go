@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // MintTo Mints new tokens to an account.  The native mint does not support
@@ -40,16 +40,16 @@ type MintTo struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (mto *MintTo) SetAccounts(accounts []*base.AccountMeta) error {
+func (mto *MintTo) SetAccounts(accounts []*solana.AccountMeta) error {
 	mto.Accounts, mto.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (mto MintTo) GetAccounts() (accounts []*base.AccountMeta) {
+func (mto MintTo) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, mto.Accounts...)
 	accounts = append(accounts, mto.Signers...)
 	return
@@ -58,8 +58,8 @@ func (mto MintTo) GetAccounts() (accounts []*base.AccountMeta) {
 // NewMintToInstructionBuilder creates a new `MintTo` instruction builder.
 func NewMintToInstructionBuilder() *MintTo {
 	nd := &MintTo{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -73,46 +73,46 @@ func (mto *MintTo) SetAmount(amount uint64) *MintTo {
 
 // SetMintAccount sets the "mint" account.
 // The mint.
-func (mto *MintTo) SetMintAccount(mint common.Address) *MintTo {
-	mto.Accounts[0] = base.Meta(mint).WRITE()
+func (mto *MintTo) SetMintAccount(mint solana.PublicKey) *MintTo {
+	mto.Accounts[0] = solana.Meta(mint).WRITE()
 	return mto
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint.
-func (mto *MintTo) GetMintAccount() *base.AccountMeta {
+func (mto *MintTo) GetMintAccount() *solana.AccountMeta {
 	return mto.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
-func (mto *MintTo) SetDestinationAccount(destination common.Address) *MintTo {
-	mto.Accounts[1] = base.Meta(destination).WRITE()
+func (mto *MintTo) SetDestinationAccount(destination solana.PublicKey) *MintTo {
+	mto.Accounts[1] = solana.Meta(destination).WRITE()
 	return mto
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The account to mint tokens to.
-func (mto *MintTo) GetDestinationAccount() *base.AccountMeta {
+func (mto *MintTo) GetDestinationAccount() *solana.AccountMeta {
 	return mto.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
-func (mto *MintTo) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *MintTo {
-	mto.Accounts[2] = base.Meta(authority)
+func (mto *MintTo) SetAuthorityAccount(authority solana.PublicKey, multisigSigners ...solana.PublicKey) *MintTo {
+	mto.Accounts[2] = solana.Meta(authority)
 	if len(multisigSigners) == 0 {
 		mto.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		mto.Signers = append(mto.Signers, base.Meta(signer).SIGNER())
+		mto.Signers = append(mto.Signers, solana.Meta(signer).SIGNER())
 	}
 	return mto
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint's minting authority.
-func (mto *MintTo) GetAuthorityAccount() *base.AccountMeta {
+func (mto *MintTo) GetAuthorityAccount() *solana.AccountMeta {
 	return mto.Accounts[2]
 }
 
@@ -176,10 +176,10 @@ func NewMintToInstruction(
 	// Parameters:
 	amount uint64,
 	// Accounts:
-	mint common.Address,
-	destination common.Address,
-	authority common.Address,
-	multisigSigners []common.Address,
+	mint solana.PublicKey,
+	destination solana.PublicKey,
+	authority solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *MintTo {
 	return NewMintToInstructionBuilder().
 		SetAmount(amount).

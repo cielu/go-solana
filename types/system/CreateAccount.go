@@ -17,9 +17,8 @@ package system
 import (
 	"encoding/binary"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // CreateAccount Create a new account
@@ -30,21 +29,21 @@ type CreateAccount struct {
 	// Number of bytes of memory to allocate
 	Space *uint64
 
-	// Address of program that will own the new account
-	Owner *common.Address
+	// PublicKey of program that will own the new account
+	Owner *solana.PublicKey
 
 	// [0] = [WRITE, SIGNER] FundingAccount
 	// ··········· Funding account
 	//
 	// [1] = [WRITE, SIGNER] NewAccount
 	// ··········· New account
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateAccountInstructionBuilder creates a new `CreateAccount` instruction builder.
 func NewCreateAccountInstructionBuilder() *CreateAccount {
 	nd := &CreateAccount{
-		AccountMetaSlice: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*solana.AccountMeta, 2),
 	}
 	return nd
 }
@@ -61,29 +60,29 @@ func (cAcc *CreateAccount) SetSpace(space uint64) *CreateAccount {
 	return cAcc
 }
 
-// Address of program that will own the new account
-func (cAcc *CreateAccount) SetOwner(owner common.Address) *CreateAccount {
+// PublicKey of program that will own the new account
+func (cAcc *CreateAccount) SetOwner(owner solana.PublicKey) *CreateAccount {
 	cAcc.Owner = &owner
 	return cAcc
 }
 
 // Funding account
-func (cAcc *CreateAccount) SetFundingAccount(fundingAccount common.Address) *CreateAccount {
-	cAcc.AccountMetaSlice[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+func (cAcc *CreateAccount) SetFundingAccount(fundingAccount solana.PublicKey) *CreateAccount {
+	cAcc.AccountMetaSlice[0] = solana.Meta(fundingAccount).WRITE().SIGNER()
 	return cAcc
 }
 
-func (cAcc *CreateAccount) GetFundingAccount() *base.AccountMeta {
+func (cAcc *CreateAccount) GetFundingAccount() *solana.AccountMeta {
 	return cAcc.AccountMetaSlice[0]
 }
 
 // New account
-func (cAcc *CreateAccount) SetNewAccount(newAccount common.Address) *CreateAccount {
-	cAcc.AccountMetaSlice[1] = base.Meta(newAccount).WRITE().SIGNER()
+func (cAcc *CreateAccount) SetNewAccount(newAccount solana.PublicKey) *CreateAccount {
+	cAcc.AccountMetaSlice[1] = solana.Meta(newAccount).WRITE().SIGNER()
 	return cAcc
 }
 
-func (cAcc *CreateAccount) GetNewAccount() *base.AccountMeta {
+func (cAcc *CreateAccount) GetNewAccount() *solana.AccountMeta {
 	return cAcc.AccountMetaSlice[1]
 }
 
@@ -124,10 +123,10 @@ func NewCreateAccountInstruction(
 	// Parameters:
 	lamports uint64,
 	space uint64,
-	owner common.Address,
+	owner solana.PublicKey,
 	// Accounts:
-	fundingAccount common.Address,
-	newAccount common.Address) *CreateAccount {
+	fundingAccount solana.PublicKey,
+	newAccount solana.PublicKey) *CreateAccount {
 	return NewCreateAccountInstructionBuilder().
 		SetLamports(lamports).
 		SetSpace(space).

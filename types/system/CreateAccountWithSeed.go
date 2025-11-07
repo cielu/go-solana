@@ -19,15 +19,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // CreateAccountWithSeed Create a new account at an address derived from a base pubkey and a seed
 type CreateAccountWithSeed struct {
 	// Base public key
-	Base *common.Address
+	Base *solana.PublicKey
 
 	// String of ASCII chars, no longer than Pubkey::MAX_SEED_LEN
 	Seed *string
@@ -39,7 +38,7 @@ type CreateAccountWithSeed struct {
 	Space *uint64
 
 	// Owner program account address
-	Owner *common.Address
+	Owner *solana.PublicKey
 
 	// [0] = [WRITE, SIGNER] FundingAccount
 	// ··········· Funding account
@@ -49,19 +48,19 @@ type CreateAccountWithSeed struct {
 	//
 	// [2] = [SIGNER] BaseAccount
 	// ··········· Base account
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateAccountWithSeedInstructionBuilder creates a new `CreateAccountWithSeed` instruction builder.
 func NewCreateAccountWithSeedInstructionBuilder() *CreateAccountWithSeed {
 	nd := &CreateAccountWithSeed{
-		AccountMetaSlice: make([]*base.AccountMeta, 3),
+		AccountMetaSlice: make([]*solana.AccountMeta, 3),
 	}
 	return nd
 }
 
 // Base public key
-func (cAcc *CreateAccountWithSeed) SetBase(base common.Address) *CreateAccountWithSeed {
+func (cAcc *CreateAccountWithSeed) SetBase(base solana.PublicKey) *CreateAccountWithSeed {
 	cAcc.Base = &base
 	return cAcc
 }
@@ -85,45 +84,45 @@ func (cAcc *CreateAccountWithSeed) SetSpace(space uint64) *CreateAccountWithSeed
 }
 
 // Owner program account address
-func (cAcc *CreateAccountWithSeed) SetOwner(owner common.Address) *CreateAccountWithSeed {
+func (cAcc *CreateAccountWithSeed) SetOwner(owner solana.PublicKey) *CreateAccountWithSeed {
 	cAcc.Owner = &owner
 	return cAcc
 }
 
 // Funding account
-func (cAcc *CreateAccountWithSeed) SetFundingAccount(fundingAccount common.Address) *CreateAccountWithSeed {
-	cAcc.AccountMetaSlice[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+func (cAcc *CreateAccountWithSeed) SetFundingAccount(fundingAccount solana.PublicKey) *CreateAccountWithSeed {
+	cAcc.AccountMetaSlice[0] = solana.Meta(fundingAccount).WRITE().SIGNER()
 	return cAcc
 }
 
-func (cAcc *CreateAccountWithSeed) GetFundingAccount() *base.AccountMeta {
+func (cAcc *CreateAccountWithSeed) GetFundingAccount() *solana.AccountMeta {
 	return cAcc.AccountMetaSlice[0]
 }
 
 // Created account
-func (cAcc *CreateAccountWithSeed) SetCreatedAccount(createdAccount common.Address) *CreateAccountWithSeed {
-	cAcc.AccountMetaSlice[1] = base.Meta(createdAccount).WRITE()
+func (cAcc *CreateAccountWithSeed) SetCreatedAccount(createdAccount solana.PublicKey) *CreateAccountWithSeed {
+	cAcc.AccountMetaSlice[1] = solana.Meta(createdAccount).WRITE()
 	return cAcc
 }
 
-func (cAcc *CreateAccountWithSeed) GetCreatedAccount() *base.AccountMeta {
+func (cAcc *CreateAccountWithSeed) GetCreatedAccount() *solana.AccountMeta {
 	return cAcc.AccountMetaSlice[1]
 }
 
 // Base account
-func (cAcc *CreateAccountWithSeed) SetBaseAccount(baseAccount common.Address) *CreateAccountWithSeed {
-	cAcc.AccountMetaSlice[2] = base.Meta(baseAccount).SIGNER()
+func (cAcc *CreateAccountWithSeed) SetBaseAccount(baseAccount solana.PublicKey) *CreateAccountWithSeed {
+	cAcc.AccountMetaSlice[2] = solana.Meta(baseAccount).SIGNER()
 	return cAcc
 }
 
-func (cAcc *CreateAccountWithSeed) GetBaseAccount() *base.AccountMeta {
+func (cAcc *CreateAccountWithSeed) GetBaseAccount() *solana.AccountMeta {
 	return cAcc.AccountMetaSlice[2]
 }
 
 func (cAcc CreateAccountWithSeed) Build() *Instruction {
 	{
 		if *cAcc.Base != cAcc.GetFundingAccount().PublicKey {
-			cAcc.AccountMetaSlice[2] = base.Meta(*cAcc.Base).SIGNER()
+			cAcc.AccountMetaSlice[2] = solana.Meta(*cAcc.Base).SIGNER()
 		}
 	}
 	return &Instruction{BaseVariant: encodbin.BaseVariant{
@@ -216,15 +215,15 @@ func (cAcc CreateAccountWithSeed) MarshalWithEncoder(encoder *encodbin.Encoder) 
 // NewCreateAccountWithSeedInstruction declares a new CreateAccountWithSeed instruction with the provided parameters and accounts.
 func NewCreateAccountWithSeedInstruction(
 	// Parameters:
-	base common.Address,
+	base solana.PublicKey,
 	seed string,
 	lamports uint64,
 	space uint64,
-	owner common.Address,
+	owner solana.PublicKey,
 	// Accounts:
-	fundingAccount common.Address,
-	createdAccount common.Address,
-	baseAccount common.Address) *CreateAccountWithSeed {
+	fundingAccount solana.PublicKey,
+	createdAccount solana.PublicKey,
+	baseAccount solana.PublicKey) *CreateAccountWithSeed {
 	return NewCreateAccountWithSeedInstructionBuilder().
 		SetBase(base).
 		SetSeed(seed).

@@ -16,7 +16,8 @@ package token
 
 import (
 	"errors"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -27,7 +28,7 @@ import (
 // `AccountInfo` otherwise.
 type InitializeAccount2 struct {
 	// The new account's owner/multisignature.
-	Owner *common.Address
+	Owner *solana.PublicKey
 
 	// [0] = [WRITE] account
 	// ··········· The account to initialize.
@@ -37,61 +38,61 @@ type InitializeAccount2 struct {
 	//
 	// [2] = [] $(SysVarRentPubkey)
 	// ··········· Rent sysvar.
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeAccount2InstructionBuilder creates a new `InitializeAccount2` instruction builder.
 func NewInitializeAccount2InstructionBuilder() *InitializeAccount2 {
 	nd := &InitializeAccount2{
-		AccountMetaSlice: make([]*base.AccountMeta, 3),
+		AccountMetaSlice: make([]*solana.AccountMeta, 3),
 	}
-	nd.AccountMetaSlice[2] = base.Meta(base.SysVarRentPubkey)
+	nd.AccountMetaSlice[2] = solana.Meta(base.SysVarRentPubkey)
 	return nd
 }
 
 // SetOwner sets the "owner" parameter.
 // The new account's owner/multisignature.
-func (initAcc2 *InitializeAccount2) SetOwner(owner common.Address) *InitializeAccount2 {
+func (initAcc2 *InitializeAccount2) SetOwner(owner solana.PublicKey) *InitializeAccount2 {
 	initAcc2.Owner = &owner
 	return initAcc2
 }
 
 // SetAccount sets the "account" account.
 // The account to initialize.
-func (initAcc2 *InitializeAccount2) SetAccount(account common.Address) *InitializeAccount2 {
-	initAcc2.AccountMetaSlice[0] = base.Meta(account).WRITE()
+func (initAcc2 *InitializeAccount2) SetAccount(account solana.PublicKey) *InitializeAccount2 {
+	initAcc2.AccountMetaSlice[0] = solana.Meta(account).WRITE()
 	return initAcc2
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
-func (initAcc2 *InitializeAccount2) GetAccount() *base.AccountMeta {
+func (initAcc2 *InitializeAccount2) GetAccount() *solana.AccountMeta {
 	return initAcc2.AccountMetaSlice[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
-func (initAcc2 *InitializeAccount2) SetMintAccount(mint common.Address) *InitializeAccount2 {
-	initAcc2.AccountMetaSlice[1] = base.Meta(mint)
+func (initAcc2 *InitializeAccount2) SetMintAccount(mint solana.PublicKey) *InitializeAccount2 {
+	initAcc2.AccountMetaSlice[1] = solana.Meta(mint)
 	return initAcc2
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
-func (initAcc2 *InitializeAccount2) GetMintAccount() *base.AccountMeta {
+func (initAcc2 *InitializeAccount2) GetMintAccount() *solana.AccountMeta {
 	return initAcc2.AccountMetaSlice[1]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initAcc2 *InitializeAccount2) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeAccount2 {
-	initAcc2.AccountMetaSlice[2] = base.Meta(SysVarRentPubkey)
+func (initAcc2 *InitializeAccount2) SetSysVarRentPubkeyAccount(SysVarRentPubkey solana.PublicKey) *InitializeAccount2 {
+	initAcc2.AccountMetaSlice[2] = solana.Meta(SysVarRentPubkey)
 	return initAcc2
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initAcc2 *InitializeAccount2) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+func (initAcc2 *InitializeAccount2) GetSysVarRentPubkeyAccount() *solana.AccountMeta {
 	return initAcc2.AccountMetaSlice[2]
 }
 
@@ -147,10 +148,10 @@ func (initAcc2 InitializeAccount2) MarshalWithEncoder(encoder *encodbin.Encoder)
 // NewInitializeAccount2Instruction declares a new InitializeAccount2 instruction with the provided parameters and accounts.
 func NewInitializeAccount2Instruction(
 	// Parameters:
-	owner common.Address,
+	owner solana.PublicKey,
 	// Accounts:
-	account common.Address,
-	mint common.Address) *InitializeAccount2 {
+	account solana.PublicKey,
+	mint solana.PublicKey) *InitializeAccount2 {
 	return NewInitializeAccount2InstructionBuilder().
 		SetOwner(owner).
 		SetAccount(account).

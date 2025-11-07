@@ -1,11 +1,7 @@
 // Copyright 2024 The go-solana Authors
 // This file is part of the go-solana library.
 
-package types
-
-import (
-	"github.com/cielu/go-solana/common"
-)
+package solana
 
 // RpcCommitmentCfg rpc config of commitment
 type RpcCommitmentCfg struct {
@@ -35,13 +31,13 @@ type RpcGetBlockContextCfg struct {
 
 type RpcCommitmentWithIdentity struct {
 	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
-	Identity   *common.Address   `json:"identity,omitempty"`
+	Identity   *PublicKey        `json:"identity,omitempty"`
 }
 
 // RpcGetBlockProduction getBlock production
 type RpcGetBlockProduction struct {
 	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
-	Identity   *common.Address   `json:"identity,omitempty"`
+	Identity   *PublicKey        `json:"identity,omitempty"`
 	Range      SlotRange         `json:"range,omitempty"`
 }
 
@@ -92,8 +88,8 @@ type RpcSupplyCfg struct {
 }
 
 type RpcMintWithProgramID struct {
-	Mint      *common.Address `json:"mint,omitempty"`
-	ProgramId *common.Address `json:"programId,omitempty"`
+	Mint      *PublicKey `json:"mint,omitempty"`
+	ProgramId *PublicKey `json:"programId,omitempty"`
 }
 
 // RpcGetTransactionCfg commitment & min slot
@@ -111,7 +107,7 @@ type RpcVoteAccountCfg struct {
 	// commitment
 	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
 	// Only return results for this validator vote address (base-58 encoded)
-	VotePubkey *common.Address `json:"votePubkey,omitempty"` //  optional
+	VotePubkey *PublicKey `json:"votePubkey,omitempty"` //  optional
 	// Do not filter out delinquent validators with no stake
 	KeepUnstakedDelinquents *bool `json:"keepUnstakedDelinquents,omitempty"` //  optional
 	// Specify the number of slots behind the tip that a validator must fall to be considered delinquent. NOTE: For the sake of consistency between ecosystem products, it is not recommended that this argument be specified.
@@ -138,9 +134,9 @@ type RpcSendTxCfg struct {
 }
 
 type MentionsAccountProgramCfg struct {
-	MentionsAccountOrProgram common.Address `json:"MentionsAccountOrProgram,omitempty"`
+	MentionsAccountOrProgram PublicKey `json:"MentionsAccountOrProgram,omitempty"`
 }
 
 type MentionsCfg struct {
-	Mentions []common.Address `json:"mentions,omitempty"`
+	Mentions []PublicKey `json:"mentions,omitempty"`
 }

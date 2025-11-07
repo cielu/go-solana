@@ -5,7 +5,7 @@ import (
 	"errors"
 	"math"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 )
 
 const (
@@ -22,14 +22,14 @@ var ErrMaxSeedLengthExceeded = errors.New("Max seed length exceeded")
 
 // CreateProgramAddress Create a program address.
 // Ported from https://github.com/solana-labs/solana/blob/216983c50e0a618facc39aa07472ba6d23f1b33a/sdk/program/src/pubkey.rs#L204
-func CreateProgramAddress(seeds [][]byte, programID common.Address) (common.Address, error) {
+func CreateProgramAddress(seeds [][]byte, programID solana.PublicKey) (solana.PublicKey, error) {
 	if len(seeds) > MaxSeeds {
-		return common.Address{}, ErrMaxSeedLengthExceeded
+		return solana.PublicKey{}, ErrMaxSeedLengthExceeded
 	}
 
 	for _, seed := range seeds {
 		if len(seed) > MaxSeedLength {
-			return common.Address{}, ErrMaxSeedLengthExceeded
+			return solana.PublicKey{}, ErrMaxSeedLengthExceeded
 		}
 	}
 
@@ -43,10 +43,10 @@ func CreateProgramAddress(seeds [][]byte, programID common.Address) (common.Addr
 	hash := sha256.Sum256(buf)
 
 	if IsOnCurve(hash[:]) {
-		return common.Address{}, errors.New("invalid seeds; address must fall off the curve")
+		return solana.PublicKey{}, errors.New("invalid seeds; address must fall off the curve")
 	}
 
-	return common.BytesToAddress(hash[:]), nil
+	return solana.BytesToPublicKey(hash[:]), nil
 }
 
 type incomparable [0]func()
@@ -134,8 +134,8 @@ func IsOnCurve(b []byte) bool {
 }
 
 // FindProgramAddress Find a valid program address and its corresponding bump seed.
-func FindProgramAddress(seed [][]byte, programID common.Address) (common.Address, uint8, error) {
-	var address common.Address
+func FindProgramAddress(seed [][]byte, programID solana.PublicKey) (solana.PublicKey, uint8, error) {
+	var address solana.PublicKey
 	var err error
 	bumpSeed := uint8(math.MaxUint8)
 	for bumpSeed != 0 {
@@ -145,14 +145,19 @@ func FindProgramAddress(seed [][]byte, programID common.Address) (common.Address
 		}
 		bumpSeed--
 	}
-	return common.Address{}, bumpSeed, errors.New("unable to find a valid program address")
+	return solana.PublicKey{}, bumpSeed, errors.New("unable to find a valid program address")
 }
 
-func FindAssociatedTokenAddress(account common.Address, mint common.Address, options ...common.Address) (common.Address, uint8, error) {
+func FindAssociatedTokenAddress(account solana.PublicKey, mint solana.PublicKey, options ...solana.PublicKey) (solana.PublicKey, uint8, error) {
 	return FindAssociatedTokenAddressAndBumpSeed(account, mint, SPLAssociatedTokenAccountProgramID, options...)
 }
 
-func FindAssociatedTokenAddressAndBumpSeed(account common.Address, splTokenMintAddress common.Address, programID common.Address, options ...common.Address) (common.Address, uint8, error) {
+func FindAssociatedTokenAddressAndBumpSeed(
+	account solana.PublicKey,
+	splTokenMintAddress solana.PublicKey,
+	programID solana.PublicKey,
+	options ...solana.PublicKey,
+) (solana.PublicKey, uint8, error) {
 	tokenProgramID := TokenProgramID
 	if len(options) > 0 && options[0] == Token2022ProgramID {
 		tokenProgramID = Token2022ProgramID

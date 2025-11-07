@@ -1,4 +1,4 @@
-package types
+package solana
 
 // SlotRange the first slot --> lastSlot
 type SlotRange struct {

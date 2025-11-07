@@ -1,14 +1,11 @@
 // Copyright 2024 The go-solana Authors
 // This file is part of the go-solana library.
 
-package solclient
+package solana
 
 import (
 	"context"
 	"errors"
-
-	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/types"
 )
 
 // Subscription represents an event subscription where events are
@@ -25,7 +22,7 @@ type Subscription interface {
 }
 
 // AccountSubscribe Subscribe to an account to receive notifications when the lamports or data for a given account public key changes
-func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- types.AccountNotifies, account common.Address, cfg ...types.RpcCommitmentWithEncodingCfg) (Subscription, error) {
+func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- AccountNotifies, account PublicKey, cfg ...RpcCommitmentWithEncodingCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "account", ch, account, getRpcCfg(cfg))
 	if err != nil {
@@ -36,12 +33,12 @@ func (sc *Client) AccountSubscribe(ctx context.Context, ch chan<- types.AccountN
 
 // BlockSubscribe Subscribe to receive notification anytime a new block is confirmed or finalized.
 // filter can receive: string | types.MentionsAccountProgramCfg
-func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- types.BlockNotifies, filter any, cfg ...types.RpcGetBlockContextCfg) (Subscription, error) {
+func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- BlockNotifies, filter any, cfg ...RpcGetBlockContextCfg) (Subscription, error) {
 	// SolSubscribe
 	switch filter.(type) {
 	case string:
 		filter = "all"
-	case types.MentionsAccountProgramCfg:
+	case MentionsAccountProgramCfg:
 	default:
 		return nil, errors.New("invalid filter arg. Require: [string|types.MentionsAccountProgramCfg]")
 	}
@@ -54,7 +51,7 @@ func (sc *Client) BlockSubscribe(ctx context.Context, ch chan<- types.BlockNotif
 
 // LogsSubscribe Subscribe to transaction logging
 // mentions can receive: string | types.MentionsCfg
-func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- types.LogsNotifies, mentions any, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
+func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- LogsNotifies, mentions any, cfg ...RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	switch mentions.(type) {
 	case string:
@@ -62,7 +59,7 @@ func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- types.LogsNotifie
 		if mentions != "all" && mentions != "allWithVotes" {
 			mentions = "all"
 		}
-	case types.MentionsCfg:
+	case MentionsCfg:
 	default:
 		return nil, errors.New("invalid mentions. Require: [string|types.MentionsCfg]")
 	}
@@ -74,7 +71,7 @@ func (sc *Client) LogsSubscribe(ctx context.Context, ch chan<- types.LogsNotifie
 }
 
 // ProgramSubscribe to a program to receive notifications when the lamports or data for an account owned by the given program changes
-func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- types.ProgramNotifies, address common.Address, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
+func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- ProgramNotifies, address PublicKey, cfg ...RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "program", ch, address, getRpcCfg(cfg))
 	if err != nil {
@@ -84,7 +81,7 @@ func (sc *Client) ProgramSubscribe(ctx context.Context, ch chan<- types.ProgramN
 }
 
 // SignatureSubscribe Subscribe to receive a notification when the transaction with the given signature reaches the specified commitment level.
-func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- types.SignatureNotifies, signature common.Signature, cfg ...types.RpcCommitmentCfg) (Subscription, error) {
+func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- SignatureNotifies, signature Signature, cfg ...RpcCommitmentCfg) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "signature", ch, signature, getRpcCfg(cfg))
 	if err != nil {
@@ -94,7 +91,7 @@ func (sc *Client) SignatureSubscribe(ctx context.Context, ch chan<- types.Signat
 }
 
 // SlotSubscribe Subscribe to receive notification anytime a slot is processed by the validator
-func (sc *Client) SlotSubscribe(ctx context.Context, ch chan<- types.SlotNotifies) (Subscription, error) {
+func (sc *Client) SlotSubscribe(ctx context.Context, ch chan<- SlotNotifies) (Subscription, error) {
 	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "slot", ch)
 	if err != nil {

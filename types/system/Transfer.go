@@ -3,9 +3,8 @@ package system
 import (
 	"encoding/binary"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 type Transfer struct {
@@ -17,18 +16,18 @@ type Transfer struct {
 	//
 	// [1] = [WRITE] RecipientAccount
 	// ··········· Recipient account
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
-	Signers     []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	Signers                 []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
 func NewTransferInstructionBuilder() *Transfer {
 	nd := &Transfer{
-		AccountMetaSlice: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*solana.AccountMeta, 2),
 	}
 	return nd
 }
 
-func (trans Transfer) GetAccounts() (accounts []*base.AccountMeta) {
+func (trans Transfer) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, trans.AccountMetaSlice...)
 	accounts = append(accounts, trans.Signers...)
 	return
@@ -40,14 +39,14 @@ func (trans *Transfer) SetLamports(lamports uint64) *Transfer {
 }
 
 // Funding account
-func (trans *Transfer) SetFundingAccount(fundingAccount common.Address) *Transfer {
-	trans.AccountMetaSlice[0] = base.Meta(fundingAccount).WRITE().SIGNER()
+func (trans *Transfer) SetFundingAccount(fundingAccount solana.PublicKey) *Transfer {
+	trans.AccountMetaSlice[0] = solana.Meta(fundingAccount).WRITE().SIGNER()
 	return trans
 }
 
 // Recipient account
-func (trans *Transfer) SetRecipientAccount(recipientAccount common.Address) *Transfer {
-	trans.AccountMetaSlice[1] = base.Meta(recipientAccount).WRITE()
+func (trans *Transfer) SetRecipientAccount(recipientAccount solana.PublicKey) *Transfer {
+	trans.AccountMetaSlice[1] = solana.Meta(recipientAccount).WRITE()
 	return trans
 }
 
@@ -72,8 +71,8 @@ func (trans Transfer) MarshalWithEncoder(encoder encodbin.Encoder) error {
 func NewTransferInstruction(
 	// Parameters:
 	// Accounts:
-	fundingAccount common.Address,
-	recipientAccount common.Address,
+	fundingAccount solana.PublicKey,
+	recipientAccount solana.PublicKey,
 	lamports uint64) *Transfer {
 	return NewTransferInstructionBuilder().
 		SetLamports(lamports).

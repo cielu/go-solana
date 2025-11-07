@@ -1,17 +1,15 @@
-package types
+package solana
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/core"
-	"github.com/cielu/go-solana/crypto"
-	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
-	"github.com/mr-tron/base58"
 	"sort"
+
+	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/pkg/encodbin"
+	"github.com/mr-tron/base58"
 )
 
 type Transaction struct {
@@ -19,7 +17,7 @@ type Transaction struct {
 	// The list is always of length `message.header.numRequiredSignatures` and not empty.
 	// The signature at index `i` corresponds to the public key at index
 	// `i` in `message.account_keys`. The first one is used as the transaction id.
-	Signatures []common.Signature `json:"signatures"`
+	Signatures []Signature `json:"signatures"`
 
 	// Defines the content of the transaction.
 	Message Message `json:"message"`
@@ -37,10 +35,10 @@ type CompiledInstruction struct {
 	// and that can be an issue.
 	Accounts []uint16 `json:"accounts"`
 	// The program input data encoded in a base-58 string.
-	Data common.Base58 `json:"data"`
+	Data SolData `json:"data"`
 }
 
-func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, payer common.Address) (*Transaction, error) {
+func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer PublicKey) (*Transaction, error) {
 	if len(instructions) == 0 {
 		return nil, fmt.Errorf("requires at-least one instruction to create a transaction")
 	}
@@ -60,8 +58,8 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 		}
 	}
 
-	programIDs := make([]common.Address, 0)
-	var accounts []*base.AccountMeta
+	programIDs := make([]PublicKey, 0)
+	var accounts []*AccountMeta
 	for _, instruction := range instructions {
 		accounts = append(accounts, instruction.Accounts()...)
 		programIDs = core.UniqueAppend(programIDs, instruction.ProgramID())
@@ -69,7 +67,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 
 	// Add programID to the account list
 	for _, programID := range programIDs {
-		accounts = append(accounts, &base.AccountMeta{
+		accounts = append(accounts, &AccountMeta{
 			PublicKey:  programID,
 			IsSigner:   false,
 			IsWritable: false,
@@ -82,8 +80,8 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 	})
 
 	var (
-		uniqAccounts    []*base.AccountMeta
-		uniqAccountsMap = map[common.Address]uint64{}
+		uniqAccounts    []*AccountMeta
+		uniqAccountsMap = map[PublicKey]uint64{}
 	)
 	for _, acc := range accounts {
 		if index, found := uniqAccountsMap[acc.PublicKey]; found {
@@ -107,7 +105,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 		// fee payer is not part of accounts we want to add it
 		accountCount++
 	}
-	finalAccounts := make([]*base.AccountMeta, accountCount)
+	finalAccounts := make([]*AccountMeta, accountCount)
 
 	itr := 1
 	for idx, uniqAccount := range uniqAccounts {
@@ -123,7 +121,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 
 	if feePayerIndex < 0 {
 		// fee payer is not part of accounts we want to add it
-		feePayerAccount := &base.AccountMeta{
+		feePayerAccount := &AccountMeta{
 			PublicKey:  feePayer,
 			IsSigner:   true,
 			IsWritable: true,
@@ -164,7 +162,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash common.Hash, pay
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
 			Accounts:       accountIndex,
-			Data:           data,
+			Data:           BytesToSolData(data),
 		})
 	}
 
@@ -222,7 +220,6 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 	if err := json.Unmarshal(input, &data); err != nil {
 		return err
 	}
-	// core.BeautifyConsole("aaa", data)
 	// get active type
 	switch v := data.(type) {
 	// slice
@@ -241,14 +238,14 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 			return fmt.Errorf("UnmarshalDataByEncoding Err: %s", v[1])
 		}
 	case map[string]interface{}:
-		//
+		// transfer map to struct munual
 		for k, vv := range v {
 			switch k {
 			case "message":
 				message := vv.(map[string]interface{})
 				// Message
 				for _, accKeys := range message["accountKeys"].([]interface{}) {
-					tx.Message.AccountKeys = append(tx.Message.AccountKeys, common.Base58ToAddress(accKeys.(string)))
+					tx.Message.AccountKeys = append(tx.Message.AccountKeys, Base58ToPublicKey(accKeys.(string)))
 				}
 				for _, insMap := range message["instructions"].([]interface{}) {
 					var (
@@ -261,7 +258,8 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 					}
 					// exist stack height
 					if ins["stackHeight"] != nil {
-						stackHeight = ins["stackHeight"].(*uint16)
+						tmpStackHeight := uint16(ins["stackHeight"].(float64))
+						stackHeight = &tmpStackHeight
 					}
 					insData, _ := base58.Decode(ins["data"].(string))
 					// Instructions
@@ -269,7 +267,7 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 						StackHeight:    stackHeight,
 						ProgramIDIndex: uint16(ins["programIdIndex"].(float64)),
 						Accounts:       accounts,
-						Data:           insData,
+						Data:           BytesToSolData(insData),
 					})
 				}
 				msgHeader, ok := message["header"].(map[string]interface{})
@@ -281,10 +279,10 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 						NumReadonlyUnsignedAccounts: uint8(msgHeader["numReadonlyUnsignedAccounts"].(float64)),
 					}
 				}
-				tx.Message.RecentBlockhash = common.Base58ToHash(message["recentBlockhash"].(string))
+				tx.Message.RecentBlockhash = Base58ToHash(message["recentBlockhash"].(string))
 			case "signatures":
 				for _, sig := range vv.([]interface{}) {
-					tx.Signatures = append(tx.Signatures, common.Base58ToSignature(sig.(string)))
+					tx.Signatures = append(tx.Signatures, Base58ToSignature(sig.(string)))
 				}
 			}
 		}
@@ -316,7 +314,7 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err erro
 			return fmt.Errorf("unable to read numSignatures: %w", err)
 		}
 
-		tx.Signatures = make([]common.Signature, numSignatures)
+		tx.Signatures = make([]Signature, numSignatures)
 		for i := 0; i < numSignatures; i++ {
 			_, err := decoder.Read(tx.Signatures[i][:])
 			if err != nil {
@@ -334,7 +332,7 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err erro
 }
 
 // Sign accounts
-func (tx *Transaction) Sign(accounts []crypto.Account) ([]byte, error) {
+func (tx *Transaction) Sign(accounts []Account) ([]byte, error) {
 
 	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
@@ -346,9 +344,9 @@ func (tx *Transaction) Sign(accounts []crypto.Account) ([]byte, error) {
 signerMatch:
 	for _, key := range signerKeys {
 		for _, signer := range accounts {
-			if key == signer.Address {
+			if key == signer.PublicKey {
 				s := signer.Sign(messageContent)
-				tx.Signatures = append(tx.Signatures, common.BytesToSignature(s))
+				tx.Signatures = append(tx.Signatures, BytesToSignature(s))
 				continue signerMatch
 			}
 		}

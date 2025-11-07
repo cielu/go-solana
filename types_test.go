@@ -1,4 +1,4 @@
-package common
+package solana
 
 import (
 	"crypto/ed25519"
@@ -10,32 +10,32 @@ func TestAddress(t *testing.T) {
 
 	tests := []struct {
 		addr string
-		want Address
+		want PublicKey
 	}{
 		{
 			addr: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // usdc
-			want: Base58ToAddress("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
+			want: Base58ToPublicKey("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
 		},
 	}
 
 	for _, test := range tests {
 		// base58 address
-		addr := Base58ToAddress(test.addr)
+		addr := Base58ToPublicKey(test.addr)
 
 		if addr != test.want {
-			t.Errorf("Go Address Err ==> Got %s, Want: %s", addr, test.want)
+			t.Errorf("Go PublicKey Err ==> Got %s, Want: %s", addr, test.want)
 		}
 
 		if addr.String() != test.addr {
-			t.Errorf("Go Address Err ==> Got %s, Want: %s", addr, test.want)
+			t.Errorf("Go PublicKey Err ==> Got %s, Want: %s", addr, test.want)
 		}
 	}
 	// Random a pub key
 	pub, prv, _ := ed25519.GenerateKey(rand.Reader)
 	// --> set Bytes
 	var (
-		addr1, addr2 Address
-		pubKey       = make([]byte, AddressLength)
+		addr1, addr2 PublicKey
+		pubKey       = make([]byte, PublicKeyLength)
 	)
 	addr1.SetBytes(pub)
 	//

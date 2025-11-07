@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // InitializeMultisig2 Like InitializeMultisig, but does not require the Rent sysvar to be provided.
@@ -33,16 +33,16 @@ type InitializeMultisig2 struct {
 	//
 	// [1] = [SIGNER] signers
 	// ··········· The signer accounts, must equal to N where 1 <= N <= 11.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (initMs *InitializeMultisig2) SetAccounts(accounts []*base.AccountMeta) error {
+func (initMs *InitializeMultisig2) SetAccounts(accounts []*solana.AccountMeta) error {
 	initMs.Accounts, initMs.Signers = core.SliceSplitFrom(accounts, 1)
 	return nil
 }
 
-func (initMs InitializeMultisig2) GetAccounts() (accounts []*base.AccountMeta) {
+func (initMs InitializeMultisig2) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, initMs.Accounts...)
 	accounts = append(accounts, initMs.Signers...)
 	return
@@ -51,8 +51,8 @@ func (initMs InitializeMultisig2) GetAccounts() (accounts []*base.AccountMeta) {
 // NewInitializeMultisig2InstructionBuilder creates a new `InitializeMultisig2` instruction builder.
 func NewInitializeMultisig2InstructionBuilder() *InitializeMultisig2 {
 	nd := &InitializeMultisig2{
-		Accounts: make([]*base.AccountMeta, 1),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 1),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -66,22 +66,22 @@ func (initMs *InitializeMultisig2) SetM(m uint8) *InitializeMultisig2 {
 
 // SetAccount sets the "account" account.
 // The multisignature account to initialize.
-func (initMs *InitializeMultisig2) SetAccount(account common.Address) *InitializeMultisig2 {
-	initMs.Accounts[0] = base.Meta(account).WRITE()
+func (initMs *InitializeMultisig2) SetAccount(account solana.PublicKey) *InitializeMultisig2 {
+	initMs.Accounts[0] = solana.Meta(account).WRITE()
 	return initMs
 }
 
 // GetAccount gets the "account" account.
 // The multisignature account to initialize.
-func (initMs *InitializeMultisig2) GetAccount() *base.AccountMeta {
+func (initMs *InitializeMultisig2) GetAccount() *solana.AccountMeta {
 	return initMs.Accounts[0]
 }
 
 // AddSigners adds the "signers" accounts.
 // The signer accounts, must equal to N where 1 <= N <= 11.
-func (initMs *InitializeMultisig2) AddSigners(signers ...common.Address) *InitializeMultisig2 {
+func (initMs *InitializeMultisig2) AddSigners(signers ...solana.PublicKey) *InitializeMultisig2 {
 	for _, signer := range signers {
-		initMs.Signers = append(initMs.Signers, base.Meta(signer).SIGNER())
+		initMs.Signers = append(initMs.Signers, solana.Meta(signer).SIGNER())
 	}
 	return initMs
 }
@@ -140,8 +140,8 @@ func NewInitializeMultisig2Instruction(
 	// Parameters:
 	m uint8,
 	// Accounts:
-	account common.Address,
-	signers []common.Address,
+	account solana.PublicKey,
+	signers []solana.PublicKey,
 ) *InitializeMultisig2 {
 	return NewInitializeMultisig2InstructionBuilder().
 		SetM(m).

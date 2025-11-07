@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // SetAuthority Sets a new authority of a mint or account.
@@ -29,7 +29,7 @@ type SetAuthority struct {
 	AuthorityType *AuthorityType
 
 	// The new authority.
-	NewAuthority *common.Address `bin:"optional"`
+	NewAuthority *solana.PublicKey `bin:"optional"`
 
 	// [0] = [WRITE] subject
 	// ··········· The mint or account to change the authority of.
@@ -39,16 +39,16 @@ type SetAuthority struct {
 	//
 	// [2...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (sAut *SetAuthority) SetAccounts(accounts []*base.AccountMeta) error {
+func (sAut *SetAuthority) SetAccounts(accounts []*solana.AccountMeta) error {
 	sAut.Accounts, sAut.Signers = core.SliceSplitFrom(accounts, 2)
 	return nil
 }
 
-func (sAut SetAuthority) GetAccounts() (accounts []*base.AccountMeta) {
+func (sAut SetAuthority) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, sAut.Accounts...)
 	accounts = append(accounts, sAut.Signers...)
 	return
@@ -57,8 +57,8 @@ func (sAut SetAuthority) GetAccounts() (accounts []*base.AccountMeta) {
 // NewSetAuthorityInstructionBuilder creates a new `SetAuthority` instruction builder.
 func NewSetAuthorityInstructionBuilder() *SetAuthority {
 	nd := &SetAuthority{
-		Accounts: make([]*base.AccountMeta, 2),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 2),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -72,40 +72,40 @@ func (sAut *SetAuthority) SetAuthorityType(authority_type AuthorityType) *SetAut
 
 // SetNewAuthority sets the "new_authority" parameter.
 // The new authority.
-func (sAut *SetAuthority) SetNewAuthority(new_authority common.Address) *SetAuthority {
+func (sAut *SetAuthority) SetNewAuthority(new_authority solana.PublicKey) *SetAuthority {
 	sAut.NewAuthority = &new_authority
 	return sAut
 }
 
 // SetSubjectAccount sets the "subject" account.
 // The mint or account to change the authority of.
-func (sAut *SetAuthority) SetSubjectAccount(subject common.Address) *SetAuthority {
-	sAut.Accounts[0] = base.Meta(subject).WRITE()
+func (sAut *SetAuthority) SetSubjectAccount(subject solana.PublicKey) *SetAuthority {
+	sAut.Accounts[0] = solana.Meta(subject).WRITE()
 	return sAut
 }
 
 // GetSubjectAccount gets the "subject" account.
 // The mint or account to change the authority of.
-func (sAut *SetAuthority) GetSubjectAccount() *base.AccountMeta {
+func (sAut *SetAuthority) GetSubjectAccount() *solana.AccountMeta {
 	return sAut.Accounts[0]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The current authority of the mint or account.
-func (sAut *SetAuthority) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *SetAuthority {
-	sAut.Accounts[1] = base.Meta(authority)
+func (sAut *SetAuthority) SetAuthorityAccount(authority solana.PublicKey, multisigSigners ...solana.PublicKey) *SetAuthority {
+	sAut.Accounts[1] = solana.Meta(authority)
 	if len(multisigSigners) == 0 {
 		sAut.Accounts[1].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		sAut.Signers = append(sAut.Signers, base.Meta(signer).SIGNER())
+		sAut.Signers = append(sAut.Signers, solana.Meta(signer).SIGNER())
 	}
 	return sAut
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The current authority of the mint or account.
-func (sAut *SetAuthority) GetAuthorityAccount() *base.AccountMeta {
+func (sAut *SetAuthority) GetAuthorityAccount() *solana.AccountMeta {
 	return sAut.Accounts[1]
 }
 
@@ -183,11 +183,11 @@ func (sAut SetAuthority) MarshalWithEncoder(encoder *encodbin.Encoder) (err erro
 func NewSetAuthorityInstruction(
 	// Parameters:
 	authority_type AuthorityType,
-	new_authority common.Address,
+	new_authority solana.PublicKey,
 	// Accounts:
-	subject common.Address,
-	authority common.Address,
-	multisigSigners []common.Address,
+	subject solana.PublicKey,
+	authority solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *SetAuthority {
 	return NewSetAuthorityInstructionBuilder().
 		SetAuthorityType(authority_type).

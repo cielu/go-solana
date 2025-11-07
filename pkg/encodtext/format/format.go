@@ -15,16 +15,15 @@
 package format
 
 import (
-	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/pkg/encodtext"
-	. "github.com/cielu/go-solana/pkg/encodtext"
-	"github.com/cielu/go-solana/types/base"
 	"strings"
 
+	"github.com/cielu/go-solana"
+	"github.com/cielu/go-solana/pkg/encodtext"
+	. "github.com/cielu/go-solana/pkg/encodtext"
 	"github.com/davecgh/go-spew/spew"
 )
 
-func Program(name string, programID common.Address) string {
+func Program(name string, programID solana.PublicKey) string {
 	return IndigoBG("Program") + ": " + Bold(name) + " " + encodtext.ColorizeBG(programID.String())
 }
 
@@ -44,11 +43,11 @@ func Param(name string, value interface{}) string {
 	)
 }
 
-func Account(name string, pubKey common.Address) string {
+func Account(name string, pubKey solana.PublicKey) string {
 	return Shakespeare(name) + ": " + encodtext.ColorizeBG(pubKey.String())
 }
 
-func MetaIfSetByIndex(name string, metaSlice base.AccountMetaSlice, index int) string {
+func MetaIfSetByIndex(name string, metaSlice solana.AccountMetaSlice, index int) string {
 	if metaSlice == nil {
 		return Meta(name, nil)
 	}
@@ -58,7 +57,7 @@ func MetaIfSetByIndex(name string, metaSlice base.AccountMetaSlice, index int) s
 	return Meta(name, metaSlice[index])
 }
 
-func Meta(name string, meta *base.AccountMeta) string {
+func Meta(name string, meta *solana.AccountMeta) string {
 	if meta == nil {
 		return Shakespeare(name) + ": " + "<nil>"
 	}

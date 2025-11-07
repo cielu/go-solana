@@ -1,11 +1,10 @@
 // Copyright 2024 The go-solana Authors
 // This file is part of the go-solana library.
 
-package types
+package solana
 
 import (
 	"encoding/json"
-	"github.com/cielu/go-solana/common"
 	"math/big"
 )
 
@@ -16,9 +15,9 @@ type ContextSlot struct {
 
 type AccountInfo struct {
 	// data associated with the account, either as encoded binary data or JSON format {<program>: <state>} - depending on encoding parameter
-	Data common.SolData `json:"data"`
+	Data SolData `json:"data"`
 	// base-58 encoded Pubkey of the program this account has been assigned to
-	Owner common.Address `json:"owner"`
+	Owner PublicKey `json:"owner"`
 	// number of lamports assigned to this account, as an u64
 	Lamports *big.Int `json:"lamports"`
 	// the epoch at which this account will next owe rent, as u64
@@ -42,16 +41,16 @@ type BalanceWithCtx struct {
 }
 
 type BlockReward struct {
-	Commission  *uint8         `json:"commission"`
-	Lamports    *big.Int       `json:"lamports"`
-	PostBalance uint64         `json:"postBalance"`
-	RewardType  string         `json:"rewardType"`
-	Pubkey      common.Address `json:"pubkey"`
+	Commission  *uint8    `json:"commission"`
+	Lamports    *big.Int  `json:"lamports"`
+	PostBalance uint64    `json:"postBalance"`
+	RewardType  string    `json:"rewardType"`
+	Pubkey      PublicKey `json:"pubkey"`
 }
 
 type UiTokenAmount struct {
 	// Address account
-	Address *common.Address `json:"address,omitempty"`
+	Address *PublicKey `json:"address,omitempty"`
 
 	// Raw amount of tokens as a string, ignoring decimals.
 	Amount string `json:"amount"`
@@ -71,10 +70,10 @@ type TokenBalance struct {
 	AccountIndex uint16 `json:"accountIndex"`
 
 	// Pubkey of the token's mint.
-	Mint common.Address `json:"mint"`
+	Mint PublicKey `json:"mint"`
 
 	// Pubkey of token balance's owner.
-	Owner common.Address `json:"owner"`
+	Owner PublicKey `json:"owner"`
 
 	// ProgramId
 	ProgramId string `json:"programId"`
@@ -91,8 +90,8 @@ type InnerInstruction struct {
 }
 
 type LoadedAddresses struct {
-	ReadOnly []common.Address `json:"readonly,omitempty"`
-	Writable []common.Address `json:"writable,omitempty"`
+	ReadOnly []PublicKey `json:"readonly,omitempty"`
+	Writable []PublicKey `json:"writable,omitempty"`
 }
 
 type TxStatus struct {
@@ -162,8 +161,8 @@ type BlockInfo struct {
 	BlockHeight       uint64            `json:"blockHeight"`
 	BlockTime         int64             `json:"blockTime"`
 	ParentSlot        uint64            `json:"parentSlot"`
-	BlockHash         common.Hash       `json:"blockHash"`
-	PreviousBlockhash common.Hash       `json:"previousBlockhash"`
+	BlockHash         Hash              `json:"blockHash"`
+	PreviousBlockhash Hash              `json:"previousBlockhash"`
 	Rewards           []BlockReward     `json:"rewards"`
 	Transactions      []TransactionInfo `json:"transactions"`
 }
@@ -190,7 +189,7 @@ type BlockProductionWithCtx struct {
 
 type ClusterInformation struct {
 	// Node public key, as base-58 encoded string
-	PubKey common.Address `json:"pubKey"`
+	PubKey PublicKey `json:"pubKey"`
 	// Gossip network address for the node
 	Gossip string `json:"gossip,omitempty"`
 	// TPU network address for the node
@@ -244,7 +243,7 @@ type HighestSnapshotSlot struct {
 }
 
 type Identity struct {
-	Identity common.Address `json:"identity"`
+	Identity PublicKey `json:"identity"`
 }
 
 type InflationGovernor struct {
@@ -286,14 +285,14 @@ type InflationReward struct {
 
 type AccountWithLamport struct {
 	// base-58 encoded address of the account
-	Address common.Address `json:"address"`
+	Address PublicKey `json:"address"`
 	// number of lamports in the account, as a u64
 	Lamports *big.Int `json:"lamports"`
 }
 
 type LastBlock struct {
 	// a Hash as base-58 encoded string
-	Blockhash common.Hash `json:"blockhash"`
+	Blockhash Hash `json:"blockhash"`
 	//  last block height at which the blockhash will be valid
 	LastValidBlockHeight uint64 `json:"lastValidBlockHeight"`
 }
@@ -310,8 +309,8 @@ type AccountsInfoWithCtx struct {
 
 // ProgramAccount program account
 type ProgramAccount struct {
-	Account AccountInfo    `json:"account"`
-	PubKey  common.Address `json:"pubKey"`
+	Account AccountInfo `json:"account"`
+	PubKey  PublicKey   `json:"pubKey"`
 }
 
 type RpcPerfSample struct {
@@ -352,7 +351,7 @@ type SignatureStatusWithCtx struct {
 
 type SignatureInfo struct {
 	// transaction signature as base-58 encoded string
-	Signature common.Signature `json:"signature,omitempty"`
+	Signature Signature `json:"signature,omitempty"`
 	// The slot that contains the block with the transaction
 	Slot uint64 `json:"slot"`
 	// Error if transaction failed, null if transaction succeeded. See TransactionError definitions for more info.
@@ -382,7 +381,7 @@ type SupplyInfo struct {
 	// Non-circulating supply in lamports
 	NonCirculating uint64 `json:"nonCirculating"`
 	// an array of account addresses of non-circulating accounts, as strings. If excludeNonCirculatingAccountsList is enabled, the returned array will be empty.
-	NonCirculatingAccounts []common.Address `json:"nonCirculatingAccounts"`
+	NonCirculatingAccounts []PublicKey `json:"nonCirculatingAccounts"`
 }
 
 type SupplyWithCtx struct {
@@ -396,8 +395,8 @@ type TokenAccountWithCtx struct {
 }
 
 type TokenAccount struct {
-	Account AccountInfo    `json:"account"`
-	Pubkey  common.Address `json:"pubkey,omitempty"`
+	Account AccountInfo `json:"account"`
+	Pubkey  PublicKey   `json:"pubkey,omitempty"`
 }
 
 type TokenAccountsWithCtx struct {
@@ -419,9 +418,9 @@ type SolVersion struct {
 
 type VoteAccount struct {
 	// Vote account address, as base-58 encoded string
-	VotePubkey common.Address `json:"votePubkey"`
+	VotePubkey PublicKey `json:"votePubkey"`
 	// Validator identity, as base-58 encoded string
-	NodePubkey common.Address `json:"nodePubkey"`
+	NodePubkey PublicKey `json:"nodePubkey"`
 	// the stake, in lamports, delegated to this vote account and active in this epoch
 	ActivatedStake uint64 `json:"activatedStake"`
 	// bool, whether the vote account is staked for this epoch
@@ -442,9 +441,9 @@ type RpcVoteAccounts struct {
 }
 
 type LogsValue struct {
-	Signature common.Signature `json:"signature"`
-	Err       json.RawMessage  `json:"err"`
-	Logs      []string         `json:"logs"`
+	Signature Signature       `json:"signature"`
+	Err       json.RawMessage `json:"err"`
+	Logs      []string        `json:"logs"`
 }
 
 type AccountNotifies AccountInfoWithCtx

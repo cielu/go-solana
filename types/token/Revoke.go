@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // Revoke the delegate's authority.
@@ -34,16 +34,16 @@ type Revoke struct {
 	//
 	// [2...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (rvk *Revoke) SetAccounts(accounts []*base.AccountMeta) error {
+func (rvk *Revoke) SetAccounts(accounts []*solana.AccountMeta) error {
 	rvk.Accounts, rvk.Signers = core.SliceSplitFrom(accounts, 2)
 	return nil
 }
 
-func (rvk Revoke) GetAccounts() (accounts []*base.AccountMeta) {
+func (rvk Revoke) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, rvk.Accounts...)
 	accounts = append(accounts, rvk.Signers...)
 	return
@@ -52,41 +52,41 @@ func (rvk Revoke) GetAccounts() (accounts []*base.AccountMeta) {
 // NewRevokeInstructionBuilder creates a new `Revoke` instruction builder.
 func NewRevokeInstructionBuilder() *Revoke {
 	nd := &Revoke{
-		Accounts: make([]*base.AccountMeta, 2),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 2),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (rvk *Revoke) SetSourceAccount(source common.Address) *Revoke {
-	rvk.Accounts[0] = base.Meta(source).WRITE()
+func (rvk *Revoke) SetSourceAccount(source solana.PublicKey) *Revoke {
+	rvk.Accounts[0] = solana.Meta(source).WRITE()
 	return rvk
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (rvk *Revoke) GetSourceAccount() *base.AccountMeta {
+func (rvk *Revoke) GetSourceAccount() *solana.AccountMeta {
 	return rvk.Accounts[0]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account's owner.
-func (rvk *Revoke) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Revoke {
-	rvk.Accounts[1] = base.Meta(owner)
+func (rvk *Revoke) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *Revoke {
+	rvk.Accounts[1] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		rvk.Accounts[1].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		rvk.Signers = append(rvk.Signers, base.Meta(signer).SIGNER())
+		rvk.Signers = append(rvk.Signers, solana.Meta(signer).SIGNER())
 	}
 	return rvk
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account's owner.
-func (rvk *Revoke) GetOwnerAccount() *base.AccountMeta {
+func (rvk *Revoke) GetOwnerAccount() *solana.AccountMeta {
 	return rvk.Accounts[1]
 }
 
@@ -133,9 +133,9 @@ func (rvk Revoke) MarshalWithEncoder(encoder *encodbin.Encoder) (err error) {
 // NewRevokeInstruction declares a new Revoke instruction with the provided parameters and accounts.
 func NewRevokeInstruction(
 	// Accounts:
-	source common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	source solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *Revoke {
 	return NewRevokeInstructionBuilder().
 		SetSourceAccount(source).

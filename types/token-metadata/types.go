@@ -20,7 +20,7 @@ package tokenmeta
 import (
 	"fmt"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -30,8 +30,8 @@ type TokenMeta struct {
 	IsInitialized         bool
 	Reg                   [3]byte `text:"-"`
 	DataType              byte
-	MintAddress           *common.Address
-	RegistrationAuthority *common.Address
+	MintAddress           *solana.PublicKey
+	RegistrationAuthority *solana.PublicKey
 	Logo                  Logo
 	Name                  Name
 	Website               Website

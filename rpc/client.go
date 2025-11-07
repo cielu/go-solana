@@ -26,8 +26,6 @@ import (
 	"strconv"
 	"sync/atomic"
 	"time"
-
-	"github.com/cielu/go-solana/core"
 )
 
 var (
@@ -547,7 +545,9 @@ func (c *Client) newMessage(method string, paramsIn ...interface{}) (*jsonrpcMes
 	}
 	// If Debug the params
 	if c.IsDebug {
-		core.BeautifyConsole("Request Body:", msg)
+		// print data
+		jsonData, _ := json.MarshalIndent(msg, "", "    ")
+		fmt.Println("Request Body", string(jsonData))
 	}
 	return msg, nil
 }

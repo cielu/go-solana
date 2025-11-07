@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // MintToChecked Mints new tokens to an account.  The native mint does not support minting.
@@ -46,16 +46,16 @@ type MintToChecked struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (mCkd *MintToChecked) SetAccounts(accounts []*base.AccountMeta) error {
+func (mCkd *MintToChecked) SetAccounts(accounts []*solana.AccountMeta) error {
 	mCkd.Accounts, mCkd.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (mCkd MintToChecked) GetAccounts() (accounts []*base.AccountMeta) {
+func (mCkd MintToChecked) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, mCkd.Accounts...)
 	accounts = append(accounts, mCkd.Signers...)
 	return
@@ -64,8 +64,8 @@ func (mCkd MintToChecked) GetAccounts() (accounts []*base.AccountMeta) {
 // NewMintToCheckedInstructionBuilder creates a new `MintToChecked` instruction builder.
 func NewMintToCheckedInstructionBuilder() *MintToChecked {
 	nd := &MintToChecked{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -86,46 +86,46 @@ func (mCkd *MintToChecked) SetDecimals(decimals uint8) *MintToChecked {
 
 // SetMintAccount sets the "mint" account.
 // The mint.
-func (mCkd *MintToChecked) SetMintAccount(mint common.Address) *MintToChecked {
-	mCkd.Accounts[0] = base.Meta(mint).WRITE()
+func (mCkd *MintToChecked) SetMintAccount(mint solana.PublicKey) *MintToChecked {
+	mCkd.Accounts[0] = solana.Meta(mint).WRITE()
 	return mCkd
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint.
-func (mCkd *MintToChecked) GetMintAccount() *base.AccountMeta {
+func (mCkd *MintToChecked) GetMintAccount() *solana.AccountMeta {
 	return mCkd.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The account to mint tokens to.
-func (mCkd *MintToChecked) SetDestinationAccount(destination common.Address) *MintToChecked {
-	mCkd.Accounts[1] = base.Meta(destination).WRITE()
+func (mCkd *MintToChecked) SetDestinationAccount(destination solana.PublicKey) *MintToChecked {
+	mCkd.Accounts[1] = solana.Meta(destination).WRITE()
 	return mCkd
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The account to mint tokens to.
-func (mCkd *MintToChecked) GetDestinationAccount() *base.AccountMeta {
+func (mCkd *MintToChecked) GetDestinationAccount() *solana.AccountMeta {
 	return mCkd.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint's minting authority.
-func (mCkd *MintToChecked) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *MintToChecked {
-	mCkd.Accounts[2] = base.Meta(authority)
+func (mCkd *MintToChecked) SetAuthorityAccount(authority solana.PublicKey, multisigSigners ...solana.PublicKey) *MintToChecked {
+	mCkd.Accounts[2] = solana.Meta(authority)
 	if len(multisigSigners) == 0 {
 		mCkd.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		mCkd.Signers = append(mCkd.Signers, base.Meta(signer).SIGNER())
+		mCkd.Signers = append(mCkd.Signers, solana.Meta(signer).SIGNER())
 	}
 	return mCkd
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint's minting authority.
-func (mCkd *MintToChecked) GetAuthorityAccount() *base.AccountMeta {
+func (mCkd *MintToChecked) GetAuthorityAccount() *solana.AccountMeta {
 	return mCkd.Accounts[2]
 }
 
@@ -198,10 +198,10 @@ func NewMintToCheckedInstruction(
 	amount uint64,
 	decimals uint8,
 	// Accounts:
-	mint common.Address,
-	destination common.Address,
-	authority common.Address,
-	multisigSigners []common.Address,
+	mint solana.PublicKey,
+	destination solana.PublicKey,
+	authority solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *MintToChecked {
 	return NewMintToCheckedInstructionBuilder().
 		SetAmount(amount).

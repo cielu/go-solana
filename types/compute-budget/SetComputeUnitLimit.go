@@ -16,8 +16,9 @@ package computebudget
 
 import (
 	"errors"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 const MAX_COMPUTE_UNIT_LIMIT = 1400000
@@ -26,11 +27,11 @@ type SetComputeUnitLimit struct {
 	Units uint32
 }
 
-func (obj *SetComputeUnitLimit) SetAccounts(accounts []*base.AccountMeta) error {
+func (obj *SetComputeUnitLimit) SetAccounts(accounts []*solana.AccountMeta) error {
 	return nil
 }
 
-func (obj SetComputeUnitLimit) GetAccounts() (accounts []*base.AccountMeta) {
+func (obj SetComputeUnitLimit) GetAccounts() (accounts []*solana.AccountMeta) {
 	return
 }
 

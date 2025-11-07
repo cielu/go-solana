@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"fmt"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -46,12 +46,12 @@ type Instruction struct {
 	encodbin.BaseVariant
 }
 
-func (inst *Instruction) ProgramID() common.Address {
+func (inst *Instruction) ProgramID() solana.PublicKey {
 	return base.ComputeBudget
 }
 
-func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
-	return inst.Impl.(base.AccountsGettable).GetAccounts()
+func (inst *Instruction) Accounts() (out []*solana.AccountMeta) {
+	return inst.Impl.(solana.AccountsGettable).GetAccounts()
 }
 
 func (inst *Instruction) Data() ([]byte, error) {

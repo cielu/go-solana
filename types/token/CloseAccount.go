@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // CloseAccount Close an account by transferring all its SOL to the destination account.
@@ -38,16 +38,16 @@ type CloseAccount struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (cloAcc *CloseAccount) SetAccounts(accounts []*base.AccountMeta) error {
+func (cloAcc *CloseAccount) SetAccounts(accounts []*solana.AccountMeta) error {
 	cloAcc.Accounts, cloAcc.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (cloAcc CloseAccount) GetAccounts() (accounts []*base.AccountMeta) {
+func (cloAcc CloseAccount) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, cloAcc.Accounts...)
 	accounts = append(accounts, cloAcc.Signers...)
 	return
@@ -56,54 +56,54 @@ func (cloAcc CloseAccount) GetAccounts() (accounts []*base.AccountMeta) {
 // NewCloseAccountInstructionBuilder creates a new `CloseAccount` instruction builder.
 func NewCloseAccountInstructionBuilder() *CloseAccount {
 	nd := &CloseAccount{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
 
 // SetAccount sets the "account" account.
 // The account to close.
-func (cloAcc *CloseAccount) SetAccount(account common.Address) *CloseAccount {
-	cloAcc.Accounts[0] = base.Meta(account).WRITE()
+func (cloAcc *CloseAccount) SetAccount(account solana.PublicKey) *CloseAccount {
+	cloAcc.Accounts[0] = solana.Meta(account).WRITE()
 	return cloAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to close.
-func (cloAcc *CloseAccount) GetAccount() *base.AccountMeta {
+func (cloAcc *CloseAccount) GetAccount() *solana.AccountMeta {
 	return cloAcc.Accounts[0]
 }
 
 // SetDestinationAccount sets the "destination" account.
 // The destination account.
-func (cloAcc *CloseAccount) SetDestinationAccount(destination common.Address) *CloseAccount {
-	cloAcc.Accounts[1] = base.Meta(destination).WRITE()
+func (cloAcc *CloseAccount) SetDestinationAccount(destination solana.PublicKey) *CloseAccount {
+	cloAcc.Accounts[1] = solana.Meta(destination).WRITE()
 	return cloAcc
 }
 
 // GetDestinationAccount gets the "destination" account.
 // The destination account.
-func (cloAcc *CloseAccount) GetDestinationAccount() *base.AccountMeta {
+func (cloAcc *CloseAccount) GetDestinationAccount() *solana.AccountMeta {
 	return cloAcc.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner.
-func (cloAcc *CloseAccount) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *CloseAccount {
-	cloAcc.Accounts[2] = base.Meta(owner)
+func (cloAcc *CloseAccount) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *CloseAccount {
+	cloAcc.Accounts[2] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		cloAcc.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		cloAcc.Signers = append(cloAcc.Signers, base.Meta(signer).SIGNER())
+		cloAcc.Signers = append(cloAcc.Signers, solana.Meta(signer).SIGNER())
 	}
 	return cloAcc
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner.
-func (cloAcc *CloseAccount) GetOwnerAccount() *base.AccountMeta {
+func (cloAcc *CloseAccount) GetOwnerAccount() *solana.AccountMeta {
 	return cloAcc.Accounts[2]
 }
 
@@ -153,10 +153,10 @@ func (cloAcc CloseAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err er
 // NewCloseAccountInstruction declares a new CloseAccount instruction with the provided parameters and accounts.
 func NewCloseAccountInstruction(
 	// Accounts:
-	account common.Address,
-	destination common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	account solana.PublicKey,
+	destination solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *CloseAccount {
 	return NewCloseAccountInstructionBuilder().
 		SetAccount(account).

@@ -1,7 +1,7 @@
 // Copyright 2024 The go-solana Authors
 // This file is part of the go-solana library.
 
-package crypto
+package solana
 
 import (
 	"crypto/ed25519"
@@ -9,17 +9,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+	"os"
+	"regexp"
+
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/hdwallet"
 	"github.com/mr-tron/base58"
 	"github.com/tyler-smith/go-bip39"
-	"os"
-	"regexp"
 )
 
 type Account struct {
-	Address    common.Address
+	PublicKey    PublicKey
 	PrivateKey ed25519.PrivateKey
 }
 
@@ -31,7 +31,7 @@ func GenerateAccount() (Account, error) {
 	if err != nil {
 		return account, err
 	}
-	copy(account.Address[:], pub)
+	copy(account.PublicKey[:], pub)
 	account.PrivateKey = prv
 	// return account
 	return account, err
@@ -64,8 +64,8 @@ func AccountFromBytes(b []byte) (Account, error) {
 		return Account{}, fmt.Errorf("PrivateKey size mismatch, expected: %v, got: %v", ed25519.PrivateKeySize, len(b))
 	}
 	account := Account{PrivateKey: ed25519.PrivateKey(b)}
-	// bytes to address
-	account.Address = common.BytesToAddress(account.PrivateKey.Public().(ed25519.PublicKey))
+	// bytes to PublicKey
+	account.PublicKey = BytesToPublicKey(account.PrivateKey.Public().(ed25519.PublicKey))
 	// return account
 	return account, nil
 }

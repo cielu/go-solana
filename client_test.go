@@ -1,24 +1,11 @@
-package solclient
+package solana
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
-
-	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/core"
-	"github.com/cielu/go-solana/crypto"
-	"github.com/cielu/go-solana/types"
-	computebudget "github.com/cielu/go-solana/types/compute-budget"
-	"github.com/cielu/go-solana/types/native"
 )
-
-// remove this, if not
-func init() {
-	// os.Setenv("http_proxy", "http://127.0.0.1:7890")
-	// os.Setenv("https_proxy", "http://127.0.0.1:7890")
-	// os.Setenv("all_proxy", "socks5://127.0.0.1:7890")
-}
 
 func newClient() *Client {
 	//
@@ -32,10 +19,17 @@ func newClient() *Client {
 	return c
 }
 
-func getDefaultRpcCfg() types.RpcCommitmentWithMinSlotCfg {
-	return types.RpcCommitmentWithMinSlotCfg{
-		Commitment: types.RpcCommitmentConfirmed,
+func getDefaultRpcCfg() RpcCommitmentWithMinSlotCfg {
+	return RpcCommitmentWithMinSlotCfg{
+		Commitment: RpcCommitmentConfirmed,
 	}
+}
+
+func beautifulConsole(title string, content any) {
+	// MarshalIndent
+	jsonData, _ := json.MarshalIndent(content, "", "    ")
+	// print data
+	fmt.Println(title, string(jsonData))
 }
 
 func TestClient_GetAccountInfo(t *testing.T) {
@@ -44,11 +38,11 @@ func TestClient_GetAccountInfo(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	account := common.Base58ToAddress("89jFVQvaVeLs3h35BC3P592UKF5xB8fK2eyjdBvSFeWw")
+	account := Base58ToPublicKey("89jFVQvaVeLs3h35BC3P592UKF5xB8fK2eyjdBvSFeWw")
 
 	// res, err := c.GetAccountInfo(ctx, account)
 
-	accounts := []common.Address{account}
+	accounts := []PublicKey{account}
 	res, err := c.GetMultipleAccounts(ctx, accounts)
 
 	if err != nil {
@@ -62,7 +56,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 	//
 	// core.BeautifyConsole("dataDetail", dataDetail)
 
-	core.BeautifyConsole("AccountInfo:", res)
+	beautifulConsole("AccountInfo:", res)
 }
 
 func TestClient_GetBalance(t *testing.T) {
@@ -70,12 +64,12 @@ func TestClient_GetBalance(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	account := common.Base58ToAddress("So11111111111111111111111111111111111111112")
+	account := Base58ToPublicKey("So11111111111111111111111111111111111111112")
 	res, err := c.GetBalance(ctx, account)
 	if err != nil {
 		t.Error("GetBalance Failed: %w", err)
 	}
-	core.BeautifyConsole("AccountBalance:", res)
+	beautifulConsole("AccountBalance:", res)
 }
 
 func TestClient_GetBlock(t *testing.T) {
@@ -83,7 +77,7 @@ func TestClient_GetBlock(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	res, err := c.GetBlock(ctx, 260373041)
+	res, err := c.GetBlock(ctx, 378542246)
 	if err != nil {
 		t.Error("GetBlock Failed: %w", err)
 	}
@@ -99,7 +93,7 @@ func TestClient_GetBlock(t *testing.T) {
 		}
 		fmt.Println("===================================================")
 	}
-	// core.BeautifyConsole("BlockInfo:", res)
+	beautifulConsole("BlockInfo:", res)
 }
 
 func TestClient_GetBlockCommitment(t *testing.T) {
@@ -111,7 +105,7 @@ func TestClient_GetBlockCommitment(t *testing.T) {
 	if err != nil {
 		t.Error("GetBlockCommitment Failed: %w", err)
 	}
-	core.BeautifyConsole("BlockCommitment:", res)
+	beautifulConsole("BlockCommitment:", res)
 }
 
 func TestClient_GetBlockHeight(t *testing.T) {
@@ -123,7 +117,7 @@ func TestClient_GetBlockHeight(t *testing.T) {
 	if err != nil {
 		t.Error("GetBlockHeight Failed: %w", err)
 	}
-	core.BeautifyConsole("GetBlockHeight:", res)
+	beautifulConsole("GetBlockHeight:", res)
 }
 
 func TestClient_GetBlockProduction(t *testing.T) {
@@ -135,7 +129,7 @@ func TestClient_GetBlockProduction(t *testing.T) {
 	if err != nil {
 		t.Error("GetBlockProduction Failed: %w", err)
 	}
-	core.BeautifyConsole("GetBlockProduction:", res)
+	beautifulConsole("GetBlockProduction:", res)
 }
 
 func TestClient_GetBlocks(t *testing.T) {
@@ -143,11 +137,11 @@ func TestClient_GetBlocks(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	res, err := c.GetBlocks(ctx, 256731099)
+	res, err := c.GetBlocks(ctx, 378542246)
 	if err != nil {
 		t.Error("GetBlocks Failed: %w", err)
 	}
-	core.BeautifyConsole("GetBlocks:", res)
+	beautifulConsole("GetBlocks:", res)
 }
 
 func TestClient_GetEpochInfo(t *testing.T) {
@@ -159,7 +153,7 @@ func TestClient_GetEpochInfo(t *testing.T) {
 	if err != nil {
 		t.Error("GetEpochInfo Failed: %w", err)
 	}
-	core.BeautifyConsole("GetEpochInfo:", res)
+	beautifulConsole("GetEpochInfo:", res)
 }
 
 func TestClient_GetEpochSchedule(t *testing.T) {
@@ -172,7 +166,7 @@ func TestClient_GetEpochSchedule(t *testing.T) {
 	if err != nil {
 		t.Error("GetEpochSchedule Failed: %w", err)
 	}
-	core.BeautifyConsole("GetEpochSchedule:", res)
+	beautifulConsole("GetEpochSchedule:", res)
 }
 
 func TestClient_GetFeeForMessage(t *testing.T) {
@@ -186,7 +180,7 @@ func TestClient_GetFeeForMessage(t *testing.T) {
 	if err != nil {
 		t.Error("GetFeeForMessage Failed: %w", err)
 	}
-	core.BeautifyConsole("GetFeeForMessage:", res)
+	beautifulConsole("GetFeeForMessage:", res)
 }
 
 func TestClient_GetProgramAccounts(t *testing.T) {
@@ -200,8 +194,10 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 		"offset": 4,
 		"bytes":  "3Mc6vR",
 	}
+	minSlot := uint64(378543712)
 	//
-	cfg := types.RpcCombinedCfg{
+	cfg := RpcCombinedCfg{
+		MinContextSlot: &minSlot,
 		Filter: []map[string]interface{}{
 			{
 				"dataSize": 17,
@@ -211,13 +207,13 @@ func TestClient_GetProgramAccounts(t *testing.T) {
 			},
 		},
 	}
-	account := common.Base58ToAddress("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s")
+	account := Base58ToPublicKey("CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK")
 	//
 	res, err := c.GetProgramAccounts(ctx, account, cfg)
 	if err != nil {
 		t.Error("GetProgramAccounts Failed: %w", err)
 	}
-	core.BeautifyConsole("GetProgramAccounts:", res)
+	beautifulConsole("GetProgramAccounts:", res)
 }
 
 func TestClient_GetRecentPerformanceSamples(t *testing.T) {
@@ -229,24 +225,24 @@ func TestClient_GetRecentPerformanceSamples(t *testing.T) {
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetSignatureStatuses(t *testing.T) {
 	var (
 		c          = newClient()
 		ctx        = context.Background()
-		// signatures = []common.Signature{
-		// 	common.Base58ToSignature("4BC9UMSQrLqEbTvcya6Ukt3Lvq1ZzWpCYRZG6ygGCu26mJYQ1uAiQNVVbu3jPz5SBS2oWKmbhNTR3h6x6wyBELS5"),
-		// }
-		account = common.Base58ToAddress("Vote111111111111111111111111111111111111111")
+		signatures = []Signature{
+			Base58ToSignature("4BC9UMSQrLqEbTvcya6Ukt3Lvq1ZzWpCYRZG6ygGCu26mJYQ1uAiQNVVbu3jPz5SBS2oWKmbhNTR3h6x6wyBELS5"),
+		}
+		// account = Base58ToPublicKey("Vote111111111111111111111111111111111111111")
 	)
-	// res, err := c.GetSignatureStatuses(ctx, signatures, types.RpcSearchTxHistoryCfg{ true })
-	res, err := c.GetSignaturesForAddress(ctx, account)
+	res, err := c.GetSignatureStatuses(ctx, signatures, RpcSearchTxHistoryCfg{ true })
+	// res, err := c.GetSignaturesForPublicKey(ctx, account)
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
@@ -254,15 +250,15 @@ func TestClient_GetTokenAccountsByDelegate(t *testing.T) {
 		c   = newClient()
 		ctx = context.Background()
 	)
-	account := common.Base58ToAddress("2gKXoChNdN3LpMijfLdx4AVs62JBseXTHtrqxCSYreWs")
+	account := Base58ToPublicKey("2gKXoChNdN3LpMijfLdx4AVs62JBseXTHtrqxCSYreWs")
 
-	prog := common.Base58ToAddress("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
+	prog := Base58ToPublicKey("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA")
 	//
-	res, err := c.GetTokenAccountsByDelegate(ctx, account, types.RpcMintWithProgramID{ProgramId: &prog})
+	res, err := c.GetTokenAccountsByDelegate(ctx, account, RpcMintWithProgramID{ProgramId: &prog})
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetTokenLargestAccounts(t *testing.T) {
@@ -271,13 +267,13 @@ func TestClient_GetTokenLargestAccounts(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	token := common.Base58ToAddress("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
+	token := Base58ToPublicKey("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
 
 	res, err := c.GetTokenLargestAccounts(ctx, token)
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetTokenSupply(t *testing.T) {
@@ -286,13 +282,13 @@ func TestClient_GetTokenSupply(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	account := common.Base58ToAddress("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
+	account := Base58ToPublicKey("J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn")
 
 	res, err := c.GetTokenSupply(ctx, account)
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetTransaction(t *testing.T) {
@@ -301,16 +297,16 @@ func TestClient_GetTransaction(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	signature := common.Base58ToSignature("5KNhYcoQLN57iB3oZoLWUeC1oLfhu58GoN1YNV2mhvr3bJQxZW9kmj3k95hwXT2imaAV9NreKDSAo7hSrxt8n6Wb")
+	signature := Base58ToSignature("5KNhYcoQLN57iB3oZoLWUeC1oLfhu58GoN1YNV2mhvr3bJQxZW9kmj3k95hwXT2imaAV9NreKDSAo7hSrxt8n6Wb")
 
-	res, err := c.GetTransaction(ctx, signature, types.RpcGetTransactionCfg{
-		Encoding:              types.EncodingBase64,
+	res, err := c.GetTransaction(ctx, signature, RpcGetTransactionCfg{
+		Encoding:              EncodingBase64,
 		MaxSupportedTxVersion: 1,
 	})
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetVoteAccounts(t *testing.T) {
@@ -324,17 +320,17 @@ func TestClient_GetVoteAccounts(t *testing.T) {
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }
 
-func TestClient_SetComputeBudgetPrice(t *testing.T) {
+func TestClient_SendTransaction(t *testing.T) {
 	var (
 		c   = newClient()
 		ctx = context.Background()
 	)
 
 	var (
-		instrs []types.Instruction
+		instrs []Instruction
 	)
 
 	recentHash, err := c.GetLatestBlockhash(ctx)
@@ -343,23 +339,23 @@ func TestClient_SetComputeBudgetPrice(t *testing.T) {
 		return
 	}
 
-	payer, _ := crypto.AccountFromBase58Key("payer private key")
+	payer, _ := GenerateAccount()
+	// payer, _ := AccountFromBase58Key("payer private key")
 
-	instrs = append(instrs, computebudget.NewSetComputeUnitLimitInstruction(1000000).Build())
+	// instrs = append(instrs, computebudget.NewSetComputeUnitLimitInstruction(1000000).Build())
+	// instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(10000).Build())
 
-	instrs = append(instrs, computebudget.NewSetComputeUnitPriceInstruction(10000).Build())
+	// transferInst := system.NewTransferInstruction(
+	// 	StrToPublicKey("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
+	// 	StrToPublicKey("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
+	// 	1e1,
+	// )
 
-	transferInst := system.NewTransferInstruction(
-		common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
-		common.StrToAddress("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
-		1e1,
-	)
-
-	instrs = append(instrs, transferInst.Build())
+	// instrs = append(instrs, transferInst.Build())
 	// return
-	tx, err := types.NewTransaction(instrs, recentHash.LastBlock.Blockhash, payer.Address)
+	tx, err := NewTransaction(instrs, recentHash.LastBlock.Blockhash, payer.PublicKey)
 
-	sigTx, err := tx.Sign([]crypto.Account{payer})
+	sigTx, err := tx.Sign([]Account{payer})
 	//
 	if err != nil {
 		fmt.Println("Sign Tx Failed:", err)
@@ -371,5 +367,5 @@ func TestClient_SetComputeBudgetPrice(t *testing.T) {
 		t.Error("Res Failed: %w", err)
 	}
 
-	core.BeautifyConsole("Res:", res)
+	beautifulConsole("Res:", res)
 }

@@ -1,10 +1,8 @@
-package solclient
+package solana
 
 import (
 	"context"
 	"fmt"
-	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/types"
 	"testing"
 )
 
@@ -12,10 +10,10 @@ func TestClient_AccountSubscribe(t *testing.T) {
 	var (
 		c             = newClient()
 		ctx           = context.Background()
-		accountNotify = make(chan types.AccountNotifies)
+		accountNotify = make(chan AccountNotifies)
 	)
 
-	account := common.Base58ToAddress("6v3nv8BUJKpXvnBnD4ZvpDiG3u847ALLYyo1NACn2zmV")
+	account := Base58ToPublicKey("6v3nv8BUJKpXvnBnD4ZvpDiG3u847ALLYyo1NACn2zmV")
 	//
 	sub, err := c.AccountSubscribe(ctx, accountNotify, account)
 	if err != nil {
@@ -23,7 +21,7 @@ func TestClient_AccountSubscribe(t *testing.T) {
 	}
 	// if error
 	if err != nil {
-		panic(fmt.Sprintf("EthSubscribe Failed: %s", err.Error()))
+		panic(fmt.Sprintf("Subscribe Failed: %s", err.Error()))
 	}
 
 	defer sub.Unsubscribe()
@@ -45,7 +43,7 @@ func TestClient_BlockSubscribe(t *testing.T) {
 	var (
 		c               = newClient()
 		ctx             = context.Background()
-		blockInfoNotify = make(chan types.BlockNotifies)
+		blockInfoNotify = make(chan BlockNotifies)
 		filter          = ""
 	)
 
@@ -82,7 +80,7 @@ func TestClient_LogsSubscribe(t *testing.T) {
 	var (
 		c              = newClient()
 		ctx            = context.Background()
-		logsInfoNotify = make(chan types.LogsNotifies)
+		logsInfoNotify = make(chan LogsNotifies)
 		filter         = "all"
 	)
 
@@ -115,9 +113,9 @@ func TestClient_ProgramSubscribe(t *testing.T) {
 	var (
 		c             = newClient()
 		ctx           = context.Background()
-		programNotify = make(chan types.ProgramNotifies)
+		programNotify = make(chan ProgramNotifies)
 	)
-	address := common.Base58ToAddress("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
+	address := Base58ToPublicKey("3p7U58GR11MnfRuWCBufj9AW3Y7P1x848CWgtECpNQpt")
 	sub, err := c.ProgramSubscribe(ctx, programNotify, address)
 	if err != nil {
 		t.Error("ProgramSubscribe Failed: %w", err)
@@ -146,10 +144,10 @@ func TestClient_SignatureSubscribe(t *testing.T) {
 	var (
 		c                    = newClient()
 		ctx                  = context.Background()
-		signatureNotifies = make(chan types.SignatureNotifies)
+		signatureNotifies = make(chan SignatureNotifies)
 	)
 
-	signature := common.Base58ToSignature("hLUfBB8BSzoBrqzvyvHyyrCJrkHWeZNFc1uyRw45c5ZZGK5eiyDX7zjWTgE3bzjGyjUAL4Rh3CHiMqkbtiXvPo2")
+	signature := Base58ToSignature("hLUfBB8BSzoBrqzvyvHyyrCJrkHWeZNFc1uyRw45c5ZZGK5eiyDX7zjWTgE3bzjGyjUAL4Rh3CHiMqkbtiXvPo2")
 	sub, err := c.SignatureSubscribe(ctx, signatureNotifies, signature)
 
 	if err != nil {
@@ -178,7 +176,7 @@ func TestClient_SlotSubscribe(t *testing.T) {
 	var (
 		c               = newClient()
 		ctx             = context.Background()
-		SlotNotifies = make(chan types.SlotNotifies)
+		SlotNotifies = make(chan SlotNotifies)
 	)
 
 	sub, err := c.SlotSubscribe(ctx, SlotNotifies)

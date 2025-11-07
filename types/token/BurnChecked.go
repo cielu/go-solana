@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // BurnChecked Burns tokens by removing them from an account.  `BurnChecked` does not
@@ -48,16 +48,16 @@ type BurnChecked struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (brCkd *BurnChecked) SetAccounts(accounts []*base.AccountMeta) error {
+func (brCkd *BurnChecked) SetAccounts(accounts []*solana.AccountMeta) error {
 	brCkd.Accounts, brCkd.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (brCkd BurnChecked) GetAccounts() (accounts []*base.AccountMeta) {
+func (brCkd BurnChecked) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, brCkd.Accounts...)
 	accounts = append(accounts, brCkd.Signers...)
 	return
@@ -66,8 +66,8 @@ func (brCkd BurnChecked) GetAccounts() (accounts []*base.AccountMeta) {
 // NewBurnCheckedInstructionBuilder creates a new `BurnChecked` instruction builder.
 func NewBurnCheckedInstructionBuilder() *BurnChecked {
 	nd := &BurnChecked{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -88,46 +88,46 @@ func (brCkd *BurnChecked) SetDecimals(decimals uint8) *BurnChecked {
 
 // SetSourceAccount sets the "source" account.
 // The account to burn from.
-func (brCkd *BurnChecked) SetSourceAccount(source common.Address) *BurnChecked {
-	brCkd.Accounts[0] = base.Meta(source).WRITE()
+func (brCkd *BurnChecked) SetSourceAccount(source solana.PublicKey) *BurnChecked {
+	brCkd.Accounts[0] = solana.Meta(source).WRITE()
 	return brCkd
 }
 
 // GetSourceAccount gets the "source" account.
 // The account to burn from.
-func (brCkd *BurnChecked) GetSourceAccount() *base.AccountMeta {
+func (brCkd *BurnChecked) GetSourceAccount() *solana.AccountMeta {
 	return brCkd.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (brCkd *BurnChecked) SetMintAccount(mint common.Address) *BurnChecked {
-	brCkd.Accounts[1] = base.Meta(mint).WRITE()
+func (brCkd *BurnChecked) SetMintAccount(mint solana.PublicKey) *BurnChecked {
+	brCkd.Accounts[1] = solana.Meta(mint).WRITE()
 	return brCkd
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (brCkd *BurnChecked) GetMintAccount() *base.AccountMeta {
+func (brCkd *BurnChecked) GetMintAccount() *solana.AccountMeta {
 	return brCkd.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
-func (brCkd *BurnChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *BurnChecked {
-	brCkd.Accounts[2] = base.Meta(owner)
+func (brCkd *BurnChecked) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *BurnChecked {
+	brCkd.Accounts[2] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		brCkd.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		brCkd.Signers = append(brCkd.Signers, base.Meta(signer).SIGNER())
+		brCkd.Signers = append(brCkd.Signers, solana.Meta(signer).SIGNER())
 	}
 	return brCkd
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner/delegate.
-func (brCkd *BurnChecked) GetOwnerAccount() *base.AccountMeta {
+func (brCkd *BurnChecked) GetOwnerAccount() *solana.AccountMeta {
 	return brCkd.Accounts[2]
 }
 
@@ -200,10 +200,10 @@ func NewBurnCheckedInstruction(
 	amount uint64,
 	decimals uint8,
 	// Accounts:
-	source common.Address,
-	mint common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	source solana.PublicKey,
+	mint solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *BurnChecked {
 	return NewBurnCheckedInstructionBuilder().
 		SetAmount(amount).

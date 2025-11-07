@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // Burn tokens by removing them from an account.  `Burn` does not support
@@ -40,16 +40,16 @@ type Burn struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (br *Burn) SetAccounts(accounts []*base.AccountMeta) error {
+func (br *Burn) SetAccounts(accounts []*solana.AccountMeta) error {
 	br.Accounts, br.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (br Burn) GetAccounts() (accounts []*base.AccountMeta) {
+func (br Burn) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, br.Accounts...)
 	accounts = append(accounts, br.Signers...)
 	return
@@ -58,8 +58,8 @@ func (br Burn) GetAccounts() (accounts []*base.AccountMeta) {
 // NewBurnInstructionBuilder creates a new `Burn` instruction builder.
 func NewBurnInstructionBuilder() *Burn {
 	nd := &Burn{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -73,46 +73,46 @@ func (br *Burn) SetAmount(amount uint64) *Burn {
 
 // SetSourceAccount sets the "source" account.
 // The account to burn from.
-func (br *Burn) SetSourceAccount(source common.Address) *Burn {
-	br.Accounts[0] = base.Meta(source).WRITE()
+func (br *Burn) SetSourceAccount(source solana.PublicKey) *Burn {
+	br.Accounts[0] = solana.Meta(source).WRITE()
 	return br
 }
 
 // GetSourceAccount gets the "source" account.
 // The account to burn from.
-func (br *Burn) GetSourceAccount() *base.AccountMeta {
+func (br *Burn) GetSourceAccount() *solana.AccountMeta {
 	return br.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (br *Burn) SetMintAccount(mint common.Address) *Burn {
-	br.Accounts[1] = base.Meta(mint).WRITE()
+func (br *Burn) SetMintAccount(mint solana.PublicKey) *Burn {
+	br.Accounts[1] = solana.Meta(mint).WRITE()
 	return br
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (br *Burn) GetMintAccount() *base.AccountMeta {
+func (br *Burn) GetMintAccount() *solana.AccountMeta {
 	return br.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The account's owner/delegate.
-func (br *Burn) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Burn {
-	br.Accounts[2] = base.Meta(owner)
+func (br *Burn) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *Burn {
+	br.Accounts[2] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		br.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		br.Signers = append(br.Signers, base.Meta(signer).SIGNER())
+		br.Signers = append(br.Signers, solana.Meta(signer).SIGNER())
 	}
 	return br
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The account's owner/delegate.
-func (br *Burn) GetOwnerAccount() *base.AccountMeta {
+func (br *Burn) GetOwnerAccount() *solana.AccountMeta {
 	return br.Accounts[2]
 }
 
@@ -176,10 +176,10 @@ func NewBurnInstruction(
 	// Parameters:
 	amount uint64,
 	// Accounts:
-	source common.Address,
-	mint common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	source solana.PublicKey,
+	mint solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *Burn {
 	return NewBurnInstructionBuilder().
 		SetAmount(amount).

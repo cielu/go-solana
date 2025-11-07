@@ -1,18 +1,17 @@
-package types
+package solana
 
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 type Instruction interface {
-	ProgramID() common.Address     // the programID the instruction acts on
-	Accounts() []*base.AccountMeta // returns the list of accounts the instructions requires
-	Data() ([]byte, error)         // the binary encoded instructions
+	ProgramID() PublicKey       // the programID the instruction acts on
+	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
+	Data() ([]byte, error)    // the binary encoded instructions
 }
 
 type MessageVersion int
@@ -36,11 +35,11 @@ func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 }
 
 // GetTableIDs returns the list of all address table IDs.
-func (lookups MessageAddressTableLookupSlice) GetTableIDs() []common.Address {
+func (lookups MessageAddressTableLookupSlice) GetTableIDs() []PublicKey {
 	if lookups == nil {
 		return nil
 	}
-	ids := make([]common.Address, 0)
+	ids := make([]PublicKey, 0)
 	// lookups
 	for _, lookup := range lookups {
 		// append unique key
@@ -50,7 +49,7 @@ func (lookups MessageAddressTableLookupSlice) GetTableIDs() []common.Address {
 }
 
 type MessageAddressTableLookup struct {
-	AccountKey      common.Address // The account key of the address table.
+	AccountKey      PublicKey // The account key of the address table.
 	WritableIndexes []uint8
 	ReadonlyIndexes []uint8
 }
@@ -61,12 +60,12 @@ type Message struct {
 	// List of base-58 encoded public keys used by the transaction,
 	// including by the instructions and for signatures.
 	// The first `message.header.numRequiredSignatures` public keys must sign the transaction.
-	AccountKeys []common.Address `json:"accountKeys"`
+	AccountKeys []PublicKey `json:"accountKeys"`
 	// Details the account types and signatures required by the transaction.
 	Header MessageHeader `json:"header"`
 	// A base-58 encoded hash of a recent block in the ledger used to
 	// prevent transaction duplication and to give transactions lifetimes.
-	RecentBlockhash common.Hash `json:"recentBlockhash"`
+	RecentBlockhash Hash `json:"recentBlockhash"`
 	// List of program instructions that will be executed in sequence
 	// and committed in one atomic transaction if all succeed.
 	Instructions []CompiledInstruction `json:"instructions"`
@@ -75,11 +74,11 @@ type Message struct {
 	// The actual tables that contain the list of account pubkeys.
 	// NOTE: you need to fetch these from the chain, and then call `SetAddressTables`
 	// before you use this transaction -- otherwise, you will get a panic.
-	addressTables map[common.Address][]common.Address
+	addressTables map[PublicKey][]PublicKey
 }
 
 // GetProgram current program address
-func (m Message) GetProgram(idIndex uint16) common.Address {
+func (m Message) GetProgram(idIndex uint16) PublicKey {
 	return m.AccountKeys[idIndex]
 }
 
@@ -106,16 +105,16 @@ func (m *Message) MarshalBinary() ([]byte, error) {
 			buf = append(buf, byte(accountIdx))
 		}
 
-		encodbin.EncodeCompactU16Length(&buf, len(instruction.Data))
+		encodbin.EncodeCompactU16Length(&buf, len(instruction.Data.RawData))
 
-		buf = append(buf, instruction.Data...)
+		buf = append(buf, instruction.Data.RawData...)
 	}
 	return buf, nil
 }
 
 // Signers returns the pubkeys of all accounts that are signers.
-func (m *Message) Signers() []common.Address {
-	out := make([]common.Address, 0, len(m.AccountKeys))
+func (m *Message) Signers() []PublicKey {
+	out := make([]PublicKey, 0, len(m.AccountKeys))
 	for _, a := range m.AccountKeys {
 		if m.IsSigner(a) {
 			out = append(out, a)
@@ -125,7 +124,7 @@ func (m *Message) Signers() []common.Address {
 }
 
 // Writable returns the pubkeys of all accounts that are writable.
-func (m *Message) Writable() (out []common.Address) {
+func (m *Message) Writable() (out []PublicKey) {
 	for _, a := range m.AccountKeys {
 		if m.IsWritable(a) {
 			out = append(out, a)
@@ -134,7 +133,7 @@ func (m *Message) Writable() (out []common.Address) {
 	return out
 }
 
-func (m *Message) IsSigner(account common.Address) bool {
+func (m *Message) IsSigner(account PublicKey) bool {
 	for idx, acc := range m.AccountKeys {
 		if acc == account {
 			return idx < int(m.Header.NumRequiredSignatures)
@@ -143,7 +142,7 @@ func (m *Message) IsSigner(account common.Address) bool {
 	return false
 }
 
-func (m *Message) IsWritable(account common.Address) bool {
+func (m *Message) IsWritable(account PublicKey) bool {
 	index := 0
 	found := false
 	for idx, acc := range m.AccountKeys {
@@ -160,7 +159,7 @@ func (m *Message) IsWritable(account common.Address) bool {
 		((index >= int(h.NumRequiredSignatures)) && (index < len(m.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
 }
 
-func (m *Message) signerKeys() []common.Address {
+func (m *Message) signerKeys() []PublicKey {
 	return m.AccountKeys[0:m.Header.NumRequiredSignatures]
 }
 
@@ -285,7 +284,7 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 		if err != nil {
 			return fmt.Errorf("unable to decode numAccountKeys: %w", err)
 		}
-		m.AccountKeys = make([]common.Address, numAccountKeys)
+		m.AccountKeys = make([]PublicKey, numAccountKeys)
 		for i := 0; i < numAccountKeys; i++ {
 			_, err := decoder.Read(m.AccountKeys[i][:])
 			if err != nil {
@@ -336,7 +335,7 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 					return fmt.Errorf("unable to decode dataBytes for ix[%d]: %w", instructionIndex, err)
 				}
 				// setBytes
-				m.Instructions[instructionIndex].Data = dataBytes
+				m.Instructions[instructionIndex].Data = BytesToSolData(dataBytes)
 			}
 		}
 	}

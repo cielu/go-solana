@@ -3,7 +3,8 @@ package token
 import (
 	"bytes"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -139,22 +140,22 @@ const (
 
 type Instruction struct {
 	encodbin.BaseVariant
-	TokenProgramID common.Address
+	TokenProgramID solana.PublicKey
 }
 
-func (inst *Instruction) ProgramID() common.Address {
+func (inst *Instruction) ProgramID() solana.PublicKey {
 	if inst.TokenProgramID.IsEmpty() {
 		return base.TokenProgramID
 	}
 	return inst.TokenProgramID
 }
 
-func (inst *Instruction) SetProgramID(tokenProgramID common.Address) {
+func (inst *Instruction) SetProgramID(tokenProgramID solana.PublicKey) {
 	inst.TokenProgramID = tokenProgramID
 }
 
-func (inst *Instruction) Accounts() (out []*base.AccountMeta) {
-	return inst.Impl.(base.AccountsGettable).GetAccounts()
+func (inst *Instruction) Accounts() (out []*solana.AccountMeta) {
+	return inst.Impl.(solana.AccountsGettable).GetAccounts()
 }
 
 func (inst *Instruction) Data() ([]byte, error) {

@@ -1,6 +1,4 @@
-package base
-
-import "github.com/cielu/go-solana/common"
+package solana
 
 type AccountsSettable interface {
 	SetAccounts(accounts []*AccountMeta) error
@@ -11,13 +9,13 @@ type AccountsGettable interface {
 }
 
 type AccountMeta struct {
-	PublicKey  common.Address `json:"publickey"`
+	PublicKey  PublicKey `json:"publickey"`
 	IsWritable bool
 	IsSigner   bool
 }
 
 // Meta intializes a new AccountMeta with the provided pubKey.
-func Meta(pubKey common.Address) *AccountMeta {
+func Meta(pubKey PublicKey) *AccountMeta {
 	return &AccountMeta{
 		PublicKey: pubKey,
 	}
@@ -35,7 +33,7 @@ func (meta *AccountMeta) SIGNER() *AccountMeta {
 	return meta
 }
 
-func NewAccountMeta(pubKey common.Address, WRITE bool, SIGNER bool) *AccountMeta {
+func NewAccountMeta(pubKey PublicKey, WRITE bool, SIGNER bool) *AccountMeta {
 	return &AccountMeta{
 		PublicKey:  pubKey,
 		IsWritable: WRITE,
@@ -95,7 +93,7 @@ func (slice AccountMetaSlice) GetSigners() []*AccountMeta {
 }
 
 // GetKeys returns the pubkeys of all AccountMeta.
-func (slice AccountMetaSlice) GetKeys() (keys []common.Address) {
+func (slice AccountMetaSlice) GetKeys() (keys []PublicKey) {
 	// range slice
 	for _, ac := range slice {
 		keys = append(keys, ac.PublicKey)

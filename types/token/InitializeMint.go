@@ -16,7 +16,8 @@ package token
 
 import (
 	"errors"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -34,25 +35,25 @@ type InitializeMint struct {
 	Decimals *uint8
 
 	// The authority/multisignature to mint tokens.
-	MintAuthority *common.Address
+	MintAuthority *solana.PublicKey
 
 	// The freeze authority/multisignature of the mint.
-	FreezeAuthority *common.Address `bin:"optional"`
+	FreezeAuthority *solana.PublicKey `bin:"optional"`
 
 	// [0] = [WRITE] mint
 	// ··········· The mint to initialize.
 	//
 	// [1] = [] $(SysVarRentPubkey)
 	// ··········· Rent sysvar.
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeMintInstructionBuilder creates a new `InitializeMint` instruction builder.
 func NewInitializeMintInstructionBuilder() *InitializeMint {
 	nd := &InitializeMint{
-		AccountMetaSlice: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*solana.AccountMeta, 2),
 	}
-	nd.AccountMetaSlice[1] = base.Meta(base.SysVarRentPubkey)
+	nd.AccountMetaSlice[1] = solana.Meta(base.SysVarRentPubkey)
 	return nd
 }
 
@@ -65,41 +66,41 @@ func (initMint *InitializeMint) SetDecimals(decimals uint8) *InitializeMint {
 
 // SetMintAuthority sets the "mint_authority" parameter.
 // The authority/multisignature to mint tokens.
-func (initMint *InitializeMint) SetMintAuthority(mint_authority common.Address) *InitializeMint {
+func (initMint *InitializeMint) SetMintAuthority(mint_authority solana.PublicKey) *InitializeMint {
 	initMint.MintAuthority = &mint_authority
 	return initMint
 }
 
 // SetFreezeAuthority sets the "freeze_authority" parameter.
 // The freeze authority/multisignature of the mint.
-func (initMint *InitializeMint) SetFreezeAuthority(freeze_authority common.Address) *InitializeMint {
+func (initMint *InitializeMint) SetFreezeAuthority(freeze_authority solana.PublicKey) *InitializeMint {
 	initMint.FreezeAuthority = &freeze_authority
 	return initMint
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint to initialize.
-func (initMint *InitializeMint) SetMintAccount(mint common.Address) *InitializeMint {
-	initMint.AccountMetaSlice[0] = base.Meta(mint).WRITE()
+func (initMint *InitializeMint) SetMintAccount(mint solana.PublicKey) *InitializeMint {
+	initMint.AccountMetaSlice[0] = solana.Meta(mint).WRITE()
 	return initMint
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint to initialize.
-func (initMint *InitializeMint) GetMintAccount() *base.AccountMeta {
+func (initMint *InitializeMint) GetMintAccount() *solana.AccountMeta {
 	return initMint.AccountMetaSlice[0]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initMint *InitializeMint) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMint {
-	initMint.AccountMetaSlice[1] = base.Meta(SysVarRentPubkey)
+func (initMint *InitializeMint) SetSysVarRentPubkeyAccount(SysVarRentPubkey solana.PublicKey) *InitializeMint {
+	initMint.AccountMetaSlice[1] = solana.Meta(SysVarRentPubkey)
 	return initMint
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initMint *InitializeMint) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+func (initMint *InitializeMint) GetSysVarRentPubkeyAccount() *solana.AccountMeta {
 	return initMint.AccountMetaSlice[1]
 }
 
@@ -179,10 +180,10 @@ func (initMint InitializeMint) MarshalWithEncoder(encoder *encodbin.Encoder) (er
 func NewInitializeMintInstruction(
 	// Parameters:
 	decimals uint8,
-	mint_authority common.Address,
-	freeze_authority common.Address,
+	mint_authority solana.PublicKey,
+	freeze_authority solana.PublicKey,
 	// Accounts:
-	mint common.Address) *InitializeMint {
+	mint solana.PublicKey) *InitializeMint {
 	return NewInitializeMintInstructionBuilder().
 		SetDecimals(decimals).
 		SetMintAuthority(mint_authority).

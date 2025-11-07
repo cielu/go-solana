@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+
 	"github.com/mr-tron/base58"
 )
 
@@ -96,13 +97,4 @@ func DecodeBase58Str(input string) []byte {
 	data, _ := base58.Decode(input)
 	return data
 }
-
-// BeautifyConsole console the content with json format
-func BeautifyConsole(title string, content any) {
-	// MarshalIndent
-	jsonData, _ := json.MarshalIndent(content, "", "    ")
-	// print data
-	fmt.Println(title, string(jsonData))
-}
-
 

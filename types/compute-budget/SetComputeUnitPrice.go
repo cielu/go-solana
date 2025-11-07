@@ -16,19 +16,20 @@ package computebudget
 
 import (
 	"errors"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 type SetComputeUnitPrice struct {
 	MicroLamports uint64
 }
 
-func (obj *SetComputeUnitPrice) SetAccounts(accounts []*base.AccountMeta) error {
+func (obj *SetComputeUnitPrice) SetAccounts(accounts []*solana.AccountMeta) error {
 	return nil
 }
 
-func (obj SetComputeUnitPrice) GetAccounts() (accounts []*base.AccountMeta) {
+func (obj SetComputeUnitPrice) GetAccounts() (accounts []*solana.AccountMeta) {
 	return
 }
 

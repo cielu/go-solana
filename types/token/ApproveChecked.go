@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // ApproveChecked  A delegate is given the authority over tokens on
@@ -50,16 +50,16 @@ type ApproveChecked struct {
 	//
 	// [4...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (apprCkd *ApproveChecked) SetAccounts(accounts []*base.AccountMeta) error {
+func (apprCkd *ApproveChecked) SetAccounts(accounts []*solana.AccountMeta) error {
 	apprCkd.Accounts, apprCkd.Signers = core.SliceSplitFrom(accounts, 4)
 	return nil
 }
 
-func (apprCkd ApproveChecked) GetAccounts() (accounts []*base.AccountMeta) {
+func (apprCkd ApproveChecked) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, apprCkd.Accounts...)
 	accounts = append(accounts, apprCkd.Signers...)
 	return
@@ -68,8 +68,8 @@ func (apprCkd ApproveChecked) GetAccounts() (accounts []*base.AccountMeta) {
 // NewApproveCheckedInstructionBuilder creates a new `ApproveChecked` instruction builder.
 func NewApproveCheckedInstructionBuilder() *ApproveChecked {
 	nd := &ApproveChecked{
-		Accounts: make([]*base.AccountMeta, 4),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 4),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -90,59 +90,59 @@ func (apprCkd *ApproveChecked) SetDecimals(decimals uint8) *ApproveChecked {
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (apprCkd *ApproveChecked) SetSourceAccount(source common.Address) *ApproveChecked {
-	apprCkd.Accounts[0] = base.Meta(source).WRITE()
+func (apprCkd *ApproveChecked) SetSourceAccount(source solana.PublicKey) *ApproveChecked {
+	apprCkd.Accounts[0] = solana.Meta(source).WRITE()
 	return apprCkd
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (apprCkd *ApproveChecked) GetSourceAccount() *base.AccountMeta {
+func (apprCkd *ApproveChecked) GetSourceAccount() *solana.AccountMeta {
 	return apprCkd.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (apprCkd *ApproveChecked) SetMintAccount(mint common.Address) *ApproveChecked {
-	apprCkd.Accounts[1] = base.Meta(mint)
+func (apprCkd *ApproveChecked) SetMintAccount(mint solana.PublicKey) *ApproveChecked {
+	apprCkd.Accounts[1] = solana.Meta(mint)
 	return apprCkd
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (apprCkd *ApproveChecked) GetMintAccount() *base.AccountMeta {
+func (apprCkd *ApproveChecked) GetMintAccount() *solana.AccountMeta {
 	return apprCkd.Accounts[1]
 }
 
 // SetDelegateAccount sets the "delegate" account.
 // The delegate.
-func (apprCkd *ApproveChecked) SetDelegateAccount(delegate common.Address) *ApproveChecked {
-	apprCkd.Accounts[2] = base.Meta(delegate)
+func (apprCkd *ApproveChecked) SetDelegateAccount(delegate solana.PublicKey) *ApproveChecked {
+	apprCkd.Accounts[2] = solana.Meta(delegate)
 	return apprCkd
 }
 
 // GetDelegateAccount gets the "delegate" account.
 // The delegate.
-func (apprCkd *ApproveChecked) GetDelegateAccount() *base.AccountMeta {
+func (apprCkd *ApproveChecked) GetDelegateAccount() *solana.AccountMeta {
 	return apprCkd.Accounts[2]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account owner.
-func (apprCkd *ApproveChecked) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *ApproveChecked {
-	apprCkd.Accounts[3] = base.Meta(owner)
+func (apprCkd *ApproveChecked) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *ApproveChecked {
+	apprCkd.Accounts[3] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		apprCkd.Accounts[3].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		apprCkd.Signers = append(apprCkd.Signers, base.Meta(signer).SIGNER())
+		apprCkd.Signers = append(apprCkd.Signers, solana.Meta(signer).SIGNER())
 	}
 	return apprCkd
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account owner.
-func (apprCkd *ApproveChecked) GetOwnerAccount() *base.AccountMeta {
+func (apprCkd *ApproveChecked) GetOwnerAccount() *solana.AccountMeta {
 	return apprCkd.Accounts[3]
 }
 
@@ -218,11 +218,11 @@ func NewApproveCheckedInstruction(
 	amount uint64,
 	decimals uint8,
 	// Accounts:
-	source common.Address,
-	mint common.Address,
-	delegate common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	source solana.PublicKey,
+	mint solana.PublicKey,
+	delegate solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *ApproveChecked {
 	return NewApproveCheckedInstructionBuilder().
 		SetAmount(amount).

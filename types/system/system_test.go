@@ -5,16 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cielu/go-solana/common"
-	"github.com/cielu/go-solana/crypto"
-	"github.com/cielu/go-solana/solclient"
-	"github.com/cielu/go-solana/types"
+	"github.com/cielu/go-solana"
 	computebudget "github.com/cielu/go-solana/types/compute-budget"
 )
 
-func newClient() *solclient.Client {
+func newClient() *solana.Client {
 	rpcUrl := "https://api.mainnet-beta.solana.com"
-	c, err := solclient.Dial(rpcUrl)
+	c, err := solana.Dial(rpcUrl)
 	if err != nil {
 		panic("Dial rpc endpoint failed")
 	}
@@ -25,7 +22,7 @@ func TestSolTransfer(t *testing.T) {
 	var (
 		c        = newClient()
 		ctx      = context.Background()
-		execInst []types.Instruction
+		execInst []solana.Instruction
 	)
 	//
 	setLimitInst := computebudget.NewSetComputeUnitLimitInstruction(1000000)
@@ -35,8 +32,8 @@ func TestSolTransfer(t *testing.T) {
 	execInst = append(execInst, setPriceInst.Build())
 
 	transferInst := NewTransferInstruction(
-		common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
-		common.StrToAddress("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
+		solana.StrToPublicKey("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"),
+		solana.StrToPublicKey("6XViKPqw7t47tZz8UJR1bJFVzxjnQbuKtN2TBgnfZmo4"),
 		1e1,
 	)
 	execInst = append(execInst, transferInst.Build())
@@ -46,11 +43,11 @@ func TestSolTransfer(t *testing.T) {
 		println("Get latest blockHash err:", err)
 	}
 
-	transaction, err := types.NewTransaction(execInst, latestHash.LastBlock.Blockhash, common.StrToAddress("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"))
+	transaction, err := solana.NewTransaction(execInst, latestHash.LastBlock.Blockhash, solana.StrToPublicKey("EfgnVEwyeeFLZyZ4nnnzZtqV6B3DhdtXFNsGSzdti9ZN"))
 
-	key, _ := crypto.AccountFromBase58Key("")
+	key, _ := solana.AccountFromBase58Key("")
 	// /
-	signTx, err := transaction.Sign([]crypto.Account{key})
+	signTx, err := transaction.Sign([]solana.Account{key})
 	if err != nil {
 		fmt.Println("signErr:", err)
 	}

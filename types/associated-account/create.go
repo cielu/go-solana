@@ -1,7 +1,7 @@
 package associatedaccount
 
 import (
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
 )
@@ -21,11 +21,11 @@ import (
 // limitations under the License.
 
 type Create struct {
-	Payer          common.Address `bin:"-" borsh_skip:"true"`
-	Wallet         common.Address `bin:"-" borsh_skip:"true"`
-	Mint           common.Address `bin:"-" borsh_skip:"true"`
-	TokenProgramID common.Address `bin:"-" borsh_skip:"true"`
-	CreateType     uint8          `bin:"-" borsh_skip:"true"`
+	Payer          solana.PublicKey `bin:"-" borsh_skip:"true"`
+	Wallet         solana.PublicKey `bin:"-" borsh_skip:"true"`
+	Mint           solana.PublicKey `bin:"-" borsh_skip:"true"`
+	TokenProgramID solana.PublicKey `bin:"-" borsh_skip:"true"`
+	CreateType     uint8            `bin:"-" borsh_skip:"true"`
 
 	// [0] = [WRITE, SIGNER] Payer
 	// ··········· Funding account
@@ -47,7 +47,7 @@ type Create struct {
 	//
 	// [6] = [] SysVarRent
 	// ··········· SysVarRentPubkey
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewCreateInstructionBuilder creates a new `Create` instruction builder.
@@ -56,22 +56,22 @@ func NewCreateInstructionBuilder() *Create {
 	return nd
 }
 
-func (inst *Create) SetPayer(payer common.Address) *Create {
+func (inst *Create) SetPayer(payer solana.PublicKey) *Create {
 	inst.Payer = payer
 	return inst
 }
 
-func (inst *Create) SetWallet(wallet common.Address) *Create {
+func (inst *Create) SetWallet(wallet solana.PublicKey) *Create {
 	inst.Wallet = wallet
 	return inst
 }
 
-func (inst *Create) SetMint(mint common.Address) *Create {
+func (inst *Create) SetMint(mint solana.PublicKey) *Create {
 	inst.Mint = mint
 	return inst
 }
 
-func (inst *Create) SetTokenProgramID(tokenProgramID common.Address) *Create {
+func (inst *Create) SetTokenProgramID(tokenProgramID solana.PublicKey) *Create {
 	inst.TokenProgramID = tokenProgramID
 	return inst
 }
@@ -85,7 +85,7 @@ func (inst *Create) SetCreateIdempotent() *Create {
 
 func (inst Create) Build() *Instruction {
 
-	var associatedTokenAddress common.Address
+	var associatedTokenAddress solana.PublicKey
 
 	// Find the associatedTokenAddress;
 	switch inst.TokenProgramID {
@@ -96,7 +96,7 @@ func (inst Create) Build() *Instruction {
 		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint)
 	}
 
-	keys := []*base.AccountMeta{
+	keys := []*solana.AccountMeta{
 		{
 			PublicKey:  inst.Payer,
 			IsSigner:   true,
@@ -154,9 +154,9 @@ func (inst Create) MarshalWithEncoder(encoder *encodbin.Encoder) error {
 }
 
 func NewCreateInstruction(
-	payer common.Address,
-	walletAddress common.Address,
-	splTokenMintAddress common.Address,
+	payer solana.PublicKey,
+	walletAddress solana.PublicKey,
+	splTokenMintAddress solana.PublicKey,
 ) *Create {
 	return NewCreateInstructionBuilder().
 		SetPayer(payer).

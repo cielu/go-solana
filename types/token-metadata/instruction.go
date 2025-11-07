@@ -22,10 +22,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/cielu/go-solana/common"
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/pkg/encodtext"
-	"github.com/cielu/go-solana/types/base"
 )
 
 func init() {
@@ -56,7 +55,7 @@ func init() {
 // 	return &inst, nil
 // }
 
-func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website Website, tokenMetaKey, ownerKey, tokenKey common.Address) *Instruction {
+func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website Website, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
 	return &Instruction{
 		BaseVariant: encodbin.BaseVariant{
 			TypeID: encodbin.TypeIDFromUint32(0, encodbin.LE),
@@ -66,9 +65,9 @@ func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website We
 				Website: website,
 				Symbol:  symbol,
 				Accounts: &RegisterTokenAccounts{
-					TokenMeta: &base.AccountMeta{PublicKey: tokenMetaKey, IsSigner: true},
-					Owner:     &base.AccountMeta{PublicKey: ownerKey, IsWritable: true},
-					Token:     &base.AccountMeta{PublicKey: tokenKey},
+					TokenMeta: &solana.AccountMeta{PublicKey: tokenMetaKey, IsSigner: true},
+					Owner:     &solana.AccountMeta{PublicKey: ownerKey, IsWritable: true},
+					Token:     &solana.AccountMeta{PublicKey: tokenKey},
 				},
 			},
 		},
@@ -81,16 +80,16 @@ type Instruction struct {
 
 var _ encodbin.EncoderDecoder = &Instruction{}
 
-func (i *Instruction) Accounts() (out []*base.AccountMeta) {
+func (i *Instruction) Accounts() (out []*solana.AccountMeta) {
 	switch i.TypeID {
 	case encodbin.TypeIDFromUint32(0, encodbin.LE):
 		accounts := i.Impl.(*RegisterToken).Accounts
-		out = []*base.AccountMeta{accounts.TokenMeta, accounts.Owner, accounts.Token}
+		out = []*solana.AccountMeta{accounts.TokenMeta, accounts.Owner, accounts.Token}
 	}
 	return
 }
 
-func (i *Instruction) ProgramID() common.Address {
+func (i *Instruction) ProgramID() solana.PublicKey {
 	return ProgramID()
 }
 
@@ -123,9 +122,9 @@ func (i Instruction) MarshalWithEncoder(encoder *encodbin.Encoder) error {
 }
 
 type RegisterTokenAccounts struct {
-	TokenMeta *base.AccountMeta `text:"linear,notype"`
-	Owner     *base.AccountMeta `text:"linear,notype"`
-	Token     *base.AccountMeta `text:"linear,notype"`
+	TokenMeta *solana.AccountMeta `text:"linear,notype"`
+	Owner     *solana.AccountMeta `text:"linear,notype"`
+	Token     *solana.AccountMeta `text:"linear,notype"`
 }
 
 type RegisterToken struct {
@@ -136,7 +135,7 @@ type RegisterToken struct {
 	Accounts *RegisterTokenAccounts `bin:"-"`
 }
 
-func (r *RegisterToken) SetAccounts(accounts []*base.AccountMeta) error {
+func (r *RegisterToken) SetAccounts(accounts []*solana.AccountMeta) error {
 	if len(accounts) < 9 {
 		return fmt.Errorf("insufficient account")
 	}

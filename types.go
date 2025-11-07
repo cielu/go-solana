@@ -1,7 +1,7 @@
 // Copyright 2024 The go-solana Authors
 // This file is part of the go-solana library.
 
-package common
+package solana
 
 import (
 	"bytes"
@@ -16,119 +16,119 @@ import (
 	"github.com/mr-tron/base58"
 )
 
-// Lengths of signatures and addresses in bytes.
+// Lengths of signatures and PublicKeys in bytes.
 const (
 	// HashLength is the expected length of the hash
 	HashLength = 32
-	// AddressLength is the expected length of the address
-	AddressLength = 32
+	// PublicKeyLength is the expected length of the PublicKey
+	PublicKeyLength = 32
 	// SignatureLength is the expected length of the signature
 	SignatureLength = 64
 )
 
 // ///// -------------------------------------------------///////
 // ///// -------------------------------------------------///////
-// ///// -------------------- Address --------------------///////
-// ///// -------------------- Address --------------------///////
+// ///// -------------------- PublicKey --------------------///////
+// ///// -------------------- PublicKey --------------------///////
 // ///// -------------------------------------------------///////
 // ///// -------------------------------------------------///////
 
-// Address The address
-type Address [AddressLength]byte
+// PublicKey The PublicKey
+type PublicKey [PublicKeyLength]byte
 
-// BytesToAddress returns Address with value b.
-func BytesToAddress(b []byte) (a Address) {
+// BytesToPublicKey returns PublicKey with value b.
+func BytesToPublicKey(b []byte) (a PublicKey) {
 	a.SetBytes(b)
 	return
 }
 
-// BigToAddress returns Address with byte values of b.
-func BigToAddress(b *big.Int) Address { return BytesToAddress(b.Bytes()) }
+// BigIntToPublicKey returns PublicKey with byte values of b.
+func BigIntToPublicKey(b *big.Int) PublicKey { return BytesToPublicKey(b.Bytes()) }
 
-// StrToAddress returns Address with byte values of b.
+// StrToPublicKey returns PublicKey with byte values of b.
 // Notice: only support base58/base64 str
-func StrToAddress(b string) Address {
+func StrToPublicKey(b string) PublicKey {
 	// decode base58 str
 	if d, err := base58.Decode(b); err == nil {
-		return BytesToAddress(d)
+		return BytesToPublicKey(d)
 	}
 	// decode base64 str
 	if d, err := base64.StdEncoding.DecodeString(b); err == nil {
-		return BytesToAddress(d)
+		return BytesToPublicKey(d)
 	}
 	// empty
-	return Address{}
+	return PublicKey{}
 }
 
-// Base58ToAddress returns Address with byte values of b.
-func Base58ToAddress(b string) Address {
+// Base58ToPublicKey returns PublicKey with byte values of b.
+func Base58ToPublicKey(b string) PublicKey {
 	// decode base58
 	d, _ := base58.Decode(b)
-	// bytes to address
-	return BytesToAddress(d)
+	// bytes to PublicKey
+	return BytesToPublicKey(d)
 }
 
-// Base64ToAddress returns Address with byte values of b.
-func Base64ToAddress(b string) Address {
+// Base64ToPublicKey returns PublicKey with byte values of b.
+func Base64ToPublicKey(b string) PublicKey {
 	// decode base64
 	d, _ := base64.StdEncoding.DecodeString(b)
-	// bytes to address
-	return BytesToAddress(d)
+	// bytes to PublicKey
+	return BytesToPublicKey(d)
 }
 
-// IsEmpty address is empty
-func (a Address) IsEmpty() bool {
-	return a == Address{}
+// IsEmpty PublicKey is empty
+func (a PublicKey) IsEmpty() bool {
+	return a == PublicKey{}
 }
 
-// Equals compares address a eq b
-func (a Address) Equals(b Address) bool  {
+// Equals compares PublicKey a eq b
+func (a PublicKey) Equals(b PublicKey) bool  {
 	return a==b
 }
 
-// Cmp compares two addresses.
-func (a Address) Cmp(other Address) int {
+// Cmp compares two PublicKeyes.
+func (a PublicKey) Cmp(other PublicKey) int {
 	return bytes.Compare(a[:], other[:])
 }
 
-// Bytes return Address bytes
-func (a Address) Bytes() []byte { return a[:] }
+// Bytes return PublicKey bytes
+func (a PublicKey) Bytes() []byte { return a[:] }
 
-// Big return Address to *big.Int
-func (a Address) Big() *big.Int { return new(big.Int).SetBytes(a[:]) }
+// Big return PublicKey to *big.Int
+func (a PublicKey) Big() *big.Int { return new(big.Int).SetBytes(a[:]) }
 
 // Base58 return base58 account
-func (a Address) Base58() string {
+func (a PublicKey) Base58() string {
 	return base58.Encode(a[:])
 }
 
 // String return base58 account
-func (a Address) String() string {
+func (a PublicKey) String() string {
 	return a.Base58()
 }
 
-// SetBytes sets the address to the value of b.
-func (a *Address) SetBytes(b []byte) {
+// SetBytes sets the PublicKey to the value of b.
+func (a *PublicKey) SetBytes(b []byte) {
 	if len(b) > len(a) {
-		b = b[len(b)-AddressLength:]
+		b = b[len(b)-PublicKeyLength:]
 	}
-	copy(a[AddressLength-len(b):], b)
+	copy(a[PublicKeyLength-len(b):], b)
 }
 
 // MarshalText returns base58 str account
-func (a Address) MarshalText() ([]byte, error) {
+func (a PublicKey) MarshalText() ([]byte, error) {
 	input, err := json.Marshal(a.Base58())
 	return input[1 : len(input)-1], err
 }
 
 // UnmarshalText parses an account in base58 syntax.
-func (a *Address) UnmarshalText(input []byte) error {
+func (a *PublicKey) UnmarshalText(input []byte) error {
 	a.SetBytes(input)
 	return nil
 }
 
 // UnmarshalJSON parses an account in base58 syntax.
-func (a *Address) UnmarshalJSON(input []byte) error {
+func (a *PublicKey) UnmarshalJSON(input []byte) error {
 	// Unmarshal data to []byte
 	data, _, err := core.UnmarshalDataByEncoding(input)
 	// set string to Hash
@@ -137,34 +137,34 @@ func (a *Address) UnmarshalJSON(input []byte) error {
 }
 
 // Scan implements Scanner for database/sql.
-func (a *Address) Scan(src interface{}) error {
+func (a *PublicKey) Scan(src interface{}) error {
 	srcB, ok := src.([]byte)
 	if !ok {
-		return fmt.Errorf("can't scan %T into Address", src)
+		return fmt.Errorf("can't scan %T into PublicKey", src)
 	}
-	if len(srcB) != AddressLength {
-		return fmt.Errorf("can't scan []byte of len %d into Address, want %d", len(srcB), AddressLength)
+	if len(srcB) != PublicKeyLength {
+		return fmt.Errorf("can't scan []byte of len %d into PublicKey, want %d", len(srcB), PublicKeyLength)
 	}
 	copy(a[:], srcB)
 	return nil
 }
 
 // Value implements valuer for database/sql.
-func (a Address) Value() (driver.Value, error) {
+func (a PublicKey) Value() (driver.Value, error) {
 	return a[:], nil
 }
 
 // ImplementsGraphQLType returns true if Hash implements the specified GraphQL type.
-func (a Address) ImplementsGraphQLType(name string) bool { return name == "Address" }
+func (a PublicKey) ImplementsGraphQLType(name string) bool { return name == "PublicKey" }
 
 // UnmarshalGraphQL unmarshals the provided GraphQL query data.
-func (a *Address) UnmarshalGraphQL(input interface{}) error {
+func (a *PublicKey) UnmarshalGraphQL(input interface{}) error {
 	var err error
 	switch input := input.(type) {
 	case string:
 		err = a.UnmarshalText([]byte(input))
 	default:
-		err = fmt.Errorf("unexpected type %T for Address", input)
+		err = fmt.Errorf("unexpected type %T for PublicKey", input)
 	}
 	return err
 }
@@ -215,7 +215,7 @@ func Base58ToHash(b string) Hash {
 func Base64ToHash(b string) Hash {
 	// decode base64
 	d, _ := base64.StdEncoding.DecodeString(b)
-	// bytes to address
+	// bytes to PublicKey
 	return BytesToHash(d)
 }
 
@@ -310,29 +310,29 @@ func (h *Hash) UnmarshalGraphQL(input interface{}) error {
 // ///// -------------------------------------------------///////
 // ///// -------------------------------------------------///////
 
-type Base58 []byte
-
-func (t Base58) MarshalJSON() ([]byte, error) {
-	return json.Marshal(base58.Encode(t))
-}
-
-func (t *Base58) UnmarshalJSON(data []byte) (err error) {
-	var s string
-	err = json.Unmarshal(data, &s)
-	if err != nil {
-		return
-	}
-	if s == "" {
-		*t = []byte{}
-		return nil
-	}
-	*t, err = base58.Decode(s)
-	return
-}
-
-func (t Base58) String() string {
-	return base58.Encode(t)
-}
+// type Base58 []byte
+//
+// func (t Base58) MarshalJSON() ([]byte, error) {
+// 	return json.Marshal(base58.Encode(t))
+// }
+//
+// func (t *Base58) UnmarshalJSON(data []byte) (err error) {
+// 	var s string
+// 	err = json.Unmarshal(data, &s)
+// 	if err != nil {
+// 		return
+// 	}
+// 	if s == "" {
+// 		*t = []byte{}
+// 		return nil
+// 	}
+// 	*t, err = base58.Decode(s)
+// 	return
+// }
+//
+// func (t Base58) String() string {
+// 	return base58.Encode(t)
+// }
 
 
 // ///// -------------------------------------------------///////
@@ -346,6 +346,12 @@ func (t Base58) String() string {
 type SolData struct {
 	RawData  []byte
 	Encoding string
+}
+
+// BytesToSolData default base58
+func BytesToSolData(data []byte) (sd SolData) {
+	sd.SetBytes(data)
+	return
 }
 
 // Base58 return base58 str
@@ -434,7 +440,7 @@ func BigToSignature(b *big.Int) Signature { return BytesToSignature(b.Bytes()) }
 func Base58ToSignature(b string) Signature {
 	// decode base58
 	d, _ := base58.Decode(b)
-	// bytes to address
+	// bytes to PublicKey
 	return BytesToSignature(d)
 }
 
@@ -453,7 +459,7 @@ func StrToSignature(b string) Signature {
 	return Signature{}
 }
 
-// Cmp compares two addresses.
+// Cmp compares two PublicKeyes.
 func (s Signature) Cmp(other Signature) int {
 	return bytes.Compare(s[:], other[:])
 }
@@ -474,7 +480,7 @@ func (s Signature) String() string {
 	return s.Base58()
 }
 
-// SetBytes sets the address to the value of b.
+// SetBytes sets the PublicKey to the value of b.
 func (s *Signature) SetBytes(b []byte) {
 	if len(b) > len(s) {
 		b = b[len(b)-SignatureLength:]

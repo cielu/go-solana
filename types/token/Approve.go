@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // Approve A delegate is given the authority over tokens on
@@ -40,16 +40,16 @@ type Approve struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (appr *Approve) SetAccounts(accounts []*base.AccountMeta) error {
+func (appr *Approve) SetAccounts(accounts []*solana.AccountMeta) error {
 	appr.Accounts, appr.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (appr Approve) GetAccounts() (accounts []*base.AccountMeta) {
+func (appr Approve) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, appr.Accounts...)
 	accounts = append(accounts, appr.Signers...)
 	return
@@ -58,8 +58,8 @@ func (appr Approve) GetAccounts() (accounts []*base.AccountMeta) {
 // NewApproveInstructionBuilder creates a new `Approve` instruction builder.
 func NewApproveInstructionBuilder() *Approve {
 	nd := &Approve{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
@@ -73,46 +73,46 @@ func (appr *Approve) SetAmount(amount uint64) *Approve {
 
 // SetSourceAccount sets the "source" account.
 // The source account.
-func (appr *Approve) SetSourceAccount(source common.Address) *Approve {
-	appr.Accounts[0] = base.Meta(source).WRITE()
+func (appr *Approve) SetSourceAccount(source solana.PublicKey) *Approve {
+	appr.Accounts[0] = solana.Meta(source).WRITE()
 	return appr
 }
 
 // GetSourceAccount gets the "source" account.
 // The source account.
-func (appr *Approve) GetSourceAccount() *base.AccountMeta {
+func (appr *Approve) GetSourceAccount() *solana.AccountMeta {
 	return appr.Accounts[0]
 }
 
 // SetDelegateAccount sets the "delegate" account.
 // The delegate.
-func (appr *Approve) SetDelegateAccount(delegate common.Address) *Approve {
-	appr.Accounts[1] = base.Meta(delegate)
+func (appr *Approve) SetDelegateAccount(delegate solana.PublicKey) *Approve {
+	appr.Accounts[1] = solana.Meta(delegate)
 	return appr
 }
 
 // GetDelegateAccount gets the "delegate" account.
 // The delegate.
-func (appr *Approve) GetDelegateAccount() *base.AccountMeta {
+func (appr *Approve) GetDelegateAccount() *solana.AccountMeta {
 	return appr.Accounts[1]
 }
 
 // SetOwnerAccount sets the "owner" account.
 // The source account owner.
-func (appr *Approve) SetOwnerAccount(owner common.Address, multisigSigners ...common.Address) *Approve {
-	appr.Accounts[2] = base.Meta(owner)
+func (appr *Approve) SetOwnerAccount(owner solana.PublicKey, multisigSigners ...solana.PublicKey) *Approve {
+	appr.Accounts[2] = solana.Meta(owner)
 	if len(multisigSigners) == 0 {
 		appr.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		appr.Signers = append(appr.Signers, base.Meta(signer).SIGNER())
+		appr.Signers = append(appr.Signers, solana.Meta(signer).SIGNER())
 	}
 	return appr
 }
 
 // GetOwnerAccount gets the "owner" account.
 // The source account owner.
-func (appr *Approve) GetOwnerAccount() *base.AccountMeta {
+func (appr *Approve) GetOwnerAccount() *solana.AccountMeta {
 	return appr.Accounts[2]
 }
 
@@ -176,10 +176,10 @@ func NewApproveInstruction(
 	// Parameters:
 	amount uint64,
 	// Accounts:
-	source common.Address,
-	delegate common.Address,
-	owner common.Address,
-	multisigSigners []common.Address,
+	source solana.PublicKey,
+	delegate solana.PublicKey,
+	owner solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *Approve {
 	return NewApproveInstructionBuilder().
 		SetAmount(amount).

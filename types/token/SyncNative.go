@@ -16,9 +16,9 @@ package token
 
 import (
 	"errors"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // SyncNative Given a wrapped / native token account (a token account containing SOL)
@@ -30,32 +30,32 @@ type SyncNative struct {
 
 	// [0] = [WRITE] tokenAccount
 	// ··········· The native token account to sync with its underlying lamports.
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewSyncNativeInstructionBuilder creates a new `SyncNative` instruction builder.
 func NewSyncNativeInstructionBuilder() *SyncNative {
 	nd := &SyncNative{
-		AccountMetaSlice: make([]*base.AccountMeta, 1),
+		AccountMetaSlice: make([]*solana.AccountMeta, 1),
 	}
 	return nd
 }
 
-func (sync SyncNative) GetAccounts() (accounts []*base.AccountMeta) {
+func (sync SyncNative) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, sync.AccountMetaSlice...)
 	return
 }
 
 // SetTokenAccount sets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
-func (sNative *SyncNative) SetTokenAccount(tokenAccount common.Address) *SyncNative {
-	sNative.AccountMetaSlice[0] = base.Meta(tokenAccount).WRITE()
+func (sNative *SyncNative) SetTokenAccount(tokenAccount solana.PublicKey) *SyncNative {
+	sNative.AccountMetaSlice[0] = solana.Meta(tokenAccount).WRITE()
 	return sNative
 }
 
 // GetTokenAccount gets the "tokenAccount" account.
 // The native token account to sync with its underlying lamports.
-func (sNative *SyncNative) GetTokenAccount() *base.AccountMeta {
+func (sNative *SyncNative) GetTokenAccount() *solana.AccountMeta {
 	return sNative.AccountMetaSlice[0]
 }
 
@@ -93,7 +93,7 @@ func (sNative SyncNative) MarshalWithEncoder(encoder *encodbin.Encoder) (err err
 // NewSyncNativeInstruction declares a new SyncNative instruction with the provided parameters and accounts.
 func NewSyncNativeInstruction(
 	// Accounts:
-	tokenAccount common.Address) *SyncNative {
+	tokenAccount solana.PublicKey) *SyncNative {
 	return NewSyncNativeInstructionBuilder().
 		SetTokenAccount(tokenAccount)
 }

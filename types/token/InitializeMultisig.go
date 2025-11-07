@@ -17,7 +17,8 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/cielu/go-solana/types/base"
@@ -48,16 +49,16 @@ type InitializeMultisig struct {
 	//
 	// [2...] = [SIGNER] signers
 	// ··········· ..2+N The signer accounts, must equal to N where 1 <= N <=11
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (initMs *InitializeMultisig) SetAccounts(accounts []*base.AccountMeta) error {
+func (initMs *InitializeMultisig) SetAccounts(accounts []*solana.AccountMeta) error {
 	initMs.Accounts, initMs.Signers = core.SliceSplitFrom(accounts, 2)
 	return nil
 }
 
-func (initMs InitializeMultisig) GetAccounts() (accounts []*base.AccountMeta) {
+func (initMs InitializeMultisig) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, initMs.Accounts...)
 	accounts = append(accounts, initMs.Signers...)
 	return
@@ -66,10 +67,10 @@ func (initMs InitializeMultisig) GetAccounts() (accounts []*base.AccountMeta) {
 // NewInitializeMultisigInstructionBuilder creates a new `InitializeMultisig` instruction builder.
 func NewInitializeMultisigInstructionBuilder() *InitializeMultisig {
 	nd := &InitializeMultisig{
-		Accounts: make([]*base.AccountMeta, 2),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 2),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
-	nd.Accounts[1] = base.Meta(base.SysVarRentPubkey)
+	nd.Accounts[1] = solana.Meta(base.SysVarRentPubkey)
 	return nd
 }
 
@@ -83,35 +84,35 @@ func (initMs *InitializeMultisig) SetM(m uint8) *InitializeMultisig {
 
 // SetAccount sets the "account" account.
 // The multisignature account to initialize.
-func (initMs *InitializeMultisig) SetAccount(account common.Address) *InitializeMultisig {
-	initMs.Accounts[0] = base.Meta(account).WRITE()
+func (initMs *InitializeMultisig) SetAccount(account solana.PublicKey) *InitializeMultisig {
+	initMs.Accounts[0] = solana.Meta(account).WRITE()
 	return initMs
 }
 
 // GetAccount gets the "account" account.
 // The multisignature account to initialize.
-func (initMs *InitializeMultisig) GetAccount() *base.AccountMeta {
+func (initMs *InitializeMultisig) GetAccount() *solana.AccountMeta {
 	return initMs.Accounts[0]
 }
 
 // SetSysVarRentPubkeyAccount sets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initMs *InitializeMultisig) SetSysVarRentPubkeyAccount(SysVarRentPubkey common.Address) *InitializeMultisig {
-	initMs.Accounts[1] = base.Meta(SysVarRentPubkey)
+func (initMs *InitializeMultisig) SetSysVarRentPubkeyAccount(SysVarRentPubkey solana.PublicKey) *InitializeMultisig {
+	initMs.Accounts[1] = solana.Meta(SysVarRentPubkey)
 	return initMs
 }
 
 // GetSysVarRentPubkeyAccount gets the "$(SysVarRentPubkey)" account.
 // Rent sysvar.
-func (initMs *InitializeMultisig) GetSysVarRentPubkeyAccount() *base.AccountMeta {
+func (initMs *InitializeMultisig) GetSysVarRentPubkeyAccount() *solana.AccountMeta {
 	return initMs.Accounts[1]
 }
 
 // AddSigners adds the "signers" accounts.
 // ..2+N The signer accounts, must equal to N where 1 <= N <=11
-func (initMs *InitializeMultisig) AddSigners(signers ...common.Address) *InitializeMultisig {
+func (initMs *InitializeMultisig) AddSigners(signers ...solana.PublicKey) *InitializeMultisig {
 	for _, signer := range signers {
-		initMs.Signers = append(initMs.Signers, base.Meta(signer).SIGNER())
+		initMs.Signers = append(initMs.Signers, solana.Meta(signer).SIGNER())
 	}
 	return initMs
 }
@@ -173,9 +174,9 @@ func NewInitializeMultisigInstruction(
 	// Parameters:
 	m uint8,
 	// Accounts:
-	account common.Address,
-	SysVarRentPubkey common.Address,
-	signers []common.Address,
+	account solana.PublicKey,
+	SysVarRentPubkey solana.PublicKey,
+	signers []solana.PublicKey,
 ) *InitializeMultisig {
 	return NewInitializeMultisigInstructionBuilder().
 		SetM(m).

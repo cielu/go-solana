@@ -17,10 +17,10 @@ package token
 import (
 	"errors"
 	"fmt"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // ThawAccount Thaw a Frozen account using the Mint's freeze_authority (if set).
@@ -37,16 +37,16 @@ type ThawAccount struct {
 	//
 	// [3...] = [SIGNER] signers
 	// ··········· M signer accounts.
-	Accounts []*base.AccountMeta `bin:"-" borsh_skip:"true"`
-	Signers  []*base.AccountMeta `bin:"-" borsh_skip:"true"`
+	Accounts []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
+	Signers  []*solana.AccountMeta `bin:"-" borsh_skip:"true"`
 }
 
-func (tAcc *ThawAccount) SetAccounts(accounts []*base.AccountMeta) error {
+func (tAcc *ThawAccount) SetAccounts(accounts []*solana.AccountMeta) error {
 	tAcc.Accounts, tAcc.Signers = core.SliceSplitFrom(accounts, 3)
 	return nil
 }
 
-func (tAcc ThawAccount) GetAccounts() (accounts []*base.AccountMeta) {
+func (tAcc ThawAccount) GetAccounts() (accounts []*solana.AccountMeta) {
 	accounts = append(accounts, tAcc.Accounts...)
 	accounts = append(accounts, tAcc.Signers...)
 	return
@@ -55,54 +55,54 @@ func (tAcc ThawAccount) GetAccounts() (accounts []*base.AccountMeta) {
 // NewThawAccountInstructionBuilder creates a new `ThawAccount` instruction builder.
 func NewThawAccountInstructionBuilder() *ThawAccount {
 	nd := &ThawAccount{
-		Accounts: make([]*base.AccountMeta, 3),
-		Signers:  make([]*base.AccountMeta, 0),
+		Accounts: make([]*solana.AccountMeta, 3),
+		Signers:  make([]*solana.AccountMeta, 0),
 	}
 	return nd
 }
 
 // SetAccount sets the "account" account.
 // The account to thaw.
-func (tAcc *ThawAccount) SetAccount(account common.Address) *ThawAccount {
-	tAcc.Accounts[0] = base.Meta(account).WRITE()
+func (tAcc *ThawAccount) SetAccount(account solana.PublicKey) *ThawAccount {
+	tAcc.Accounts[0] = solana.Meta(account).WRITE()
 	return tAcc
 }
 
 // GetAccount gets the "account" account.
 // The account to thaw.
-func (tAcc *ThawAccount) GetAccount() *base.AccountMeta {
+func (tAcc *ThawAccount) GetAccount() *solana.AccountMeta {
 	return tAcc.Accounts[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The token mint.
-func (tAcc *ThawAccount) SetMintAccount(mint common.Address) *ThawAccount {
-	tAcc.Accounts[1] = base.Meta(mint)
+func (tAcc *ThawAccount) SetMintAccount(mint solana.PublicKey) *ThawAccount {
+	tAcc.Accounts[1] = solana.Meta(mint)
 	return tAcc
 }
 
 // GetMintAccount gets the "mint" account.
 // The token mint.
-func (tAcc *ThawAccount) GetMintAccount() *base.AccountMeta {
+func (tAcc *ThawAccount) GetMintAccount() *solana.AccountMeta {
 	return tAcc.Accounts[1]
 }
 
 // SetAuthorityAccount sets the "authority" account.
 // The mint freeze authority.
-func (tAcc *ThawAccount) SetAuthorityAccount(authority common.Address, multisigSigners ...common.Address) *ThawAccount {
-	tAcc.Accounts[2] = base.Meta(authority)
+func (tAcc *ThawAccount) SetAuthorityAccount(authority solana.PublicKey, multisigSigners ...solana.PublicKey) *ThawAccount {
+	tAcc.Accounts[2] = solana.Meta(authority)
 	if len(multisigSigners) == 0 {
 		tAcc.Accounts[2].SIGNER()
 	}
 	for _, signer := range multisigSigners {
-		tAcc.Signers = append(tAcc.Signers, base.Meta(signer).SIGNER())
+		tAcc.Signers = append(tAcc.Signers, solana.Meta(signer).SIGNER())
 	}
 	return tAcc
 }
 
 // GetAuthorityAccount gets the "authority" account.
 // The mint freeze authority.
-func (tAcc *ThawAccount) GetAuthorityAccount() *base.AccountMeta {
+func (tAcc *ThawAccount) GetAuthorityAccount() *solana.AccountMeta {
 	return tAcc.Accounts[2]
 }
 
@@ -152,10 +152,10 @@ func (tAcc ThawAccount) MarshalWithEncoder(encoder *encodbin.Encoder) (err error
 // NewThawAccountInstruction declares a new ThawAccount instruction with the provided parameters and accounts.
 func NewThawAccountInstruction(
 	// Accounts:
-	account common.Address,
-	mint common.Address,
-	authority common.Address,
-	multisigSigners []common.Address,
+	account solana.PublicKey,
+	mint solana.PublicKey,
+	authority solana.PublicKey,
+	multisigSigners []solana.PublicKey,
 ) *ThawAccount {
 	return NewThawAccountInstructionBuilder().
 		SetAccount(account).

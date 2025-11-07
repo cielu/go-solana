@@ -16,62 +16,62 @@ package token
 
 import (
 	"errors"
-	"github.com/cielu/go-solana/common"
+
+	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/pkg/encodbin"
-	"github.com/cielu/go-solana/types/base"
 )
 
 // InitializeAccount3 Like InitializeAccount2, but does not require the Rent sysvar to be provided.
 type InitializeAccount3 struct {
 	// The new account's owner/multisignature.
-	Owner *common.Address
+	Owner *solana.PublicKey
 
 	// [0] = [WRITE] account
 	// ··········· The account to initialize.
 	//
 	// [1] = [] mint
 	// ··········· The mint this account will be associated with.
-	base.AccountMetaSlice `bin:"-" borsh_skip:"true"`
+	solana.AccountMetaSlice `bin:"-" borsh_skip:"true"`
 }
 
 // NewInitializeAccount3InstructionBuilder creates a new `InitializeAccount3` instruction builder.
 func NewInitializeAccount3InstructionBuilder() *InitializeAccount3 {
 	nd := &InitializeAccount3{
-		AccountMetaSlice: make([]*base.AccountMeta, 2),
+		AccountMetaSlice: make([]*solana.AccountMeta, 2),
 	}
 	return nd
 }
 
 // SetOwner sets the "owner" parameter.
 // The new account's owner/multisignature.
-func (initAcc3 *InitializeAccount3) SetOwner(owner common.Address) *InitializeAccount3 {
+func (initAcc3 *InitializeAccount3) SetOwner(owner solana.PublicKey) *InitializeAccount3 {
 	initAcc3.Owner = &owner
 	return initAcc3
 }
 
 // SetAccount sets the "account" account.
 // The account to initialize.
-func (initAcc3 *InitializeAccount3) SetAccount(account common.Address) *InitializeAccount3 {
-	initAcc3.AccountMetaSlice[0] = base.Meta(account).WRITE()
+func (initAcc3 *InitializeAccount3) SetAccount(account solana.PublicKey) *InitializeAccount3 {
+	initAcc3.AccountMetaSlice[0] = solana.Meta(account).WRITE()
 	return initAcc3
 }
 
 // GetAccount gets the "account" account.
 // The account to initialize.
-func (initAcc3 *InitializeAccount3) GetAccount() *base.AccountMeta {
+func (initAcc3 *InitializeAccount3) GetAccount() *solana.AccountMeta {
 	return initAcc3.AccountMetaSlice[0]
 }
 
 // SetMintAccount sets the "mint" account.
 // The mint this account will be associated with.
-func (initAcc3 *InitializeAccount3) SetMintAccount(mint common.Address) *InitializeAccount3 {
-	initAcc3.AccountMetaSlice[1] = base.Meta(mint)
+func (initAcc3 *InitializeAccount3) SetMintAccount(mint solana.PublicKey) *InitializeAccount3 {
+	initAcc3.AccountMetaSlice[1] = solana.Meta(mint)
 	return initAcc3
 }
 
 // GetMintAccount gets the "mint" account.
 // The mint this account will be associated with.
-func (initAcc3 *InitializeAccount3) GetMintAccount() *base.AccountMeta {
+func (initAcc3 *InitializeAccount3) GetMintAccount() *solana.AccountMeta {
 	return initAcc3.AccountMetaSlice[1]
 }
 
@@ -124,10 +124,10 @@ func (initAcc3 InitializeAccount3) MarshalWithEncoder(encoder *encodbin.Encoder)
 // NewInitializeAccount3Instruction declares a new InitializeAccount3 instruction with the provided parameters and accounts.
 func NewInitializeAccount3Instruction(
 	// Parameters:
-	owner common.Address,
+	owner solana.PublicKey,
 	// Accounts:
-	account common.Address,
-	mint common.Address) *InitializeAccount3 {
+	account solana.PublicKey,
+	mint solana.PublicKey) *InitializeAccount3 {
 	return NewInitializeAccount3InstructionBuilder().
 		SetOwner(owner).
 		SetAccount(account).
