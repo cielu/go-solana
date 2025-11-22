@@ -379,9 +379,9 @@ func (sc *Client) GetSignatureStatuses(ctx context.Context, signatures []Signatu
 	return
 }
 
-// GetSignaturesForPublicKey Returns signatures for confirmed transactions that include the given PublicKey in their accountKeys list.
+// GetSignaturesForAddress Returns signatures for confirmed transactions that include the given PublicKey in their accountKeys list.
 // Returns signatures backwards in time from the provided signature or most recent confirmed block
-func (sc *Client) GetSignaturesForPublicKey(ctx context.Context, account PublicKey, cfg ...RpcSignaturesForAddressCfg) (res []SignatureInfo, err error) {
+func (sc *Client) GetSignaturesForAddress(ctx context.Context, account PublicKey, cfg ...RpcSignaturesForAddressCfg) (res []SignatureInfo, err error) {
 	err = sc.c.CallContext(ctx, &res, "getSignaturesForAddress", account, getRpcCfg(cfg))
 	return
 }
