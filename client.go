@@ -539,7 +539,7 @@ func (sc *Client) SendTransaction(ctx context.Context, signedTx []byte, cfg ...R
 }
 
 // SimulateTransaction Simulate sending a transaction
-func (sc *Client) SimulateTransaction(ctx context.Context, signedTx []byte) (res map[string]interface{}, err error) {
+func (sc *Client) SimulateTransaction(ctx context.Context, signedTx []byte) (res SimulateResult, err error) {
 	err = sc.c.CallContext(ctx, &res, "simulateTransaction", BytesToSolData(signedTx))
 	return
 }

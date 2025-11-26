@@ -156,6 +156,53 @@ type TransactionInfo struct {
 	Version TxVersion `json:"version"`
 }
 
+type SimulateResult struct {
+	Context ContextSlot    `json:"context"`
+	Value   SimulationInfo `json:"value"`
+}
+
+type SimulationInfo struct {
+	Accounts               []AccountInfo      `json:"accounts"`
+	// Error if transaction failed, null if transaction succeeded.
+	// https://github.com/solana-labs/solana/blob/master/sdk/src/transaction.rs#L24
+	Err                    json.RawMessage    `json:"err"`
+	// Fee this transaction was charged
+	Fee uint64 `json:"fee"`
+
+	// Array of *big.Int account balances from before the transaction was processed
+	PreBalances []*big.Int `json:"preBalances"`
+
+	// Array of *big.Int account balances after the transaction was processed
+	PostBalances []*big.Int `json:"postBalances"`
+
+	// List of inner instructions or omitted if inner instruction recording
+	// was not yet enabled during this transaction
+	InnerInstructions []InnerInstruction `json:"innerInstructions"`
+
+	// List of token balances from before the transaction was processed
+	// or omitted if token balance recording was not yet enabled during this transaction
+	PreTokenBalances []TokenBalance `json:"preTokenBalances"`
+
+	// List of token balances from after the transaction was processed
+	// or omitted if token balance recording was not yet enabled during this transaction
+	PostTokenBalances []TokenBalance `json:"postTokenBalances"`
+
+	LoadedAccountsDataSize *uint32            `json:"loadedAccountsDataSize"`
+	LoadedAddresses        LoadedAddresses    `json:"loadedAddresses"`
+	// Array of string log messages or omitted if log message
+	// recording was not yet enabled during this transaction
+	Logs                   []string           `json:"logs"`
+
+	ReplacementBlockhash   *LastBlock         `json:"replacementBlockhash"`
+	ReturnData             *SimulateReturn    `json:"returnData"`
+	UnitsConsumed          *uint64            `json:"unitsConsumed"`
+}
+
+type SimulateReturn struct {
+	ProgramID string  `json:"programId"`
+	Data      SolData `json:"data"`
+}
+
 type BlockInfo struct {
 	Err               json.RawMessage   `json:"err"`
 	BlockHeight       uint64            `json:"blockHeight"`
