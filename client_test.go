@@ -52,7 +52,7 @@ func TestClient_GetAccountInfo(t *testing.T) {
 
 	// var dataDetail AccountData
 
-	// encodbin.NewBinDecoder(res.Accounts[0].Data.RawData).Decode(&dataDetail)
+	// encodbin.NewBinDecoder(res.Accounts[0].Data).Decode(&dataDetail)
 	//
 	// core.BeautifyConsole("dataDetail", dataDetail)
 
@@ -237,7 +237,7 @@ func TestClient_GetSignatureStatuses(t *testing.T) {
 		}
 		// account = Base58ToPublicKey("Vote111111111111111111111111111111111111111")
 	)
-	res, err := c.GetSignatureStatuses(ctx, signatures, RpcSearchTxHistoryCfg{ true })
+	res, err := c.GetSignatureStatuses(ctx, signatures, RpcSearchTxHistoryCfg{true})
 	// res, err := c.GetSignaturesForPublicKey(ctx, account)
 	if err != nil {
 		t.Error("Res Failed: %w", err)
@@ -297,16 +297,20 @@ func TestClient_GetTransaction(t *testing.T) {
 		ctx = context.Background()
 	)
 
-	signature := Base58ToSignature("5KNhYcoQLN57iB3oZoLWUeC1oLfhu58GoN1YNV2mhvr3bJQxZW9kmj3k95hwXT2imaAV9NreKDSAo7hSrxt8n6Wb")
-
+	signature := Base58ToSignature("3rGHV82oPnL2gZphq78bzXPpc4PHRPbQGfKLng4VrS6HYkyCn8CmgMzhmTuchbZZQ1RiUPzrqqgfwGygeeJqRy5c")
+	// GetTransaction
 	res, err := c.GetTransaction(ctx, signature, RpcGetTransactionCfg{
 		Encoding:              EncodingBase64,
+		Commitment:            RpcCommitmentConfirmed,
 		MaxSupportedTxVersion: 1,
 	})
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	beautifulConsole("Res:", res)
+	addrTableLookups := res.Transaction.Message.AddressTableLookups
+	// utils
+	beautifulConsole("table IDs", addrTableLookups.GetTableIDs())
+	fmt.Println("numLookups:", addrTableLookups.NumLookups())
 }
 
 func TestClient_GetVoteAccounts(t *testing.T) {

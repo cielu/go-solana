@@ -533,13 +533,13 @@ func (sc *Client) RequestAirdrop(ctx context.Context, address PublicKey, lamport
 // The transaction signatures are verified
 // The transaction is simulated against the bank slot specified by the preflight commitment. On failure an error will be returned. Preflight checks may be disabled if desired. It is recommended to specify the same commitment and preflight commitment to avoid confusing behavior.
 // The returned signature is the first signature in the transaction, which is used to identify the transaction (transaction id). This identifier can be easily extracted from the transaction data before submission.
-func (sc *Client) SendTransaction(ctx context.Context, signedTx []byte, cfg ...RpcSendTxCfg) (res Signature, err error) {
-	err = sc.c.CallContext(ctx, &res, "sendTransaction", BytesToSolData(signedTx), getRpcCfg(cfg))
+func (sc *Client) SendTransaction(ctx context.Context, signedTx Base58Data, cfg ...RpcSendTxCfg) (res Signature, err error) {
+	err = sc.c.CallContext(ctx, &res, "sendTransaction", signedTx, getRpcCfg(cfg))
 	return
 }
 
 // SimulateTransaction Simulate sending a transaction
-func (sc *Client) SimulateTransaction(ctx context.Context, signedTx []byte) (res SimulateResult, err error) {
-	err = sc.c.CallContext(ctx, &res, "simulateTransaction", BytesToSolData(signedTx))
+func (sc *Client) SimulateTransaction(ctx context.Context, signedTx Base58Data) (res SimulateResult, err error) {
+	err = sc.c.CallContext(ctx, &res, "simulateTransaction", signedTx)
 	return
 }

@@ -6,9 +6,20 @@ import (
 	"testing"
 )
 
+func newWssClient() *WsClient {
+	//
+	rpcUrl := "wss://api.mainnet-beta.solana.com"
+	// dial rpc
+	c, err := DialWs(rpcUrl)
+	if err != nil {
+		panic("Dial rpc endpoint failed")
+	}
+	return c
+}
+
 func TestClient_AccountSubscribe(t *testing.T) {
 	var (
-		c             = newClient()
+		c             = newWssClient()
 		ctx           = context.Background()
 		accountNotify = make(chan AccountNotifies)
 	)
@@ -41,7 +52,7 @@ func TestClient_AccountSubscribe(t *testing.T) {
 
 func TestClient_BlockSubscribe(t *testing.T) {
 	var (
-		c               = newClient()
+		c               = newWssClient()
 		ctx             = context.Background()
 		blockInfoNotify = make(chan BlockNotifies)
 		filter          = ""
@@ -78,7 +89,7 @@ func TestClient_BlockSubscribe(t *testing.T) {
 
 func TestClient_LogsSubscribe(t *testing.T) {
 	var (
-		c              = newClient()
+		c              = newWssClient()
 		ctx            = context.Background()
 		logsInfoNotify = make(chan LogsNotifies)
 		filter         = "all"
@@ -111,7 +122,7 @@ func TestClient_LogsSubscribe(t *testing.T) {
 
 func TestClient_ProgramSubscribe(t *testing.T) {
 	var (
-		c             = newClient()
+		c             = newWssClient()
 		ctx           = context.Background()
 		programNotify = make(chan ProgramNotifies)
 	)
@@ -142,7 +153,7 @@ func TestClient_ProgramSubscribe(t *testing.T) {
 
 func TestClient_SignatureSubscribe(t *testing.T) {
 	var (
-		c                    = newClient()
+		c                    = newWssClient()
 		ctx                  = context.Background()
 		signatureNotifies = make(chan SignatureNotifies)
 	)
@@ -174,7 +185,7 @@ func TestClient_SignatureSubscribe(t *testing.T) {
 }
 func TestClient_SlotSubscribe(t *testing.T) {
 	var (
-		c               = newClient()
+		c               = newWssClient()
 		ctx             = context.Background()
 		SlotNotifies = make(chan SlotNotifies)
 	)

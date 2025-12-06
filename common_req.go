@@ -11,7 +11,7 @@ type RpcCommitmentCfg struct {
 // RpcCommitmentWithEncodingCfg rpc config of commitment
 type RpcCommitmentWithEncodingCfg struct {
 	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
-	Encoding   EnumEncoding      `json:"encoding,omitempty"`
+	Encoding   EncodingEnum      `json:"encoding,omitempty"`
 }
 
 // RpcCommitmentWithMinSlotCfg commitment & min slot
@@ -23,7 +23,7 @@ type RpcCommitmentWithMinSlotCfg struct {
 // RpcGetBlockContextCfg commitment & min slot
 type RpcGetBlockContextCfg struct {
 	Commitment            EnumRpcCommitment `json:"commitment,omitempty"`
-	Encoding              EnumEncoding      `json:"encoding,omitempty"`
+	Encoding              EncodingEnum      `json:"encoding,omitempty"`
 	TransactionDetails    EnumTxDetailLevel `json:"transactionDetails,omitempty"`
 	MaxSupportedTxVersion uint8             `json:"maxSupportedTransactionVersion"`
 	Rewards               *bool             `json:"rewards,omitempty"`
@@ -49,7 +49,7 @@ type RpcCommitmentWithFilter struct {
 
 // RpcAccountInfoCfg Get multiple data
 type RpcAccountInfoCfg struct {
-	Encoding       EnumEncoding      `json:"encoding,omitempty"`
+	Encoding       EncodingEnum      `json:"encoding,omitempty"`
 	Commitment     EnumRpcCommitment `json:"commitment,omitempty"`
 	MinContextSlot *uint64           `json:"minContextSlot,omitempty"`
 	DataSlice      *DataSlice        `json:"dataSlice,omitempty"`
@@ -57,7 +57,7 @@ type RpcAccountInfoCfg struct {
 
 type RpcCombinedCfg struct {
 	WithContext    bool                     `json:"withContext,omitempty"`
-	Encoding       EnumEncoding             `json:"encoding,omitempty"`
+	Encoding       EncodingEnum             `json:"encoding,omitempty"`
 	Commitment     EnumRpcCommitment        `json:"commitment,omitempty"`
 	MinContextSlot *uint64                  `json:"minContextSlot,omitempty"`
 	DataSlice      *DataSlice               `json:"dataSlice,omitempty"`
@@ -95,7 +95,7 @@ type RpcMintWithProgramID struct {
 // RpcGetTransactionCfg commitment & min slot
 type RpcGetTransactionCfg struct {
 	Commitment EnumRpcCommitment `json:"commitment,omitempty"`
-	Encoding   EnumEncoding      `json:"encoding,omitempty"`
+	Encoding   EncodingEnum      `json:"encoding,omitempty"`
 
 	// MaxSupportedTransactionVersion Set the max transaction version to return in responses.
 	// If the requested transaction is a higher version, an error will be returned.
@@ -119,7 +119,7 @@ type RpcSendTxCfg struct {
 	// Encoding used for the transaction data.
 	// Default: base58
 	// Values: base58 (slow, DEPRECATED), or base64.
-	Encoding EnumEncoding `json:"encoding,omitempty"`
+	Encoding EncodingEnum `json:"encoding,omitempty"`
 	// Default: false
 	// when true, skip the preflight transaction checks
 	SkipPreflight bool `json:"skipPreflight,omitempty"`

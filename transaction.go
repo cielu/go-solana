@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/library"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/mr-tron/base58"
 )
@@ -35,7 +35,13 @@ type CompiledInstruction struct {
 	// and that can be an issue.
 	Accounts []uint16 `json:"accounts"`
 	// The program input data encoded in a base-58 string.
-	Data SolData `json:"data"`
+	Data Base58Data `json:"data"`
+}
+
+type Instruction interface {
+	ProgramID() PublicKey     // the programID the instruction acts on
+	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
+	Data() ([]byte, error)    // the binary encoded instructions
 }
 
 func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer PublicKey) (*Transaction, error) {
@@ -62,7 +68,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 	var accounts []*AccountMeta
 	for _, instruction := range instructions {
 		accounts = append(accounts, instruction.Accounts()...)
-		programIDs = core.UniqueAppend(programIDs, instruction.ProgramID())
+		programIDs = library.UniqueAppend(programIDs, instruction.ProgramID())
 	}
 
 	// Add programID to the account list
@@ -162,7 +168,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 		message.Instructions = append(message.Instructions, CompiledInstruction{
 			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
 			Accounts:       accountIndex,
-			Data:           BytesToSolData(data),
+			Data:           data,
 		})
 	}
 
@@ -267,7 +273,7 @@ func (tx *Transaction) UnmarshalJSON(input []byte) error {
 						StackHeight:    stackHeight,
 						ProgramIDIndex: uint16(ins["programIdIndex"].(float64)),
 						Accounts:       accounts,
-						Data:           BytesToSolData(insData),
+						Data:           insData,
 					})
 				}
 				msgHeader, ok := message["header"].(map[string]interface{})

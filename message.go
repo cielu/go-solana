@@ -4,15 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/library"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
-
-type Instruction interface {
-	ProgramID() PublicKey       // the programID the instruction acts on
-	Accounts() []*AccountMeta // returns the list of accounts the instructions requires
-	Data() ([]byte, error)    // the binary encoded instructions
-}
 
 type MessageVersion int
 
@@ -34,6 +28,16 @@ func (lookups MessageAddressTableLookupSlice) NumLookups() int {
 	return count
 }
 
+// NumWritableLookups returns the number of writable accounts
+// across all the lookups (all the address tables).
+func (lookups MessageAddressTableLookupSlice) NumWritableLookups() int {
+	count := 0
+	for _, lookup := range lookups {
+		count += len(lookup.WritableIndexes)
+	}
+	return count
+}
+
 // GetTableIDs returns the list of all address table IDs.
 func (lookups MessageAddressTableLookupSlice) GetTableIDs() []PublicKey {
 	if lookups == nil {
@@ -43,19 +47,18 @@ func (lookups MessageAddressTableLookupSlice) GetTableIDs() []PublicKey {
 	// lookups
 	for _, lookup := range lookups {
 		// append unique key
-		ids = core.UniqueAppend(ids, lookup.AccountKey)
+		ids = library.UniqueAppend(ids, lookup.AccountKey)
 	}
 	return ids
 }
 
 type MessageAddressTableLookup struct {
-	AccountKey      PublicKey // The account key of the address table.
-	WritableIndexes []uint8
-	ReadonlyIndexes []uint8
+	AccountKey      PublicKey `json:"accountKey"` // The account key of the address table.
+	WritableIndexes []uint8   `json:"writableIndexes"`
+	ReadonlyIndexes []uint8   `json:"readonlyIndexes"`
 }
 
 type Message struct {
-
 	version MessageVersion
 	// List of base-58 encoded public keys used by the transaction,
 	// including by the instructions and for signatures.
@@ -70,11 +73,30 @@ type Message struct {
 	// and committed in one atomic transaction if all succeed.
 	Instructions []CompiledInstruction `json:"instructions"`
 	// List of address table lookups used to load additional accounts for this transaction.
-	addressTableLookups MessageAddressTableLookupSlice
+	AddressTableLookups MessageAddressTableLookupSlice `json:"addressTableLookups"`
 	// The actual tables that contain the list of account pubkeys.
 	// NOTE: you need to fetch these from the chain, and then call `SetAddressTables`
 	// before you use this transaction -- otherwise, you will get a panic.
 	addressTables map[PublicKey][]PublicKey
+	// if true, the lookups have been resolved, and the `AccountKeys` slice contains all the accounts (static + dynamic).
+	resolved bool
+}
+
+// SetAddressTables sets the actual address tables used by this message.
+// Use `mx.GetAddressTableLookups().GetTableIDs()` to get the list of all address table IDs.
+// NOTE: you can call this once.
+func (m *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
+	if m.addressTables != nil {
+		return fmt.Errorf("address tables already set")
+	}
+	m.addressTables = tables
+	return nil
+}
+
+// GetAddressTables returns the actual address tables used by this message.
+// NOTE: you must have called `SetAddressTable` before being able to use this method.
+func (m *Message) GetAddressTables() map[PublicKey][]PublicKey {
+	return m.addressTables
 }
 
 // GetProgram current program address
@@ -82,7 +104,35 @@ func (m Message) GetProgram(idIndex uint16) PublicKey {
 	return m.AccountKeys[idIndex]
 }
 
+// GetVersion returns the message version.
+func (m *Message) GetVersion() MessageVersion {
+	return m.version
+}
+
+// SetAddressTableLookups (re)sets the lookups used by this message.
+func (m *Message) SetAddressTableLookups(lookups []MessageAddressTableLookup) *Message {
+	m.AddressTableLookups = lookups
+	m.version = MessageVersionV0
+	return m
+}
+
+// AddAddressTableLookup adds a new lookup to the message.
+func (m *Message) AddAddressTableLookup(lookup MessageAddressTableLookup) *Message {
+	m.AddressTableLookups = append(m.AddressTableLookups, lookup)
+	m.version = MessageVersionV0
+	return m
+}
+
 func (m *Message) MarshalBinary() ([]byte, error) {
+	// VersionV0
+	if m.version == MessageVersionV0 {
+		return m.MarshalV0()
+	}
+	// Default is legacy
+	return m.MarshalLegacy()
+}
+
+func (m *Message) MarshalLegacy() ([]byte, error) {
 
 	buf := []byte{
 		m.Header.NumRequiredSignatures,
@@ -105,11 +155,80 @@ func (m *Message) MarshalBinary() ([]byte, error) {
 			buf = append(buf, byte(accountIdx))
 		}
 
-		encodbin.EncodeCompactU16Length(&buf, len(instruction.Data.RawData))
+		encodbin.EncodeCompactU16Length(&buf, len(instruction.Data))
 
-		buf = append(buf, instruction.Data.RawData...)
+		buf = append(buf, instruction.Data...)
 	}
 	return buf, nil
+}
+
+func (m Message) getStaticKeys() (keys []PublicKey) {
+	if m.resolved {
+		// If the message has been resolved, then the account keys have already
+		// been appended to the `AccountKeys` field of the message.
+		return m.AccountKeys[:m.numStaticAccounts()]
+	}
+	return m.AccountKeys
+}
+
+func (m *Message) MarshalV0() ([]byte, error) {
+	buf := []byte{
+		m.Header.NumRequiredSignatures,
+		m.Header.NumReadonlySignedAccounts,
+		m.Header.NumReadonlyUnsignedAccounts,
+	}
+	{
+		// Encode only the keys that are not in the address table lookups.
+		staticAccountKeys := m.getStaticKeys()
+		encodbin.EncodeCompactU16Length(&buf, len(staticAccountKeys))
+		for _, key := range staticAccountKeys {
+			buf = append(buf, key[:]...)
+		}
+
+		buf = append(buf, m.RecentBlockhash[:]...)
+
+		encodbin.EncodeCompactU16Length(&buf, len(m.Instructions))
+		for _, instruction := range m.Instructions {
+			buf = append(buf, byte(instruction.ProgramIDIndex))
+			encodbin.EncodeCompactU16Length(&buf, len(instruction.Accounts))
+			for _, accountIdx := range instruction.Accounts {
+				buf = append(buf, byte(accountIdx))
+			}
+
+			encodbin.EncodeCompactU16Length(&buf, len(instruction.Data))
+			buf = append(buf, instruction.Data...)
+		}
+	}
+	versionNum := byte(m.version) // TODO: what number is this?
+	if versionNum > 127 {
+		return nil, fmt.Errorf("invalid message version: %d", m.version)
+	}
+	buf = append([]byte{byte(versionNum + 127)}, buf...)
+
+	// wite length of address table lookups as u8
+	buf = append(buf, byte(len(m.AddressTableLookups)))
+	for _, lookup := range m.AddressTableLookups {
+		// write account pubkey
+		buf = append(buf, lookup.AccountKey[:]...)
+		// write writable indexes
+		encodbin.EncodeCompactU16Length(&buf, len(lookup.WritableIndexes))
+		buf = append(buf, lookup.WritableIndexes...)
+		// write readonly indexes
+		encodbin.EncodeCompactU16Length(&buf, len(lookup.ReadonlyIndexes))
+		buf = append(buf, lookup.ReadonlyIndexes...)
+	}
+
+	return buf, nil
+}
+
+// numStaticAccounts returns the number of accounts that are always present in the
+// account keys list (i.e. all the accounts that are NOT in the lookup table).
+func (m Message) numStaticAccounts() int {
+	if !m.resolved || m.AddressTableLookups == nil {
+		return len(m.AccountKeys)
+	}
+	// NumLookups
+	return len(m.AccountKeys) - m.AddressTableLookups.NumLookups()
 }
 
 // Signers returns the pubkeys of all accounts that are signers.
@@ -179,7 +298,6 @@ type MessageHeader struct {
 	NumReadonlyUnsignedAccounts uint8 `json:"numReadonlyUnsignedAccounts"`
 }
 
-
 func (m *Message) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
 	// peek first byte to determine if this is a legacy or v0 message
 	versionNum, err := decoder.Peek(1)
@@ -230,10 +348,10 @@ func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 		return fmt.Errorf("failed to read address table lookups length: %w", err)
 	}
 	if addressTableLookupsLen > 0 {
-		m.addressTableLookups = make([]MessageAddressTableLookup, addressTableLookupsLen)
+		m.AddressTableLookups = make([]MessageAddressTableLookup, addressTableLookupsLen)
 		for i := 0; i < int(addressTableLookupsLen); i++ {
 			// read account pubkey
-			_, err = decoder.Read(m.addressTableLookups[i].AccountKey[:])
+			_, err = decoder.Read(m.AddressTableLookups[i].AccountKey[:])
 			if err != nil {
 				return fmt.Errorf("failed to read account pubkey: %w", err)
 			}
@@ -243,8 +361,8 @@ func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 			if err != nil {
 				return fmt.Errorf("failed to read writable indexes length: %w", err)
 			}
-			m.addressTableLookups[i].WritableIndexes = make([]byte, writableIndexesLen)
-			_, err = decoder.Read(m.addressTableLookups[i].WritableIndexes)
+			m.AddressTableLookups[i].WritableIndexes = make([]byte, writableIndexesLen)
+			_, err = decoder.Read(m.AddressTableLookups[i].WritableIndexes)
 			if err != nil {
 				return fmt.Errorf("failed to read writable indexes: %w", err)
 			}
@@ -254,8 +372,8 @@ func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 			if err != nil {
 				return fmt.Errorf("failed to read readonly indexes length: %w", err)
 			}
-			m.addressTableLookups[i].ReadonlyIndexes = make([]byte, readonlyIndexesLen)
-			_, err = decoder.Read(m.addressTableLookups[i].ReadonlyIndexes)
+			m.AddressTableLookups[i].ReadonlyIndexes = make([]byte, readonlyIndexesLen)
+			_, err = decoder.Read(m.AddressTableLookups[i].ReadonlyIndexes)
 			if err != nil {
 				return fmt.Errorf("failed to read readonly indexes: %w", err)
 			}
@@ -268,15 +386,15 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 	{
 		m.Header.NumRequiredSignatures, err = decoder.ReadUint8()
 		if err != nil {
-			return fmt.Errorf("unable to decode mx.Header.NumRequiredSignatures: %w", err)
+			return fmt.Errorf("unable to decode m.Header.NumRequiredSignatures: %w", err)
 		}
 		m.Header.NumReadonlySignedAccounts, err = decoder.ReadUint8()
 		if err != nil {
-			return fmt.Errorf("unable to decode mx.Header.NumReadonlySignedAccounts: %w", err)
+			return fmt.Errorf("unable to decode m.Header.NumReadonlySignedAccounts: %w", err)
 		}
 		m.Header.NumReadonlyUnsignedAccounts, err = decoder.ReadUint8()
 		if err != nil {
-			return fmt.Errorf("unable to decode mx.Header.NumReadonlyUnsignedAccounts: %w", err)
+			return fmt.Errorf("unable to decode m.Header.NumReadonlyUnsignedAccounts: %w", err)
 		}
 	}
 	{
@@ -288,14 +406,14 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 		for i := 0; i < numAccountKeys; i++ {
 			_, err := decoder.Read(m.AccountKeys[i][:])
 			if err != nil {
-				return fmt.Errorf("unable to decode mx.AccountKeys[%d]: %w", i, err)
+				return fmt.Errorf("unable to decode m.AccountKeys[%d]: %w", i, err)
 			}
 		}
 	}
 	{
 		_, err := decoder.Read(m.RecentBlockhash[:])
 		if err != nil {
-			return fmt.Errorf("unable to decode mx.RecentBlockhash: %w", err)
+			return fmt.Errorf("unable to decode m.RecentBlockhash: %w", err)
 		}
 	}
 	{
@@ -307,7 +425,7 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 		for instructionIndex := 0; instructionIndex < numInstructions; instructionIndex++ {
 			programIDIndex, err := decoder.ReadUint8()
 			if err != nil {
-				return fmt.Errorf("unable to decode mx.Instructions[%d].ProgramIDIndex: %w", instructionIndex, err)
+				return fmt.Errorf("unable to decode m.Instructions[%d].ProgramIDIndex: %w", instructionIndex, err)
 			}
 			m.Instructions[instructionIndex].ProgramIDIndex = uint16(programIDIndex)
 
@@ -335,7 +453,7 @@ func (m *Message) UnmarshalLegacy(decoder *encodbin.Decoder) (err error) {
 					return fmt.Errorf("unable to decode dataBytes for ix[%d]: %w", instructionIndex, err)
 				}
 				// setBytes
-				m.Instructions[instructionIndex].Data = BytesToSolData(dataBytes)
+				m.Instructions[instructionIndex].Data = dataBytes
 			}
 		}
 	}

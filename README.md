@@ -9,7 +9,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/library"
 	"github.com/cielu/go-solana/rpc"
 	"github.com/cielu/go-solana/solclient"
 	"math/big"

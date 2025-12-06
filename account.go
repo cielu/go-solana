@@ -12,14 +12,14 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/cielu/go-solana/core"
+	"github.com/cielu/go-solana/library"
 	"github.com/cielu/go-solana/pkg/hdwallet"
 	"github.com/mr-tron/base58"
 	"github.com/tyler-smith/go-bip39"
 )
 
 type Account struct {
-	PublicKey    PublicKey
+	PublicKey  PublicKey
 	PrivateKey ed25519.PrivateKey
 }
 
@@ -41,7 +41,7 @@ func GenerateAccount() (Account, error) {
 func GenerateBase58PrvKey(a Account) (string, error) {
 	// empty account
 	if len(a.PrivateKey) == 0 {
-		return "", core.ErrEmptyAccount
+		return "", library.ErrEmptyAccount
 	}
 	return base58.Encode(a.PrivateKey), nil
 }
@@ -50,7 +50,7 @@ func GenerateBase58PrvKey(a Account) (string, error) {
 func GenerateHexPrvKey(a Account) (string, error) {
 	// empty account
 	if len(a.PrivateKey) == 0 {
-		return "", core.ErrEmptyAccount
+		return "", library.ErrEmptyAccount
 	}
 	enHexKey := hex.EncodeToString(a.PrivateKey)
 	// return 0x + enHexKey
@@ -74,12 +74,12 @@ func AccountFromBytes(b []byte) (Account, error) {
 func AccountFromBase58Key(key string) (Account, error) {
 	// empty string
 	if len(key) == 0 {
-		return Account{}, core.ErrEmptyString
+		return Account{}, library.ErrEmptyString
 	}
 	b, err := base58.Decode(key)
 	// if err
 	if err != nil {
-		return Account{}, core.StdErr("AccountFromBase58", err)
+		return Account{}, library.StdErr("AccountFromBase58", err)
 	}
 	return AccountFromBytes(b)
 }
@@ -88,17 +88,17 @@ func AccountFromBase58Key(key string) (Account, error) {
 func AccountFromHexKey(key string) (Account, error) {
 	// empty string
 	if len(key) == 0 {
-		return Account{}, core.ErrEmptyString
+		return Account{}, library.ErrEmptyString
 	}
 	// has 0x prefix
-	if core.Has0xPrefix(key) {
+	if library.Has0xPrefix(key) {
 		key = key[2:]
 	}
 	// DecodeString
 	b, err := hex.DecodeString(key)
 	// if err
 	if err != nil {
-		return Account{}, core.StdErr("AccountFromHex", err)
+		return Account{}, library.StdErr("AccountFromHex", err)
 	}
 	return AccountFromBytes(b)
 }
@@ -143,7 +143,7 @@ func AccountFromMnemonic(mnemonic string, args ...interface{}) (Account, error) 
 	seed, err = bip39.NewSeedWithErrorChecking(mnemonic, password)
 	// New Seed Failed
 	if err != nil {
-		return Account{}, core.StdErr("NewSeedWithErrorChecking", err)
+		return Account{}, library.StdErr("NewSeedWithErrorChecking", err)
 	}
 	// has path
 	if path != "" {
@@ -160,13 +160,13 @@ func AccountFromKeygenFile(file string) (Account, error) {
 	// read file
 	content, err := os.ReadFile(file)
 	if err != nil {
-		return Account{}, core.StdErr("read keygen file", err)
+		return Account{}, library.StdErr("read keygen file", err)
 	}
 
 	var values []byte
 	// Unmarshal content
 	if err = json.Unmarshal(content, &values); err != nil {
-		return Account{}, core.StdErr("decode keygen file", err)
+		return Account{}, library.StdErr("decode keygen file", err)
 	}
 	return AccountFromBytes(values)
 }

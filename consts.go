@@ -21,15 +21,15 @@ const (
 	RpcCommitmentProcessed EnumRpcCommitment = "processed"
 )
 
-type EnumEncoding string
+type EncodingEnum string
 
 // base58 base64 base64+zstd jsonParsed
 const (
-	EncodingBase58     EnumEncoding = "base58"
-	EncodingBase64     EnumEncoding = "base64"
-	EncodingBase64Zstd EnumEncoding = "base64+zstd"
-	EncodingJson       EnumEncoding = "json"
-	EncodingJsonParsed EnumEncoding = "jsonParsed"
+	EncodingBase58     EncodingEnum = "base58"
+	EncodingBase64     EncodingEnum = "base64"
+	EncodingBase64Zstd EncodingEnum = "base64+zstd"
+	EncodingJson       EncodingEnum = "json"
+	EncodingJsonParsed EncodingEnum = "jsonParsed"
 )
 
 type EnumTxDetailLevel string
