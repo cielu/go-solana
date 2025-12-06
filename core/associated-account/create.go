@@ -3,6 +3,7 @@ package associatedaccount
 import (
 	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core/base"
+	"github.com/cielu/go-solana/core/spltoken"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -90,10 +91,10 @@ func (inst Create) Build() *Instruction {
 	// Find the associatedTokenAddress;
 	switch inst.TokenProgramID {
 	case base.Token2022ProgramID:
-		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
+		associatedTokenAddress, _, _ = spltoken.FindAssociatedTokenAddress(inst.Wallet, inst.Mint, base.Token2022ProgramID)
 	default:
 		inst.TokenProgramID = base.TokenProgramID
-		associatedTokenAddress, _, _ = base.FindAssociatedTokenAddress(inst.Wallet, inst.Mint)
+		associatedTokenAddress, _, _ = spltoken.FindAssociatedTokenAddress(inst.Wallet, inst.Mint)
 	}
 
 	keys := []*solana.AccountMeta{

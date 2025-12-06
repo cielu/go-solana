@@ -310,7 +310,20 @@ func TestClient_GetTransaction(t *testing.T) {
 	addrTableLookups := res.Transaction.Message.AddressTableLookups
 	// utils
 	beautifulConsole("table IDs", addrTableLookups.GetTableIDs())
-	fmt.Println("numLookups:", addrTableLookups.NumLookups())
+	// // has Address TableLookups
+	// if len(addrTableLookups) > 0 {
+	// 	for _, address := range addrTableLookups {
+	// 		accRes, _ := c.GetAccountInfo(ctx, address.AccountKey, RpcAccountInfoCfg{
+	// 			Encoding:   EncodingBase64,
+	// 			Commitment: RpcCommitmentConfirmed,
+	// 		})
+	// 		beautifulConsole("AccInfo:", accRes.AccountInfo)
+	// 		// Decode AccRes
+	// 		lookupState, _ := DecodeAddressLookupTableState(accRes.AccountInfo.Data.RawData())
+	// 		// Decode Address lookups table
+	// 		beautifulConsole("Res:", lookupState)
+	// 	}
+	// }
 }
 
 func TestClient_GetVoteAccounts(t *testing.T) {
