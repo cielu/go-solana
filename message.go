@@ -99,9 +99,6 @@ type Message struct {
 // Use `mx.GetAddressTableLookups().GetTableIDs()` to get the list of all address table IDs.
 // NOTE: you can call this once.
 func (m *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
-	if m.addressTables != nil {
-		return fmt.Errorf("address tables already set")
-	}
 	m.addressTables = tables
 	return nil
 }
