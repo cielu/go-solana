@@ -2,6 +2,7 @@ package solana
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/cielu/go-solana/library"
@@ -53,9 +54,21 @@ func (lookups MessageAddressTableLookupSlice) GetTableIDs() []PublicKey {
 }
 
 type MessageAddressTableLookup struct {
-	AccountKey      PublicKey `json:"accountKey"` // The account key of the address table.
-	WritableIndexes []uint8   `json:"writableIndexes"`
-	ReadonlyIndexes []uint8   `json:"readonlyIndexes"`
+	AccountKey      PublicKey  `json:"accountKey"` // The account key of the address table.
+	WritableIndexes Uint8Slice `json:"writableIndexes"`
+	ReadonlyIndexes Uint8Slice `json:"readonlyIndexes"`
+}
+
+// Uint8Slice is a slice of uint8s that can be marshaled as numbers instead of a byte slice.
+type Uint8Slice []uint8
+
+// MarshalJSON implements json.Marshaler.
+func (u8s Uint8Slice) MarshalJSON() ([]byte, error) {
+	out := make([]uint16, len(u8s))
+	for i, idx := range u8s {
+		out[i] = uint16(idx)
+	}
+	return json.Marshal(out)
 }
 
 type Message struct {
@@ -97,6 +110,71 @@ func (m *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
 // NOTE: you must have called `SetAddressTable` before being able to use this method.
 func (m *Message) GetAddressTables() map[PublicKey][]PublicKey {
 	return m.addressTables
+}
+
+func (m Message) IsVersioned() bool {
+	return m.version != MessageVersionLegacy
+}
+
+func (m *Message) canLookupAccounts() error {
+	// if this is versioned,
+	// and there are > 0 lookups,
+	// but the address table is empty,
+	// then we can't build the account meta list:
+	if m.IsVersioned() && m.AddressTableLookups.NumLookups() > 0 && (m.addressTables == nil || len(m.addressTables) == 0) {
+		return fmt.Errorf("cannot build account meta list without address tables")
+	}
+	return nil
+}
+
+// GetAddressTableLookupAccounts associates the lookups with the accounts
+// in the actual address tables, and returns the accounts.
+// NOTE: you need to call `SetAddressTables` before calling this method,
+// so that the lookups can be associated with the accounts in the address tables.
+func (m Message) GetAddressTableLookupAccounts() ([]PublicKey, error) {
+	// lookup accounts
+	if err := m.canLookupAccounts(); err != nil {
+		return nil, err
+	}
+	var writable []PublicKey
+	var readonly []PublicKey
+
+	for _, lookup := range m.AddressTableLookups {
+		table, ok := m.addressTables[lookup.AccountKey]
+		if !ok {
+			return writable, fmt.Errorf("address table lookup not found for account: %s", lookup.AccountKey)
+		}
+		for _, idx := range lookup.WritableIndexes {
+			if int(idx) >= len(table) {
+				return writable, fmt.Errorf("address table lookup index out of range: %d", idx)
+			}
+			writable = append(writable, table[idx])
+		}
+		for _, idx := range lookup.ReadonlyIndexes {
+			if int(idx) >= len(table) {
+				return writable, fmt.Errorf("address table lookup index out of range: %d", idx)
+			}
+			readonly = append(readonly, table[idx])
+		}
+	}
+
+	return append(writable, readonly...), nil
+}
+
+// GetAllKeys returns ALL the message's account keys (including the keys from resolved address lookup tables).
+func (m Message) GetAllKeys() (keys []PublicKey, err error) {
+	if m.resolved {
+		// If the message has been resolved, then the account keys have already
+		// been appended to the `AccountKeys` field of the message.
+		return m.AccountKeys, nil
+	}
+	// If not resolved, then we need to resolve the lookups first...
+	atlAccounts, err := m.GetAddressTableLookupAccounts()
+	if err != nil {
+		return keys, err
+	}
+	// ...and return the account keys with the lookups appended:
+	return append(m.AccountKeys, atlAccounts...), nil
 }
 
 // GetProgram current program address
@@ -273,9 +351,13 @@ func (m *Message) IsWritable(account PublicKey) bool {
 	if !found {
 		return false
 	}
+
 	h := m.Header
-	return (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
+
+	isWriteAble := (index < int(h.NumRequiredSignatures-h.NumReadonlySignedAccounts)) ||
 		((index >= int(h.NumRequiredSignatures)) && (index < len(m.AccountKeys)-int(h.NumReadonlyUnsignedAccounts)))
+
+	return isWriteAble
 }
 
 func (m *Message) signerKeys() []PublicKey {
@@ -357,9 +439,12 @@ func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 			}
 
 			// read writable indexes
-			writableIndexesLen, err := decoder.ReadCompactU16Length()
+			writableIndexesLen, err := decoder.ReadCompactU16()
 			if err != nil {
 				return fmt.Errorf("failed to read writable indexes length: %w", err)
+			}
+			if writableIndexesLen > decoder.Remaining() {
+				return fmt.Errorf("writable indexes length is too large: %d", writableIndexesLen)
 			}
 			m.AddressTableLookups[i].WritableIndexes = make([]byte, writableIndexesLen)
 			_, err = decoder.Read(m.AddressTableLookups[i].WritableIndexes)
@@ -368,9 +453,12 @@ func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 			}
 
 			// read readonly indexes
-			readonlyIndexesLen, err := decoder.ReadCompactU16Length()
+			readonlyIndexesLen, err := decoder.ReadCompactU16()
 			if err != nil {
 				return fmt.Errorf("failed to read readonly indexes length: %w", err)
+			}
+			if readonlyIndexesLen > decoder.Remaining() {
+				return fmt.Errorf("readonly indexes length is too large: %d", readonlyIndexesLen)
 			}
 			m.AddressTableLookups[i].ReadonlyIndexes = make([]byte, readonlyIndexesLen)
 			_, err = decoder.Read(m.AddressTableLookups[i].ReadonlyIndexes)

@@ -307,23 +307,7 @@ func TestClient_GetTransaction(t *testing.T) {
 	if err != nil {
 		t.Error("Res Failed: %w", err)
 	}
-	addrTableLookups := res.Transaction.Message.AddressTableLookups
-	// utils
-	beautifulConsole("table IDs", addrTableLookups.GetTableIDs())
-	// // has Address TableLookups
-	// if len(addrTableLookups) > 0 {
-	// 	for _, address := range addrTableLookups {
-	// 		accRes, _ := c.GetAccountInfo(ctx, address.AccountKey, RpcAccountInfoCfg{
-	// 			Encoding:   EncodingBase64,
-	// 			Commitment: RpcCommitmentConfirmed,
-	// 		})
-	// 		beautifulConsole("AccInfo:", accRes.AccountInfo)
-	// 		// Decode AccRes
-	// 		lookupState, _ := DecodeAddressLookupTableState(accRes.AccountInfo.Data.RawData())
-	// 		// Decode Address lookups table
-	// 		beautifulConsole("Res:", lookupState)
-	// 	}
-	// }
+	beautifulConsole("Res:", res)
 }
 
 func TestClient_GetVoteAccounts(t *testing.T) {
