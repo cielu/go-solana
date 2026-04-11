@@ -120,37 +120,28 @@ func (sc *Client) GetBlockTime(ctx context.Context, blockNum uint64) (res int64,
 	return
 }
 
-// GetBlocks Returns a list of confirmed blocks between two slots.
-// Optional args: [endSlot uint64|int], [cfg RpcCommitmentCfg].
-// The slot range [startSlot, endSlot] must be <= 500000.
+// GetBlocks Returns a list of confirmed blocks between two slots
 func (sc *Client) GetBlocks(ctx context.Context, startSlot uint64, args ...interface{}) (res []uint64, err error) {
 	var (
-		tmpSlot   uint64
-		hasEndArg bool
-		endSlot   *uint64
-		cfg       *RpcCommitmentCfg
+		tmpSlot uint64
+		endSlot *uint64
+		cfg     *RpcCommitmentCfg
 	)
 	for _, arg := range args {
+		// set endSlot & cfg
 		switch v := arg.(type) {
 		case int:
 			tmpSlot = uint64(v)
-			hasEndArg = true
 		case uint64:
 			tmpSlot = v
-			hasEndArg = true
 		case RpcCommitmentCfg:
 			cfg = &v
 		default:
 			return res, errors.New("invalid args. Require: [uint64|types.RpcCommitmentCfg]")
 		}
 	}
-	if hasEndArg {
-		if tmpSlot < startSlot {
-			return res, fmt.Errorf("getBlocks: endSlot (%d) must be >= startSlot (%d)", tmpSlot, startSlot)
-		}
-		if tmpSlot-startSlot >= 500000 {
-			return res, fmt.Errorf("getBlocks: slot range must be <= 500000 (got %d)", tmpSlot-startSlot)
-		}
+	// setTmpSlot
+	if tmpSlot > startSlot && tmpSlot-startSlot < 500000 {
 		endSlot = &tmpSlot
 	}
 	err = sc.call(ctx, &res, "getBlocks", startSlot, endSlot, cfg)
@@ -339,10 +330,10 @@ func (sc *Client) GetMinimumBalanceForRentExemption(ctx context.Context, args ..
 }
 
 // GetMultipleAccounts Returns the account information for a list of Pubkeys.
-// Up to 100 accounts per call.
 func (sc *Client) GetMultipleAccounts(ctx context.Context, accounts []PublicKey, cfg ...RpcAccountInfoCfg) (res AccountsInfoWithCtx, err error) {
+	// require accounts len <= 100
 	if len(accounts) > 100 {
-		return res, fmt.Errorf("getMultipleAccounts: at most 100 accounts allowed (got %d)", len(accounts))
+		return res, errors.New("accounts maximum is 100)")
 	}
 	err = sc.call(ctx, &res, "getMultipleAccounts", accounts, getRpcCfg(cfg))
 	return
@@ -356,13 +347,11 @@ func (sc *Client) GetProgramAccounts(ctx context.Context, program PublicKey, cfg
 
 // GetRecentPerformanceSamples Returns a list of recent performance samples, in reverse slot order.
 // Performance samples are taken every 60 seconds and include the number of transactions and slots that occur in a given time window.
-// Optional arg: limit (max 720).
 func (sc *Client) GetRecentPerformanceSamples(ctx context.Context, args ...uint64) (res []RpcPerfSample, err error) {
+	// has limit
 	var limit *uint64
-	if len(args) > 0 {
-		if args[0] > 720 {
-			return res, fmt.Errorf("getRecentPerformanceSamples: limit must be <= 720 (got %d)", args[0])
-		}
+	// has arg
+	if len(args) > 0 && args[0] <= 720 {
 		limit = &args[0]
 	}
 	err = sc.call(ctx, &res, "getRecentPerformanceSamples", limit)
@@ -370,31 +359,31 @@ func (sc *Client) GetRecentPerformanceSamples(ctx context.Context, args ...uint6
 }
 
 // GetRecentPrioritizationFees Returns a list of prioritization fees from recent blocks.
-// Optional args: up to 128 PublicKey values (or a single []PublicKey) to filter fees by account.
 func (sc *Client) GetRecentPrioritizationFees(ctx context.Context, args ...interface{}) (res []RpcPrioritizationFee, err error) {
+	// var []common.PublicKey
 	var accounts []PublicKey
+	// args
 	for _, arg := range args {
+		// require accounts len <= 100
 		switch v := arg.(type) {
 		case PublicKey:
 			accounts = append(accounts, v)
 		case []PublicKey:
 			accounts = v
-		default:
-			return res, fmt.Errorf("getRecentPrioritizationFees: invalid arg type %T, want PublicKey or []PublicKey", arg)
 		}
 	}
 	if len(accounts) > 128 {
-		return res, fmt.Errorf("getRecentPrioritizationFees: at most 128 accounts allowed (got %d)", len(accounts))
+		return res, errors.New("accounts maximum is 128)")
 	}
 	err = sc.call(ctx, &res, "getRecentPrioritizationFees", accounts)
 	return
 }
 
 // GetSignatureStatuses Returns the statuses of a list of signatures. Each signature must be a txid, the first signature of a transaction.
-// Up to 256 signatures per call.
 func (sc *Client) GetSignatureStatuses(ctx context.Context, signatures []Signature, cfg ...RpcSearchTxHistoryCfg) (res SignatureStatusWithCtx, err error) {
+	// require signatures len <= 256
 	if len(signatures) > 256 {
-		return res, fmt.Errorf("getSignatureStatuses: at most 256 signatures allowed (got %d)", len(signatures))
+		return res, errors.New("signatures maximum is 256)")
 	}
 	err = sc.call(ctx, &res, "getSignatureStatuses", signatures, getRpcCfg(cfg))
 	return
@@ -420,9 +409,10 @@ func (sc *Client) GetSlotLeader(ctx context.Context, cfg ...RpcCommitmentWithMin
 	return
 }
 
-// GetSlotLeaders Returns the slot leaders for a given slot range.
-// args: startSlot[, limit]; limit must be <= 5000.
+// GetSlotLeaders Returns the slot leaders for a given slot range
 func (sc *Client) GetSlotLeaders(ctx context.Context, args ...uint64) (res []PublicKey, err error) {
+	// startSlot, limit uint64, cfg...
+	// var []common.PublicKey
 	var startSlot, limit *uint64
 	switch len(args) {
 	case 1:
@@ -430,11 +420,14 @@ func (sc *Client) GetSlotLeaders(ctx context.Context, args ...uint64) (res []Pub
 	case 2:
 		startSlot = &args[0]
 		limit = &args[1]
+		// require limit < 5000
 		if *limit > 5000 {
-			return res, fmt.Errorf("getSlotLeaders: limit must be <= 5000 (got %d)", *limit)
+			err = errors.New("limit maximum is 5000)")
+			return
 		}
 	default:
-		return res, fmt.Errorf("getSlotLeaders: expected 1 or 2 args (startSlot[, limit]), got %d", len(args))
+		err = errors.New("invalid args length")
+		return
 	}
 	err = sc.call(ctx, &res, "getSlotLeaders", startSlot, limit)
 	return
