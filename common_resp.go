@@ -520,3 +520,28 @@ type SlotNotifies struct {
 	Root   uint64 `json:"root"`
 	Slot   uint64 `json:"slot"`
 }
+
+// RootNotifies carries the latest rooted slot reported by rootSubscribe.
+type RootNotifies uint64
+
+// SlotsUpdatesNotifies is the payload for slotsUpdatesSubscribe. See the
+// Solana RPC docs for the full set of possible Type values; commonly
+// "firstShredReceived", "completed", "createdBank", "frozen", "dead",
+// "optimisticConfirmation", and "root".
+type SlotsUpdatesNotifies struct {
+	Parent    uint64                `json:"parent"`
+	Slot      uint64                `json:"slot"`
+	Timestamp int64                 `json:"timestamp"`
+	Type      string                `json:"type"`
+	Stats     *SlotsUpdatesBankStat `json:"stats,omitempty"`
+	Err       string                `json:"err,omitempty"`
+}
+
+// SlotsUpdatesBankStat is the optional per-bank statistics attached to
+// some SlotsUpdatesNotifies events.
+type SlotsUpdatesBankStat struct {
+	MaxTransactionsPerEntry   uint64 `json:"maxTransactionsPerEntry"`
+	NumFailedTransactions     uint64 `json:"numFailedTransactions"`
+	NumSuccessfulTransactions uint64 `json:"numSuccessfulTransactions"`
+	NumTransactionEntries     uint64 `json:"numTransactionEntries"`
+}

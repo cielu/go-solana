@@ -6,6 +6,7 @@ package solana
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/cielu/go-solana/rpc"
 )
@@ -58,15 +59,17 @@ func (sc *WsClient) AccountSubscribe(ctx context.Context, ch chan<- AccountNotif
 }
 
 // BlockSubscribe Subscribe to receive notification anytime a new block is confirmed or finalized.
-// filter can receive: string | types.MentionsAccountProgramCfg
+// The filter must be either the literal string "all" or a MentionsAccountProgramCfg value.
 func (sc *WsClient) BlockSubscribe(ctx context.Context, ch chan<- BlockNotifies, filter any, cfg ...RpcGetBlockContextCfg) (Subscription, error) {
-	// SolSubscribe
-	switch filter.(type) {
+	switch v := filter.(type) {
 	case string:
-		filter = "all"
+		if v != "all" {
+			return nil, fmt.Errorf("blockSubscribe: string filter must be \"all\", got %q", v)
+		}
 	case MentionsAccountProgramCfg:
+		// ok
 	default:
-		return nil, errors.New("invalid filter arg. Require: [string|types.MentionsAccountProgramCfg]")
+		return nil, errors.New("blockSubscribe: filter must be \"all\" or MentionsAccountProgramCfg")
 	}
 	sub, err := sc.c.Subscribe(ctx, "block", ch, filter, getRpcCfg(cfg))
 	if err != nil {
@@ -75,19 +78,18 @@ func (sc *WsClient) BlockSubscribe(ctx context.Context, ch chan<- BlockNotifies,
 	return sub, nil
 }
 
-// LogsSubscribe Subscribe to transaction logging
-// mentions can receive: string | types.MentionsCfg
+// LogsSubscribe Subscribe to transaction logging.
+// mentions must be either the literal string "all" / "allWithVotes" or a MentionsCfg value.
 func (sc *WsClient) LogsSubscribe(ctx context.Context, ch chan<- LogsNotifies, mentions any, cfg ...RpcCommitmentCfg) (Subscription, error) {
-	// SolSubscribe
-	switch mentions.(type) {
+	switch v := mentions.(type) {
 	case string:
-		// invalid mentions
-		if mentions != "all" && mentions != "allWithVotes" {
-			mentions = "all"
+		if v != "all" && v != "allWithVotes" {
+			return nil, fmt.Errorf("logsSubscribe: string mentions must be \"all\" or \"allWithVotes\", got %q", v)
 		}
 	case MentionsCfg:
+		// ok
 	default:
-		return nil, errors.New("invalid mentions. Require: [string|types.MentionsCfg]")
+		return nil, errors.New("logsSubscribe: mentions must be \"all\"/\"allWithVotes\" or MentionsCfg")
 	}
 	sub, err := sc.c.Subscribe(ctx, "logs", ch, mentions, getRpcCfg(cfg))
 	if err != nil {
@@ -118,8 +120,28 @@ func (sc *WsClient) SignatureSubscribe(ctx context.Context, ch chan<- SignatureN
 
 // SlotSubscribe Subscribe to receive notification anytime a slot is processed by the validator
 func (sc *WsClient) SlotSubscribe(ctx context.Context, ch chan<- SlotNotifies) (Subscription, error) {
-	// SolSubscribe
 	sub, err := sc.c.Subscribe(ctx, "slot", ch)
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
+}
+
+// RootSubscribe Subscribe to receive notification anytime a new root is set by the validator.
+// The channel receives the rooted slot number as a uint64.
+func (sc *WsClient) RootSubscribe(ctx context.Context, ch chan<- RootNotifies) (Subscription, error) {
+	sub, err := sc.c.Subscribe(ctx, "root", ch)
+	if err != nil {
+		return nil, err
+	}
+	return sub, nil
+}
+
+// SlotsUpdatesSubscribe Subscribe to receive a notification from the validator on a
+// variety of updates on every slot. This subscription is unstable and the format of
+// the notification may change in the future; use SlotSubscribe for stable guarantees.
+func (sc *WsClient) SlotsUpdatesSubscribe(ctx context.Context, ch chan<- SlotsUpdatesNotifies) (Subscription, error) {
+	sub, err := sc.c.Subscribe(ctx, "slotsUpdates", ch)
 	if err != nil {
 		return nil, err
 	}
