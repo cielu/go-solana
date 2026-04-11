@@ -20,7 +20,7 @@ import (
 
 	"github.com/cielu/go-solana"
 	"github.com/cielu/go-solana/core/base"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -54,7 +54,7 @@ type InitializeMultisig struct {
 }
 
 func (initMs *InitializeMultisig) SetAccounts(accounts []*solana.AccountMeta) error {
-	initMs.Accounts, initMs.Signers = library.SliceSplitFrom(accounts, 2)
+	initMs.Accounts, initMs.Signers = internal.SliceSplitFrom(accounts, 2)
 	return nil
 }
 

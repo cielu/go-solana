@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -53,7 +53,7 @@ type BurnChecked struct {
 }
 
 func (brCkd *BurnChecked) SetAccounts(accounts []*solana.AccountMeta) error {
-	brCkd.Accounts, brCkd.Signers = library.SliceSplitFrom(accounts, 3)
+	brCkd.Accounts, brCkd.Signers = internal.SliceSplitFrom(accounts, 3)
 	return nil
 }
 

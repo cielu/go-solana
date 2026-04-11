@@ -2,7 +2,7 @@
 // This file is part of the go-solana library.
 
 
-package library
+package internal
 
 import (
 	"errors"

@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -51,7 +51,7 @@ type MintToChecked struct {
 }
 
 func (mCkd *MintToChecked) SetAccounts(accounts []*solana.AccountMeta) error {
-	mCkd.Accounts, mCkd.Signers = library.SliceSplitFrom(accounts, 3)
+	mCkd.Accounts, mCkd.Signers = internal.SliceSplitFrom(accounts, 3)
 	return nil
 }
 

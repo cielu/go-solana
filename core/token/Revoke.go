@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -39,7 +39,7 @@ type Revoke struct {
 }
 
 func (rvk *Revoke) SetAccounts(accounts []*solana.AccountMeta) error {
-	rvk.Accounts, rvk.Signers = library.SliceSplitFrom(accounts, 2)
+	rvk.Accounts, rvk.Signers = internal.SliceSplitFrom(accounts, 2)
 	return nil
 }
 

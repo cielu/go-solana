@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 	"github.com/mr-tron/base58"
 )
@@ -68,7 +68,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 	var accounts []*AccountMeta
 	for _, instruction := range instructions {
 		accounts = append(accounts, instruction.Accounts()...)
-		programIDs = library.UniqueAppend(programIDs, instruction.ProgramID())
+		programIDs = internal.UniqueAppend(programIDs, instruction.ProgramID())
 	}
 
 	// Add programID to the account list

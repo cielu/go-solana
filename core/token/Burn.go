@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -45,7 +45,7 @@ type Burn struct {
 }
 
 func (br *Burn) SetAccounts(accounts []*solana.AccountMeta) error {
-	br.Accounts, br.Signers = library.SliceSplitFrom(accounts, 3)
+	br.Accounts, br.Signers = internal.SliceSplitFrom(accounts, 3)
 	return nil
 }
 

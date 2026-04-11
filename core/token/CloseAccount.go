@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -43,7 +43,7 @@ type CloseAccount struct {
 }
 
 func (cloAcc *CloseAccount) SetAccounts(accounts []*solana.AccountMeta) error {
-	cloAcc.Accounts, cloAcc.Signers = library.SliceSplitFrom(accounts, 3)
+	cloAcc.Accounts, cloAcc.Signers = internal.SliceSplitFrom(accounts, 3)
 	return nil
 }
 

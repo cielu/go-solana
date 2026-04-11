@@ -2,7 +2,7 @@ package token
 
 import (
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -32,7 +32,7 @@ type TransferChecked struct {
 }
 
 func (tc *TransferChecked) SetAccounts(accounts []*solana.AccountMeta) error {
-	tc.Accounts, tc.Signers = library.SliceSplitFrom(accounts, 4)
+	tc.Accounts, tc.Signers = internal.SliceSplitFrom(accounts, 4)
 	return nil
 }
 

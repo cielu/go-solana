@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"github.com/cielu/go-solana"
-	"github.com/cielu/go-solana/library"
+	"github.com/cielu/go-solana/internal"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -45,7 +45,7 @@ type Approve struct {
 }
 
 func (appr *Approve) SetAccounts(accounts []*solana.AccountMeta) error {
-	appr.Accounts, appr.Signers = library.SliceSplitFrom(accounts, 3)
+	appr.Accounts, appr.Signers = internal.SliceSplitFrom(accounts, 3)
 	return nil
 }
 

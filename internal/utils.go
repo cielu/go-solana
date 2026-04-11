@@ -2,7 +2,7 @@
 // This file is part of the go-solana library.
 
 
-package library
+package internal
 
 // Has0xPrefix input has 0x prefix
 func Has0xPrefix(input string) bool {
