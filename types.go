@@ -590,6 +590,8 @@ func (s *Signature) UnmarshalGraphQL(input interface{}) error {
 	return err
 }
 
-func (s Signature) Sign(message []byte) []byte {
-	return ed25519.Sign(s.Bytes(), message)
+// Verify reports whether sig is a valid signature of message by publicKey.
+// It never panics.
+func (s Signature) Verify(publicKey PublicKey, message []byte) bool {
+	return ed25519.Verify(publicKey[:], message, s[:])
 }

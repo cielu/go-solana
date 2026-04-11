@@ -2,10 +2,8 @@ package solana
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 
-	"github.com/cielu/go-solana/library"
 	"github.com/cielu/go-solana/pkg/encodbin"
 )
 
@@ -39,16 +37,20 @@ func (lookups MessageAddressTableLookupSlice) NumWritableLookups() int {
 	return count
 }
 
-// GetTableIDs returns the list of all address table IDs.
+// GetTableIDs returns the list of all address table IDs (deduplicated,
+// preserving first-seen order).
 func (lookups MessageAddressTableLookupSlice) GetTableIDs() []PublicKey {
 	if lookups == nil {
 		return nil
 	}
-	ids := make([]PublicKey, 0)
-	// lookups
+	ids := make([]PublicKey, 0, len(lookups))
+	seen := make(map[PublicKey]struct{}, len(lookups))
 	for _, lookup := range lookups {
-		// append unique key
-		ids = library.UniqueAppend(ids, lookup.AccountKey)
+		if _, ok := seen[lookup.AccountKey]; ok {
+			continue
+		}
+		seen[lookup.AccountKey] = struct{}{}
+		ids = append(ids, lookup.AccountKey)
 	}
 	return ids
 }
@@ -62,13 +64,34 @@ type MessageAddressTableLookup struct {
 // Uint8Slice is a slice of uint8s that can be marshaled as numbers instead of a byte slice.
 type Uint8Slice []uint8
 
-// MarshalJSON implements json.Marshaler.
+// MarshalJSON implements json.Marshaler, emitting [n1, n2, ...] rather than a
+// base64-encoded string (which is the default for []byte). Encoded in-place
+// without intermediate allocations.
 func (u8s Uint8Slice) MarshalJSON() ([]byte, error) {
-	out := make([]uint16, len(u8s))
-	for i, idx := range u8s {
-		out[i] = uint16(idx)
+	if u8s == nil {
+		return []byte("null"), nil
 	}
-	return json.Marshal(out)
+	if len(u8s) == 0 {
+		return []byte("[]"), nil
+	}
+	// Preallocate: max 3 digits ("255") + 1 separator per element, plus brackets.
+	buf := make([]byte, 0, 2+len(u8s)*4)
+	buf = append(buf, '[')
+	for i, v := range u8s {
+		if i > 0 {
+			buf = append(buf, ',')
+		}
+		switch {
+		case v >= 100:
+			buf = append(buf, '0'+v/100, '0'+(v/10)%10, '0'+v%10)
+		case v >= 10:
+			buf = append(buf, '0'+v/10, '0'+v%10)
+		default:
+			buf = append(buf, '0'+v)
+		}
+	}
+	buf = append(buf, ']')
+	return buf, nil
 }
 
 type Message struct {
@@ -103,10 +126,19 @@ func (m *Message) SetAddressTables(tables map[PublicKey][]PublicKey) error {
 	return nil
 }
 
-// GetAddressTables returns the actual address tables used by this message.
-// NOTE: you must have called `SetAddressTable` before being able to use this method.
+// GetAddressTables returns a shallow copy of the address tables used by this
+// message. The returned map may be freely mutated by the caller without
+// affecting the internal state.
+// NOTE: you must have called `SetAddressTables` before being able to use this method.
 func (m *Message) GetAddressTables() map[PublicKey][]PublicKey {
-	return m.addressTables
+	if m.addressTables == nil {
+		return nil
+	}
+	out := make(map[PublicKey][]PublicKey, len(m.addressTables))
+	for k, v := range m.addressTables {
+		out[k] = v
+	}
+	return out
 }
 
 func (m Message) IsVersioned() bool {
@@ -274,11 +306,15 @@ func (m *Message) MarshalV0() ([]byte, error) {
 			buf = append(buf, instruction.Data...)
 		}
 	}
-	versionNum := byte(m.version) // TODO: what number is this?
-	if versionNum > 127 {
+	// Solana encodes the message version in the high bit of the first byte:
+	// legacy messages have first byte < 0x80 (that byte being NumRequiredSignatures),
+	// while versioned messages are prefixed with (0x80 | wireVersion). Internally
+	// MessageVersionV0 == 1 maps to wire version 0, so the prefix byte is
+	// (internal - 1) + 0x80 == internal + 127.
+	if m.version < MessageVersionV0 || m.version > 128 {
 		return nil, fmt.Errorf("invalid message version: %d", m.version)
 	}
-	buf = append([]byte{byte(versionNum + 127)}, buf...)
+	buf = append([]byte{byte(m.version) + 127}, buf...)
 
 	// wite length of address table lookups as u8
 	buf = append(buf, byte(len(m.AddressTableLookups)))
@@ -378,13 +414,15 @@ type MessageHeader struct {
 }
 
 func (m *Message) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err error) {
-	// peek first byte to determine if this is a legacy or v0 message
+	// Peek first byte to determine message version. Per the Solana wire format,
+	// legacy messages begin with NumRequiredSignatures (always < 0x80 in practice),
+	// while versioned messages set the high bit and encode the wire version in
+	// the low 7 bits: (0x80 | version).
 	versionNum, err := decoder.Peek(1)
 	if err != nil {
 		return err
 	}
-	// TODO: is this the right way to determine if this is a legacy or v0 message?
-	if versionNum[0] < 127 {
+	if versionNum[0]&0x80 == 0 {
 		m.version = MessageVersionLegacy
 	} else {
 		m.version = MessageVersionV0
@@ -412,8 +450,15 @@ func (m *Message) UnmarshalV0(decoder *encodbin.Decoder) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to read message version: %w", err)
 	}
-	// TODO: check version
-	m.version = MessageVersion(version - 127)
+	if version&0x80 == 0 {
+		return fmt.Errorf("UnmarshalV0: not a versioned message, first byte is 0x%02x", version)
+	}
+	// Wire version is the lower 7 bits. Internally, V0 is represented as 1.
+	wireVersion := version & 0x7f
+	if wireVersion != 0 {
+		return fmt.Errorf("unsupported message version: %d", wireVersion)
+	}
+	m.version = MessageVersionV0
 
 	// The middle of the message is the same as the legacy message:
 	err = m.UnmarshalLegacy(decoder)
