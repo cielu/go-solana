@@ -449,10 +449,7 @@ func (h *handler) handleResponses(batch []*jsonrpcMessage, handleCall func(*json
 func (h *handler) handleSubscriptionResult(msg *jsonrpcMessage) {
 	var result subscriptionResult
 	if err := json.Unmarshal(msg.Params, &result); err != nil {
-		// Invalid subscription payload; drop the message. Logging is wired
-		// up throughout this handler via commented-out h.log.* calls — we
-		// leave the drop silent to stay consistent with that choice.
-		_ = err
+		fmt.Errorf("dropping invalid subscription message, %s", err.Error())
 		return
 	}
 	resID := fmt.Sprintf("%d", result.ID)

@@ -112,7 +112,7 @@ func (i *Instruction) Data() ([]byte, error) {
 }
 
 var InstructionDefVariant = encodbin.NewVariantDefinition(encodbin.Uint32TypeIDEncoding, []encodbin.VariantType{
-	{Name: "register_token", Type: (*RegisterToken)(nil)},
+	{"register_token", (*RegisterToken)(nil)},
 })
 
 func (i *Instruction) TextEncode(encoder *encodtext.Encoder, option *encodtext.Option) error {
