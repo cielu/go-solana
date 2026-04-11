@@ -489,13 +489,14 @@ func (c *Client) Notify(ctx context.Context, method string, args ...interface{})
 // ErrSubscriptionQueueOverflow. Use a sufficiently large buffer on the channel or ensure
 // that the channel usually has at least one reader to prevent this issue.
 func (c *Client) Subscribe(ctx context.Context, namespace string, channel interface{}, args ...interface{}) (*ClientSubscription, error) {
-	// Check type of channel first.
+	// Check type of channel first. These used to be panics, but a library
+	// should never terminate the caller's process on a misuse like this.
 	chanVal := reflect.ValueOf(channel)
 	if chanVal.Kind() != reflect.Chan || chanVal.Type().ChanDir()&reflect.SendDir == 0 {
-		panic(fmt.Sprintf("channel argument of Subscribe has type %T, need writable channel", channel))
+		return nil, fmt.Errorf("rpc: Subscribe channel argument has type %T, want writable channel", channel)
 	}
 	if chanVal.IsNil() {
-		panic("channel given to Subscribe must not be nil")
+		return nil, errors.New("rpc: Subscribe channel must not be nil")
 	}
 	if c.isHTTP {
 		return nil, ErrNotificationsUnsupported
