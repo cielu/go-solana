@@ -147,7 +147,10 @@ func AccountFromMnemonic(mnemonic string, args ...interface{}) (Account, error) 
 	}
 	// has path
 	if path != "" {
-		derivedKey, _ := hdwallet.Derived(path, seed)
+		derivedKey, err := hdwallet.Derived(path, seed)
+		if err != nil {
+			return Account{}, library.StdErr("hdwallet.Derived", err)
+		}
 		// override seed
 		seed = derivedKey.PrivateKey
 	}

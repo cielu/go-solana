@@ -86,8 +86,8 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 	})
 
 	var (
-		uniqAccounts    []*AccountMeta
-		uniqAccountsMap = map[PublicKey]uint64{}
+		uniqAccounts    = make([]*AccountMeta, 0, len(accounts))
+		uniqAccountsMap = make(map[PublicKey]int, len(accounts))
 	)
 	for _, acc := range accounts {
 		if index, found := uniqAccountsMap[acc.PublicKey]; found {
@@ -95,7 +95,7 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 			continue
 		}
 		uniqAccounts = append(uniqAccounts, acc)
-		uniqAccountsMap[acc.PublicKey] = uint64(len(uniqAccounts) - 1)
+		uniqAccountsMap[acc.PublicKey] = len(uniqAccounts) - 1
 	}
 
 	// Move fee payer to the front
@@ -137,11 +137,12 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 
 	message := Message{
 		RecentBlockhash: recentBlockHash,
+		AccountKeys:     make([]PublicKey, 0, len(finalAccounts)),
 	}
-	accountKeyIndex := map[string]uint16{}
+	accountKeyIndex := make(map[PublicKey]uint16, len(finalAccounts))
 	for idx, acc := range finalAccounts {
 		message.AccountKeys = append(message.AccountKeys, acc.PublicKey)
-		accountKeyIndex[acc.PublicKey.String()] = uint16(idx)
+		accountKeyIndex[acc.PublicKey] = uint16(idx)
 		if acc.IsSigner {
 			message.Header.NumRequiredSignatures++
 			if !acc.IsWritable {
@@ -155,18 +156,19 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 		}
 	}
 
+	message.Instructions = make([]CompiledInstruction, 0, len(instructions))
 	for txIdx, instruction := range instructions {
 		accounts = instruction.Accounts()
 		accountIndex := make([]uint16, len(accounts))
 		for idx, acc := range accounts {
-			accountIndex[idx] = accountKeyIndex[acc.PublicKey.String()]
+			accountIndex[idx] = accountKeyIndex[acc.PublicKey]
 		}
 		data, err := instruction.Data()
 		if err != nil {
 			return nil, fmt.Errorf("unable to encode instructions [%d]: %w", txIdx, err)
 		}
 		message.Instructions = append(message.Instructions, CompiledInstruction{
-			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
+			ProgramIDIndex: accountKeyIndex[instruction.ProgramID()],
 			Accounts:       accountIndex,
 			Data:           data,
 		})
@@ -177,41 +179,40 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, payer Publ
 	}, nil
 }
 
+// ErrIncompleteSigning is returned when the transaction has not been signed by
+// all required signers.
+var ErrIncompleteSigning = errors.New("transaction is not fully signed")
+
+// MarshalBinary serializes a fully-signed transaction to its wire format.
+// It returns ErrIncompleteSigning if not all required signatures are present.
 func (tx *Transaction) MarshalBinary() ([]byte, error) {
 	if len(tx.Signatures) == 0 || len(tx.Signatures) != int(tx.Message.Header.NumRequiredSignatures) {
-		return nil, errors.New("signature verification failed")
+		return nil, ErrIncompleteSigning
 	}
-
-	messageContent, err := tx.Message.MarshalBinary()
-	if err != nil {
-		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
-	}
-
-	var signatureCount []byte
-	encodbin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
-	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
-	output = append(output, signatureCount...)
-	for _, sig := range tx.Signatures {
-		output = append(output, sig[:]...)
-	}
-	output = append(output, messageContent...)
-
-	return output, nil
+	return tx.marshalBinary(tx.Signatures)
 }
 
+// NoSignedMarshalBinary serializes the transaction with zero-filled signature
+// placeholders. This is the form wallets expect when they receive a transaction
+// to sign.
 func (tx *Transaction) NoSignedMarshalBinary() ([]byte, error) {
+	placeholders := make([]Signature, tx.Message.Header.NumRequiredSignatures)
+	return tx.marshalBinary(placeholders)
+}
 
+// marshalBinary encodes the transaction using the provided signatures slice.
+func (tx *Transaction) marshalBinary(signatures []Signature) ([]byte, error) {
 	messageContent, err := tx.Message.MarshalBinary()
 	if err != nil {
 		return nil, fmt.Errorf("failed to encode tx.Message to binary: %w", err)
 	}
 
 	var signatureCount []byte
-	encodbin.EncodeCompactU16Length(&signatureCount, len(tx.Signatures))
-	output := make([]byte, 0, len(signatureCount)+len(signatureCount)*64+len(messageContent))
+	encodbin.EncodeCompactU16Length(&signatureCount, len(signatures))
+	output := make([]byte, 0, len(signatureCount)+len(signatures)*SignatureLength+len(messageContent))
 	output = append(output, signatureCount...)
-	for _, sig := range tx.Signatures {
-		output = append(output, sig[:]...)
+	for i := range signatures {
+		output = append(output, signatures[i][:]...)
 	}
 	output = append(output, messageContent...)
 
@@ -337,7 +338,10 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *encodbin.Decoder) (err erro
 	return nil
 }
 
-// Sign accounts
+// Sign signs the transaction with the provided accounts and returns the
+// fully-serialized wire-format bytes. It returns an error if any required
+// signer is missing from accounts. Any existing signatures on the transaction
+// are discarded.
 func (tx *Transaction) Sign(accounts []Account) ([]byte, error) {
 
 	messageContent, err := tx.Message.MarshalBinary()
@@ -345,18 +349,20 @@ func (tx *Transaction) Sign(accounts []Account) ([]byte, error) {
 		return nil, fmt.Errorf("unable to encode message for signing: %w", err)
 	}
 
-	signerKeys := tx.Message.signerKeys()
+	// Build an index of provided signers for O(1) lookup.
+	signerByKey := make(map[PublicKey]*Account, len(accounts))
+	for i := range accounts {
+		signerByKey[accounts[i].PublicKey] = &accounts[i]
+	}
 
-signerMatch:
+	signerKeys := tx.Message.signerKeys()
+	tx.Signatures = make([]Signature, 0, len(signerKeys))
 	for _, key := range signerKeys {
-		for _, signer := range accounts {
-			if key == signer.PublicKey {
-				s := signer.Sign(messageContent)
-				tx.Signatures = append(tx.Signatures, BytesToSignature(s))
-				continue signerMatch
-			}
+		signer, ok := signerByKey[key]
+		if !ok {
+			return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
 		}
-		return nil, fmt.Errorf("signer key %q not found. Ensure all the signer keys are in the vault", key.String())
+		tx.Signatures = append(tx.Signatures, BytesToSignature(signer.Sign(messageContent)))
 	}
 
 	return tx.MarshalBinary()
