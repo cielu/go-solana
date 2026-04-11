@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/cielu/go-solana"
-	computebudget "github.com/cielu/go-solana/core/compute-budget"
+	"github.com/cielu/go-solana/core/computebudget"
 )
 
 func newClient() *solana.Client {
