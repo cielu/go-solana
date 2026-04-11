@@ -1,0 +1,40 @@
+# Build artifacts
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binaries and coverage
+*.test
+*.out
+coverage.out
+coverage.html
+profile.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Vendor directory (we don't vendor)
+vendor/
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local environment
+.env
+.envrc
+
+# Benchmark outputs
+benchmarks/results/
+*.bench.txt
