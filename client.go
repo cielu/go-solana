@@ -5,7 +5,6 @@ package solana
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/big"
 
@@ -121,40 +120,26 @@ func (sc *Client) GetBlockTime(ctx context.Context, blockNum uint64) (res int64,
 }
 
 // GetBlocks Returns a list of confirmed blocks between two slots.
-// Optional args: [endSlot uint64|int], [cfg RpcCommitmentCfg].
-// The slot range [startSlot, endSlot] must be <= 500000.
-func (sc *Client) GetBlocks(ctx context.Context, startSlot uint64, args ...interface{}) (res []uint64, err error) {
-	var (
-		tmpSlot   uint64
-		hasEndArg bool
-		endSlot   *uint64
-		cfg       *RpcCommitmentCfg
-	)
-	for _, arg := range args {
-		switch v := arg.(type) {
-		case int:
-			tmpSlot = uint64(v)
-			hasEndArg = true
-		case uint64:
-			tmpSlot = v
-			hasEndArg = true
-		case RpcCommitmentCfg:
-			cfg = &v
-		default:
-			return res, errors.New("invalid args. Require: [uint64|types.RpcCommitmentCfg]")
+// The optional slot range [startSlot, endSlot] must be at most 500000 slots wide.
+// Options: WithBlocksEndSlot, WithBlocksCommitment.
+func (sc *Client) GetBlocks(ctx context.Context, startSlot uint64, opts ...BlocksOption) ([]uint64, error) {
+	c := &blocksConfig{}
+	for _, opt := range opts {
+		opt(c)
+	}
+	if c.endSlot != nil {
+		if *c.endSlot < startSlot {
+			return nil, fmt.Errorf("getBlocks: endSlot (%d) must be >= startSlot (%d)", *c.endSlot, startSlot)
+		}
+		if *c.endSlot-startSlot >= 500000 {
+			return nil, fmt.Errorf("getBlocks: slot range must be <= 500000 (got %d)", *c.endSlot-startSlot)
 		}
 	}
-	if hasEndArg {
-		if tmpSlot < startSlot {
-			return res, fmt.Errorf("getBlocks: endSlot (%d) must be >= startSlot (%d)", tmpSlot, startSlot)
-		}
-		if tmpSlot-startSlot >= 500000 {
-			return res, fmt.Errorf("getBlocks: slot range must be <= 500000 (got %d)", tmpSlot-startSlot)
-		}
-		endSlot = &tmpSlot
+	var res []uint64
+	if err := sc.call(ctx, &res, "getBlocks", startSlot, c.endSlot, c.cfg); err != nil {
+		return nil, err
 	}
-	err = sc.call(ctx, &res, "getBlocks", startSlot, endSlot, cfg)
-	return
+	return res, nil
 }
 
 // GetBlocksWithLimit Returns a list of confirmed blocks starting at the given slot
@@ -231,27 +216,19 @@ func (sc *Client) GetInflationRate(ctx context.Context) (res InflationRate, err 
 	return
 }
 
-// GetInflationReward Returns the inflation / staking reward for a list of PublicKeyes for an epoch
-func (sc *Client) GetInflationReward(ctx context.Context, args ...interface{}) (res []InflationReward, err error) {
-	var (
-		accounts []PublicKey
-		cfg      *RpcCommitmentCfg
-	)
-	for _, arg := range args {
-		// set endSlot & cfg
-		switch v := arg.(type) {
-		case PublicKey:
-			accounts = append(accounts, v)
-		case []PublicKey:
-			accounts = v
-		case RpcCommitmentCfg:
-			cfg = &v
-		default:
-			return res, errors.New("invalid args. Require: [PublicKey|[]PublicKey|RpcCommitmentCfg]")
-		}
+// GetInflationReward Returns the inflation / staking reward for a list of
+// PublicKeys for an epoch.
+// Options: WithRewardAccounts, WithRewardCommitment.
+func (sc *Client) GetInflationReward(ctx context.Context, opts ...RewardOption) ([]InflationReward, error) {
+	c := &rewardConfig{}
+	for _, opt := range opts {
+		opt(c)
 	}
-	err = sc.call(ctx, &res, "getInflationReward", accounts, cfg)
-	return
+	var res []InflationReward
+	if err := sc.call(ctx, &res, "getInflationReward", c.accounts, c.cfg); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // GetLargestAccounts Returns the 20 largest accounts, by lamport balance (results may be cached up to two hours)
@@ -266,34 +243,20 @@ func (sc *Client) GetLatestBlockhash(ctx context.Context, cfg ...RpcCommitmentWi
 	return
 }
 
-// GetLeaderSchedule Returns the leader schedule for an epoch --> args [slot:u64]
-func (sc *Client) GetLeaderSchedule(ctx context.Context, args ...interface{}) (res map[string][]uint64, err error) {
-	// Fetch the leader schedule for the epoch that corresponds to the provided slot.
-	var (
-		slot    *uint64
-		tmpSlot uint64
-		cfg     *RpcCommitmentWithIdentity
-	)
-	// args
-	for _, arg := range args {
-		// set endSlot & cfg
-		switch v := arg.(type) {
-		case RpcCommitmentWithIdentity:
-			cfg = &v
-		case int:
-			tmpSlot = uint64(v)
-		case uint64:
-			tmpSlot = v
-		default:
-			return res, errors.New("invalid args. Require: [uint64|types.RpcCommitmentWithIdentityCtx]")
-		}
+// GetLeaderSchedule Returns the leader schedule for an epoch. By default this
+// is the current epoch; pass WithScheduleSlot to select the epoch that contains
+// a specific slot.
+// Options: WithScheduleSlot, WithScheduleCommitment, WithScheduleIdentity.
+func (sc *Client) GetLeaderSchedule(ctx context.Context, opts ...ScheduleOption) (map[string][]uint64, error) {
+	c := &scheduleConfig{}
+	for _, opt := range opts {
+		opt(c)
 	}
-	// slot
-	if tmpSlot > 0 {
-		slot = &tmpSlot
+	var res map[string][]uint64
+	if err := sc.call(ctx, &res, "getLeaderSchedule", c.slot, c.cfg); err != nil {
+		return nil, err
 	}
-	err = sc.call(ctx, &res, "getLeaderSchedule", slot, cfg)
-	return
+	return res, nil
 }
 
 // GetMaxRetransmitSlot Get the max slot seen from retransmit stage.
@@ -308,34 +271,19 @@ func (sc *Client) GetMaxShredInsertSlot(ctx context.Context) (res uint64, err er
 	return
 }
 
-// GetMinimumBalanceForRentExemption Returns minimum balance required to make account rent exempt.
-func (sc *Client) GetMinimumBalanceForRentExemption(ctx context.Context, args ...interface{}) (res uint64, err error) {
-	// the Account's data length
-	var (
-		accLen *uint64
-		tmpLen uint64
-		cfg    *RpcCommitmentCfg
-	)
-	// args
-	for _, arg := range args {
-		// set endSlot & cfg
-		switch v := arg.(type) {
-		case RpcCommitmentCfg:
-			cfg = &v
-		case int:
-			tmpLen = uint64(v)
-		case uint64:
-			tmpLen = v
-		default:
-			return res, errors.New("invalid args. Require: [uint64|types.RpcCommitmentCfg]")
-		}
+// GetMinimumBalanceForRentExemption Returns the minimum lamport balance required
+// to make an account of the given data size rent-exempt.
+// Options: WithRentExemptDataLen, WithRentExemptCommitment.
+func (sc *Client) GetMinimumBalanceForRentExemption(ctx context.Context, opts ...RentExemptOption) (uint64, error) {
+	c := &rentExemptConfig{}
+	for _, opt := range opts {
+		opt(c)
 	}
-	// slot
-	if tmpLen > 0 {
-		accLen = &tmpLen
+	var res uint64
+	if err := sc.call(ctx, &res, "getMinimumBalanceForRentExemption", c.dataLen, c.cfg); err != nil {
+		return 0, err
 	}
-	err = sc.call(ctx, &res, "getMinimumBalanceForRentExemption", accLen, cfg)
-	return
+	return res, nil
 }
 
 // GetMultipleAccounts Returns the account information for a list of Pubkeys.
@@ -369,25 +317,22 @@ func (sc *Client) GetRecentPerformanceSamples(ctx context.Context, args ...uint6
 	return
 }
 
-// GetRecentPrioritizationFees Returns a list of prioritization fees from recent blocks.
-// Optional args: up to 128 PublicKey values (or a single []PublicKey) to filter fees by account.
-func (sc *Client) GetRecentPrioritizationFees(ctx context.Context, args ...interface{}) (res []RpcPrioritizationFee, err error) {
-	var accounts []PublicKey
-	for _, arg := range args {
-		switch v := arg.(type) {
-		case PublicKey:
-			accounts = append(accounts, v)
-		case []PublicKey:
-			accounts = v
-		default:
-			return res, fmt.Errorf("getRecentPrioritizationFees: invalid arg type %T, want PublicKey or []PublicKey", arg)
-		}
+// GetRecentPrioritizationFees Returns a list of prioritization fees from recent
+// blocks, optionally scoped to a set of accounts.
+// Options: WithFeesAccounts (at most 128 accounts total).
+func (sc *Client) GetRecentPrioritizationFees(ctx context.Context, opts ...FeesOption) ([]RpcPrioritizationFee, error) {
+	c := &feesConfig{}
+	for _, opt := range opts {
+		opt(c)
 	}
-	if len(accounts) > 128 {
-		return res, fmt.Errorf("getRecentPrioritizationFees: at most 128 accounts allowed (got %d)", len(accounts))
+	if len(c.accounts) > 128 {
+		return nil, fmt.Errorf("getRecentPrioritizationFees: at most 128 accounts allowed (got %d)", len(c.accounts))
 	}
-	err = sc.call(ctx, &res, "getRecentPrioritizationFees", accounts)
-	return
+	var res []RpcPrioritizationFee
+	if err := sc.call(ctx, &res, "getRecentPrioritizationFees", c.accounts); err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 // GetSignatureStatuses Returns the statuses of a list of signatures. Each signature must be a txid, the first signature of a transaction.
